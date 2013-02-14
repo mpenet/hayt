@@ -3,12 +3,17 @@
   (:require [qbits.hayt.cql :as cql]))
 
 (defprotocol PQuery
-  (as-cql [this]))
+  (as-cql [this] "Returns the 2 arg vector dependent of the *raw-values* binding")
+  (as-prepared [this] "Returns a 2 arg vector ready to be used as prepared
+                             statement (*raw-values* = true)"))
 
 (defrecord Query [template query]
   PQuery
   (as-cql [this]
-    (cql/apply-template query template)))
+    (cql/apply-cql query template))
+
+  (as-prepared [this]
+    (cql/apply-prepared query template)))
 
 (defn select
   ""
@@ -127,11 +132,3 @@
   ""
   [q value]
   (assoc-in q [:query :index-name] value))
-
-(defmacro with-raw-values [& body]
-  `(binding [qbits.hayt.cql/*raw-values* true]
-     ~@body))
-
-(defmacro with-encoded-values [& body]
-  `(binding [qbits.hayt.cql/*raw-values* false]
-     ~@body))

@@ -6,27 +6,52 @@
 
 (deftest test-select
 
-  (is (= ["SELECT * FROM %s;" ["foo"]]
+  ;;
+  (is (= ["SELECT * FROM ?;" ["foo"]]
+         (as-prepared (select :foo))))
+
+  (is (= "SELECT * FROM foo;"
          (as-cql (select :foo))))
 
-  (is (= ["SELECT * FROM %s;" ["foo"]]
-         (as-cql (select "foo"))))
+  ;;
+  (is (= ["SELECT ?, ? FROM ?;" ["bar" "baz" "foo"]]
+         (as-prepared (-> (select :foo)
+                     (columns :bar "baz")))))
 
-  (is (= ["SELECT %s, %s FROM %s;" ["bar" "baz" "foo"]]
+  (is (= "SELECT bar, baz FROM foo;"
          (as-cql (-> (select :foo)
                      (columns :bar "baz")))))
 
-  (is (= ["SELECT %s, %s FROM %s LIMIT 100;" ["bar" "baz" "foo"]]
+  ;;
+  (is (= ["SELECT ?, ? FROM ? LIMIT 100;" ["bar" "baz" "foo"]]
+         (as-prepared (-> (select :foo)
+                     (columns :bar "baz")
+                     (limit 100)))))
+
+  (is (= "SELECT bar, baz FROM foo LIMIT 100;"
          (as-cql (-> (select :foo)
                      (columns :bar "baz")
                      (limit 100)))))
 
-  (is (= ["SELECT * FROM %s ORDER BY %s %s;" ["foo" "bar" "desc"]]
+  ;;
+  (is (= ["SELECT * FROM ? ORDER BY ? ?;" ["foo" "bar" "desc"]]
+         (as-prepared (-> (select :foo)
+                     (order-by [:bar :desc])))))
+
+  (is (= "SELECT * FROM foo ORDER BY bar desc;"
          (as-cql (-> (select :foo)
                      (order-by [:bar :desc])))))
 
-  (is (= ["SELECT * FROM %s WHERE %s = %s AND %s > %s AND %s > %s AND %s IN (%s, %s, %s);"
+  ;;
+  (is (= ["SELECT * FROM ? WHERE ? = ? AND ? > ? AND ? > ? AND ? IN (?, ?, ?);"
           ["foo" "foo" "bar" "moo" 3 "meh" 4 "baz" 5 6 7]]
+         (as-prepared (-> (select :foo)
+                     (where {:foo :bar
+                             :moo [> 3]
+                             :meh [:> 4]
+                             :baz [:in [5 6 7]]})))))
+
+  (is (= "SELECT * FROM foo WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
          (as-cql (-> (select :foo)
                      (where {:foo :bar
                              :moo [> 3]
@@ -34,43 +59,57 @@
                              :baz [:in [5 6 7]]}))))))
 
 (deftest test-insert
-  (is (= ["INSERT INTO %s (%s, %s) VALUES (%s, %s) USING TIMESTAMP %s AND TTL %s;"
+  (is (= ["INSERT INTO ? (?, ?) VALUES (?, ?) USING TIMESTAMP ? AND TTL ?;"
           ["foo" "a" "c" "b" "d" 100000 200000]]
-         (as-cql (-> (insert :foo)
+         (as-prepared (-> (insert :foo)
                      (values {"a" "b" "c" "d"})
                      (using :timestamp 100000
                             :ttl 200000)))))
 
-
-  (with-encoded-values
-    (is (= ["INSERT INTO %s (%s, %s) VALUES (%s, %s) USING TIMESTAMP %s AND TTL %s;"
-            ["foo" "a" "c" "'b'" "'d'" 100000 200000]]
-           (as-cql (-> (insert :foo)
-                       (values {"a" "b" "c" "d"})
-                       (using :timestamp 100000
-                              :ttl 200000)))))))
+  (is (= "INSERT INTO foo (a, c) VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;"
+         (as-cql (-> (insert :foo)
+                     (values {"a" "b" "c" "d"})
+                     (using :timestamp 100000
+                            :ttl 200000))))))
 
 (deftest test-update
-  (is (= ["UPDATE %s SET %s = %s, %s = %s  %s;" ["foo" "bar" 1 "baz" "baz" 2]]
-         (as-cql (-> (update :foo)
+  ;;
+  (is (= ["UPDATE ? SET ? = ?, ? = ? + ?;" ["foo" "bar" 1 "baz" "baz" 2]]
+         (as-prepared (-> (update :foo)
                      (set {:bar 1
-                           :baz [:+= 2] })))))
+                           :baz [+ 2] })))))
 
-  (is (= ["UPDATE %s SET %s = %s, %s = %s  %s WHERE %s = %s AND %s > %s AND %s > %s AND %s IN (%s, %s, %s);"
-          ["foo" "bar" 1 "baz" "baz" 2 "foo" "bar" "moo" 3 "meh" 4 "baz" 5 6 7]]
+  (is (= "UPDATE foo SET bar = 1, baz = baz + 2;"
          (as-cql (-> (update :foo)
+                          (set {:bar 1
+                                :baz [+ 2] })))))
+
+  ;;
+  (is (= ["UPDATE ? SET ? = ?, ? = ? + ? WHERE ? = ? AND ? > ? AND ? > ? AND ? IN (?, ?, ?);"
+          ["foo" "bar" 1 "baz" "baz" 2 "foo" "bar" "moo" 3 "meh" 4 "baz" 5 6 7]]
+         (as-prepared (-> (update :foo)
                      (set {:bar 1
-                           :baz [:+= 2] })
+                           :baz [+ 2] })
                      (where {:foo :bar
                              :moo [> 3]
                              :meh [:> 4]
-                             :baz [:in [5 6 7]]}))))))
+                             :baz [:in [5 6 7]]})))))
+
+
+  (is (= ["UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"]
+         (as-cql (-> (update :foo)
+                          (set {:bar 1
+                                :baz [+ 2] })
+                          (where {:foo :bar
+                                  :moo [> 3]
+                                  :meh [:> 4]
+                                  :baz [:in [5 6 7]]}))))))
 
 
 (deftest test-delete
-  (is (= ["DELETE * FROM %s USING TIMESTAMP %s AND TTL %s WHERE %s = %s AND %s > %s AND %s > %s AND %s IN (%s, %s, %s);"
+  (is (= ["DELETE * FROM ? USING TIMESTAMP ? AND TTL ? WHERE ? = ? AND ? > ? AND ? > ? AND ? IN (?, ?, ?);"
           ["foo" 100000 200000 "foo" "bar" "moo" 3 "meh" 4 "baz" 5 6 7]]
-         (as-cql (-> (delete :foo)
+         (as-prepared (-> (delete :foo)
                      (using :timestamp 100000
                             :ttl 200000)
                      (where {:foo :bar
@@ -79,23 +118,23 @@
                              :baz [:in [5 6 7]]}))))))
 
 (deftest test-truncate
-  (is (= ["TRUNCATE %s;" ["foo"]]
-         (as-cql (truncate :foo)))))
+  (is (= ["TRUNCATE ?;" ["foo"]]
+         (as-prepared (truncate :foo)))))
 
 (deftest test-drop
-  (is (= ["DROP INDEX %s;" ["foo"]]
-         (as-cql (drop-index :foo))))
+  (is (= ["DROP INDEX ?;" ["foo"]]
+         (as-prepared (drop-index :foo))))
 
-  (is (= ["DROP KEYSPACE %s;" ["foo"]]
-         (as-cql (drop-keyspace :foo))))
+  (is (= ["DROP KEYSPACE ?;" ["foo"]]
+         (as-prepared (drop-keyspace :foo))))
 
-  (is (= ["DROP TABLE %s;" ["foo"]]
-         (as-cql (drop-table :foo)))))
+  (is (= ["DROP TABLE ?;" ["foo"]]
+         (as-prepared (drop-table :foo)))))
 
 (deftest test-create-index
-  (is (= ["CREATE INDEX ON %s ( %s );" ["foo" "bar"]]
-         (as-cql (create-index :foo :bar))))
+  (is (= ["CREATE INDEX ON ? ( ? );" ["foo" "bar"]]
+         (as-prepared (create-index :foo :bar))))
 
-  (is (= ["CREATE INDEX %s ON %s ( %s );" ["baz" "foo" "bar"]]
-         (as-cql (-> (create-index :foo :bar)
+  (is (= ["CREATE INDEX ? ON ? ( ? );" ["baz" "foo" "bar"]]
+         (as-prepared (-> (create-index :foo :bar)
                      (index-name "baz"))))))

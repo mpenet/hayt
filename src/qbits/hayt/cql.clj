@@ -3,15 +3,17 @@
   (:require [clojure.string :as string]))
 
 (def ^:dynamic *param-stack*)
-(def ^:dynamic *param-placeholder* "%s")
-(def ^:dynamic *raw-values* true)
+;; can be :prepared :raw
+(def ^:dynamic *prepared-statement* true)
 
 ;; this has to be an atom, we cannot bash a transient in place (we
 ;; could but it's marked as sin in the docs ("an implementation detail")
 (defmacro set-param!
   [x]
-  `(do (swap! *param-stack* conj ~x)
-       *param-placeholder*))
+  `(if *prepared-statement*
+     (do (swap! *param-stack* conj ~x)
+         "?")
+     ~x))
 
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join " " %))
@@ -37,33 +39,33 @@
   String
   (cql-identifier [x] (set-param! (name x)))
   (cql-value [x]
-    (set-param! (if *raw-values*
-                  x
-                  (quote-string x))))
+    (if *prepared-statement*
+      (set-param! x)
+      (quote-string x)))
 
   clojure.lang.Keyword
   (cql-identifier [x] (cql-identifier (name x)))
-  (cql-value [x] (cql-identifier (name x)))
+  (cql-value [x] (cql-value (name x)))
 
   ;; collections are just for cassandra collection types, not to
   ;; generate query parts, ex in where clause
   clojure.lang.IPersistentSet
   (cql-value [x]
-    (if *raw-values*
-        (set-param! x)
-        (str "{" (join-coma (map cql-value x)) "}")))
+    (if *prepared-statement*
+      (set-param! x)
+      (str "{" (join-coma (map cql-value x)) "}")))
 
   clojure.lang.IPersistentMap
   (cql-value [x]
-    (if *raw-values*
+    (if *prepared-statement*
       (set-param! x)
-      (->> (map (fn [[k v]]
-                  (format-kv (cql-value k) (cql-value v)))
-                x)
+      (map (fn [[k v]]
+             (format-kv (cql-value k) (cql-value v)))
+           x)))
 
   clojure.lang.Sequential
   (cql-value [x]
-    (if *raw-values*
+    (if *prepared-statement*
       (set-param! x)
       (str "[" (join-coma (map cql-value x)) "]")))
 
@@ -75,7 +77,9 @@
                 > ">"
                 < "<"
                 <= "<="
-                >= ">="})
+                >= ">="
+                + "+"
+                - "-"})
 
 (defn where-sequential-entry [column [op value]]
   (let [col-name (cql-identifier column)]
@@ -173,16 +177,24 @@
 
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 
-(defn apply-template
+(defn emit-query [query template]
+  (->> (map (fn [token]
+              (if (string? token)
+                token
+                (when-let [context (token query)]
+                  ((get emit token emit-catch-all) query context))))
+            template)
+       (filter identity)
+       join-spaced
+       terminate))
+
+(defn apply-cql
+  [query template]
+  (binding [*prepared-statement* false]
+    (emit-query query template)))
+
+(defn apply-prepared
   [query template]
   (binding [*param-stack* (atom [])]
-    [(->> (map (fn [token]
-                 (if (string? token)
-                   token
-                   (when-let [context (token query)]
-                     ((get emit token emit-catch-all) query context))))
-               template)
-          (filter identity)
-          join-spaced
-          terminate)
+    [(emit-query query template)
      @*param-stack*]))
