@@ -1,4 +1,5 @@
 (ns qbits.hayt.core-test
+  (:refer-clojure :exclude [set])
   (:use clojure.test
         qbits.hayt
         qbits.hayt.cql))
@@ -34,10 +35,16 @@
                              :meh [:> 4]
                              :baz [:in [5 6 7]]})))))
 
-
   (is (= ["INSERT INTO %s (%s, %s) VALUES (%s, %s) USING TIMESTAMP %s AND TTL %s;"
           ["foo" "a" "c" "'b'" "'d'" 100000 200000]]
          (as-cql (-> (insert :foo)
                      (values {"a" "b" "c" "d"})
                      (using :timestamp 100000
-                            :ttl 200000))))))
+                            :ttl 200000)))))
+
+  (is (= ["UPDATE %s SET %s = %s, %s = %s  %s;" ["foo" "bar" 1 "baz" "baz" 2]]
+         (as-cql (-> (update :foo)
+                     (set {:bar 1
+                           :baz [:+= 2] })))))
+
+  )

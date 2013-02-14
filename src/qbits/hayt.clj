@@ -19,9 +19,9 @@
   (Query. ["INSERT INTO" :table :values :using]
           {:table table}))
 
-;; (defn update [table]
-;;   (Query. ["UPDATE" :table :using :set :where]
-;;           {:table table}))
+(defn update [table]
+  (Query. ["UPDATE" :table :using :set :where]
+          {:table table}))
 
 ;; (defn delete [table]
 ;;   (Query. ["DELETE" :columns "FROM" :scope :using :where]
@@ -70,8 +70,8 @@
 (defn values [q values]
   (assoc-in q [:query :values] values))
 
-;; (defn set [q values]
-;;   (assoc-in ~q [:query :set] values))
+(defn set [q values]
+  (assoc-in q [:query :set] values))
 
 ;; (defn def-cols [q values]
 ;;   (update-in q [:query :defs] merge values))

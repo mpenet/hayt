@@ -103,6 +103,14 @@
            " " (name op) " "
            (encode-value value)))))
 
+(defn counter [column [op value]]
+  (format-eq (encode-name column)
+             ;; we cannot cache the col-name value, since there is a
+             ;; stack update behind this call
+             (join-spaced [(encode-name column)
+                           (operators op)
+                           (encode-value value)])))
+
 (def emit
   {:columns
    (fn [q fields]
@@ -142,6 +150,18 @@
        (str (wrap-parens (join-coma (map encode-name columns)))
             " VALUES "
             (wrap-parens (join-coma (map encode-value values))))))
+
+   :set
+   (fn [q values]
+     (->> (map (fn [[k v]]
+                 ;; counter (we need to support maps/set/list updates
+                 ;; too, so this is kind of a hack now)
+                 (if (vector? v)
+                   (counter k v)
+                   (format-eq (encode-name k) (encode-value v))))
+               values)
+          join-coma
+          (str "SET ")))
 
    :using
    (fn [q args]
