@@ -21,9 +21,9 @@
         *param-placeholder*))
 
 ;; string manip helpers
-(def join-and (partial string/join " AND "))
-(def join-spaced (partial string/join " "))
-(def join-coma (partial string/join ", "))
+(def join-and #(string/join " AND " %))
+(def join-spaced #(string/join " " %))
+(def join-coma #(string/join ", " %))
 (def format-eq (partial format "%s = %s"))
 (def format-kv (partial format "%s : %s"))
 (def quote-string #(str \' (string/escape % {\" "\""}) \'))
