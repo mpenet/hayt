@@ -2,11 +2,6 @@
   (:refer-clojure :exlude [set])
   (:require [qbits.hayt.cql :as cql]))
 
-(defprotocol PQuery
-  (as-cql [this] "Returns the query as raw string")
-  (as-prepared [this] "Returns a 2 arg vector [query values-vector] ready to be used as prepared statement, the values are raw (still java/clojure natives"))
-
-
 (defn as-cql [query]
   (binding [qbits.hayt.cql/*prepared-statement* false]
     (cql/emit-query query)))
