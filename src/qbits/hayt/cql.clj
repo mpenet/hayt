@@ -180,9 +180,7 @@
 
    :queries
    (fn [q queries]
-     (let [subqs (map (fn [query]
-                        (emit-query query))
-                      queries)]
+     (let [subqs (map emit-query queries)]
        (if *prepared-statement*
          [(join-lf subqs) @*param-stack*])
        (join-lf subqs)))})
