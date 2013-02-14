@@ -23,14 +23,18 @@
   (Query. ["UPDATE" :table :using :set :where]
           {:table table}))
 
-;; (defn delete [table]
-;;   (Query. ["DELETE" :columns "FROM" :scope :using :where]
-;;           {:scope table
-;;            :columns [[:*]]}))
+(defn delete [table]
+  (Query. ["DELETE" :columns "FROM" :table :using :where]
+          {:table table
+           :columns []}))
 
-;; (defn truncate [table]
-;;   (Query. ["TRUNCATE" :table]
-;;           {:table table}))
+(defn truncate [table]
+  (Query. ["TRUNCATE" :table]
+          {:table table}))
+
+(defn drop [x]
+  (Query. (str "DROP " (name x))
+          {}))
 
 ;; (defn create-table [table]
 ;;   (Query. ["CREATE COLUMNFAMILY" :table :defs :with]
@@ -44,9 +48,7 @@
 ;;   (Query. ["CREATE INDEX" :index-name "ON" :table "(" :col-name ")"]
 ;;           {:table table :col-name col-name}))
 
-;; (defn drop [x]
-;;   (Query. (str "DROP " (name x))
-;;           {}))
+
 
 
 ;; clauses
