@@ -10,15 +10,14 @@
 ;; we'll just overwrite this for prepared statements, yeah it's a dyn
 ;; var, sucks, maybe it's better to do that from an argument
 (def ^:dynamic *param-placeholder* "%s")
-
-(def ^:dynamic *escape-values* true)
+(def ^:dynamic *raw-values* true)
 
 ;; this has to be an atom, we cannot bash a transient in place (we
 ;; could but it's marked as sin in the docs ("an implementation detail")
 (defmacro set-param!
   [x]
-  `(do  (swap! *param-stack* conj ~x)
-        *param-placeholder*))
+  `(do (swap! *param-stack* conj ~x)
+       *param-placeholder*))
 
 ;; string manip helpers
 (def join-and #(string/join " AND " %))
@@ -50,9 +49,9 @@
   String
   (cql-identifier [x] (set-param! (name x)))
   (cql-value [x]
-    (set-param! (if *escape-values*
-                  (quote-string x)
-                  x)))
+    (set-param! (if *raw-values*
+                  x
+                  (quote-string x))))
 
   clojure.lang.Keyword
   (cql-identifier [x] (cql-identifier (name x)))
@@ -62,19 +61,25 @@
   ;; generate query parts, ex in where clause
   clojure.lang.IPersistentSet
   (cql-value [x]
-    (str "{" (join-coma (map cql-value x)) "}"))
+    (if *raw-values*
+        (set-param! x)
+        (str "{" (join-coma (map cql-value x)) "}")))
 
   clojure.lang.IPersistentMap
   (cql-value [x]
-    (->> (map (fn [[k v]]
-                (format-kv (cql-value k) (cql-value v)))
-              x)
-         join-coma
-         #(str "{" % "}")))
+    (if *raw-values*
+      (set-param! x)
+      (->> (map (fn [[k v]]
+                  (format-kv (cql-value k) (cql-value v)))
+                x)
+           join-coma
+           #(str "{" % "}"))))
 
   clojure.lang.Sequential
   (cql-value [x]
-    (str "[" (join-coma (map cql-value x)) "]"))
+    (if *raw-values*
+      (set-param! x)
+      (str "[" (join-coma (map cql-value x)) "]")))
 
   Object
   (cql-identifier [x] (set-param! x))

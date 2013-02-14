@@ -127,3 +127,11 @@
   ""
   [q value]
   (assoc-in q [:query :index-name] value))
+
+(defmacro with-raw-values [& body]
+  `(binding [qbits.hayt.cql/*raw-values* true]
+     ~@body))
+
+(defmacro with-encoded-values [& body]
+  `(binding [qbits.hayt.cql/*raw-values* false]
+     ~@body))

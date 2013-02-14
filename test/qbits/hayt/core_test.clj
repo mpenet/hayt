@@ -35,11 +35,20 @@
 
 (deftest test-insert
   (is (= ["INSERT INTO %s (%s, %s) VALUES (%s, %s) USING TIMESTAMP %s AND TTL %s;"
-          ["foo" "a" "c" "'b'" "'d'" 100000 200000]]
+          ["foo" "a" "c" "b" "d" 100000 200000]]
          (as-cql (-> (insert :foo)
                      (values {"a" "b" "c" "d"})
                      (using :timestamp 100000
-                            :ttl 200000))))))
+                            :ttl 200000)))))
+
+
+  (with-encoded-values
+    (is (= ["INSERT INTO %s (%s, %s) VALUES (%s, %s) USING TIMESTAMP %s AND TTL %s;"
+            ["foo" "a" "c" "'b'" "'d'" 100000 200000]]
+           (as-cql (-> (insert :foo)
+                       (values {"a" "b" "c" "d"})
+                       (using :timestamp 100000
+                              :ttl 200000)))))))
 
 (deftest test-update
   (is (= ["UPDATE %s SET %s = %s, %s = %s  %s;" ["foo" "bar" 1 "baz" "baz" 2]]
