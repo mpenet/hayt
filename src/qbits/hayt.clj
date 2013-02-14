@@ -9,11 +9,11 @@
 
 (defn as-cql [query]
   (binding [qbits.hayt.cql/*prepared-statement* false]
-    (cql/emit-query query (:template (meta query) ))))
+    (cql/emit-query query (cql/template query))))
 
 (defn as-prepared [query]
   (binding [cql/*param-stack* (atom [])]
-    [(cql/emit-query query (:template (meta query)))
+    [(cql/emit-query query (cql/template query))
      @cql/*param-stack*]))
 
 (defn query

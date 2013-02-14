@@ -6,6 +6,8 @@
 (def ^:dynamic *param-stack*)
 (def ^:dynamic *prepared-statement* true)
 
+(defn template [q] (-> q meta :template))
+
 ;; this has to be an atom, we cannot bash a transient in place (we
 ;; could but it's marked as sin in the docs ("an implementation detail")
 (defmacro set-param!
@@ -179,7 +181,7 @@
    :queries
    (fn [q queries]
      (let [subqs (map (fn [query]
-                        (emit-query query (:template (meta query))))
+                        (emit-query query (template q)))
                       queries)]
        (if *prepared-statement*
          [(join-lf subqs) @*param-stack*])
