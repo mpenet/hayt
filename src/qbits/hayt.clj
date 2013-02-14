@@ -6,76 +6,83 @@
   (as-cql [this] "Returns the query as raw string")
   (as-prepared [this] "Returns a 2 arg vector [query values-vector] ready to be used as prepared statement, the values are raw (still java/clojure natives"))
 
-(defrecord Query [template query]
-  PQuery
-  (as-cql [this]
-    (cql/apply-cql query template))
 
-  (as-prepared [this]
-    (cql/apply-prepared query template)))
+(defn as-cql [query]
+  (binding [qbits.hayt.cql/*prepared-statement* false]
+    (cql/emit-query query (:template (meta query) ))))
+
+(defn as-prepared [query]
+  (binding [cql/*param-stack* (atom [])]
+    [(cql/emit-query query (:template (meta query)))
+     @cql/*param-stack*]))
+
+(defn query
+  [template query-map]
+  (vary-meta query-map assoc :template template))
 
 (defn select
   ""
   [table]
-  (Query. ["SELECT" :columns "FROM" :table :where :order-by :limit]
-          {:table table
-           :columns []}))
+  (query
+   ["SELECT" :columns "FROM" :table :where :order-by :limit]
+   {:table table
+    :columns []}))
 
 (defn insert
   ""
   [table]
-  (Query. ["INSERT INTO" :table :values :using]
-          {:table table}))
+  (query ["INSERT INTO" :table :values :using]
+         {:table table}))
 
 (defn update
   ""
   [table]
-  (Query. ["UPDATE" :table :using :set :where]
-          {:table table}))
+  (query ["UPDATE" :table :using :set :where]
+         {:table table}))
 
 (defn delete
   ""
   [table]
-  (Query. ["DELETE" :columns "FROM" :table :using :where]
-          {:table table
-           :columns []}))
+  (query ["DELETE" :columns "FROM" :table :using :where]
+         {:table table
+          :columns []}))
 
 (defn truncate
   ""
   [table]
-  (Query. ["TRUNCATE" :table]
+  (query ["TRUNCATE" :table]
           {:table table}))
 
 (defn drop-keyspace
   ""
   [keyspace]
-  (Query. ["DROP KEYSPACE" :keyspace]
-          {:keyspace keyspace}))
+  (query ["DROP KEYSPACE" :keyspace]
+         {:keyspace keyspace}))
 
 (defn drop-table
   ""
   [table]
-  (Query. ["DROP TABLE" :table]
-          {:table table}))
+  (query ["DROP TABLE" :table]
+         {:table table}))
 
 (defn drop-index
   ""
   [index]
-  (Query. ["DROP INDEX" :index]
-          {:index index}))
+  (query ["DROP INDEX" :index]
+         {:index index}))
 
 (defn create-index
   ""
   [table column]
-  (Query. ["CREATE INDEX" :index-name "ON" :table "(" :column ")"]
-          {:table table :column column}))
+  (query ["CREATE INDEX" :index-name "ON" :table "(" :column ")"]
+         {:table table :column column}))
 
 
 (defn batch
   ""
   [& queries]
-  (Query. ["BATCH" :using "\n" :queries  "\nAPPLY BATCH"]
-          {:queries queries}))
+  (query ["BATCH" :using "\n" :queries  "\nAPPLY BATCH"]
+         {:queries queries}))
 
 
 ;; clauses
@@ -83,37 +90,37 @@
 (defn columns
   ""
   [q & columns]
-  (assoc-in q [:query :columns] columns))
+  (assoc q :columns columns))
 
 (defn using
   ""
   [q & args]
-  (assoc-in q [:query :using] args))
+  (assoc q :using args))
 
 (defn limit
   ""
   [q n]
-  (assoc-in q [:query :limit] n))
+  (assoc q :limit n))
 
 (defn order-by
   ""
   [q & fields]
-  (assoc-in q [:query :order-by] fields))
+  (assoc q :order-by fields))
 
 (defn where
   ""
   [q args]
-  (assoc-in q [:query :where] args))
+  (assoc q :where args))
 
 (defn values
   ""
   [q values]
-  (assoc-in q [:query :values] values))
+  (assoc q :values values))
 
 (defn set
   ""
   [q values]
-  (assoc-in q [:query :set] values))
+  (assoc q :set values))
 
 ;; (defn def-cols [q values]
 ;;   (update-in q [:query :defs] merge values))
@@ -124,9 +131,9 @@
 (defn with
   ""
   [q values]
-  (assoc-in q [:query :with] values))
+  (assoc q :with values))
 
 (defn index-name
   ""
   [q value]
-  (assoc-in q [:query :index-name] value))
+  (assoc q :index-name value))

@@ -178,8 +178,8 @@
 
    :queries
    (fn [q queries]
-     (let [subqs (map (fn [{:keys [template query]}]
-                        (emit-query query template))
+     (let [subqs (map (fn [query]
+                        (emit-query query (:template (meta query))))
                       queries)]
        (if *prepared-statement*
          [(join-lf subqs) @*param-stack*])
@@ -197,14 +197,3 @@
        (filter identity)
        join-spaced
        terminate))
-
-(defn apply-cql
-  [query template]
-  (binding [*prepared-statement* false]
-    (emit-query query template)))
-
-(defn apply-prepared
-  [query template]
-  (binding [*param-stack* (atom [])]
-    [(emit-query query template)
-     @*param-stack*]))
