@@ -3,7 +3,6 @@
   (:require [clojure.string :as string]))
 
 (def ^:dynamic *param-stack*)
-;; can be :prepared :raw
 (def ^:dynamic *prepared-statement* true)
 
 ;; this has to be an atom, we cannot bash a transient in place (we
