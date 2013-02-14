@@ -70,17 +70,17 @@
 (defn values [q values]
   (assoc-in q [:query :values] values))
 
-(defn set [q values]
-  (assoc-in ~q [:query :set] values))
+;; (defn set [q values]
+;;   (assoc-in ~q [:query :set] values))
 
-(defn def-cols [q values]
-  (update-in q [:query :defs] merge values))
+;; (defn def-cols [q values]
+;;   (update-in q [:query :defs] merge values))
 
-(defn def-pk [q & values]
-  (assoc-in q [:query :defs :pk] values))
+;; (defn def-pk [q & values]
+;;   (assoc-in q [:query :defs :pk] values))
 
-(defn with [q values]
-  (assoc-in q [:query :with] values))
+;; (defn with [q values]
+;;   (assoc-in q [:query :with] values))
 
-(defn index-name [q value]
-  (assoc-in q [:query :index-name] value))
+;; (defn index-name [q value]
+;;   (assoc-in q [:query :index-name] value))
