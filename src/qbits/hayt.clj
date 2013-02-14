@@ -15,9 +15,9 @@
           {:table table
            :columns []}))
 
-;; (defn insert [table]
-;;   (Query. ["INSERT INTO" :table :values :using]
-;;           {:table table}))
+(defn insert [table]
+  (Query. ["INSERT INTO" :table :values :using]
+          {:table table}))
 
 ;; (defn update [table]
 ;;   (Query. ["UPDATE" :table :using :set :where]
@@ -64,7 +64,7 @@
   [q & fields]
   (assoc-in q [:query :order-by] fields))
 
-(defn where [q & args]
+(defn where [q args]
   (assoc-in q [:query :where] args))
 
 (defn values [q values]
