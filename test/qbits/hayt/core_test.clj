@@ -4,8 +4,6 @@
         qbits.hayt
         qbits.hayt.cql))
 
-
-
 (deftest test-select
 
   (is (= ["SELECT * FROM %s;" ["foo"]]

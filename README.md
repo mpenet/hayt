@@ -1,6 +1,6 @@
-# hayt
+# hayt [![Build Status](https://secure.travis-ci.org/mpenet/alia.png?branch=master)](http://travis-ci.org/mpenet/alia)
 
-Nothing to see for now.
+Small library to help with CQL qery generation from Clojure.
 
 [Discussion here] (https://github.com/mpenet/hayt/wiki/Ideas)
 
