@@ -26,7 +26,7 @@
          (as-cql (-> (select :foo)
                      (order-by [:bar :desc])))))
 
-  (is (= ["SELECT * FROM %s WHERE %s = %s AND %s > %s AND %s > %s AND %s > %s IN (%s, %s, %s);"
+  (is (= ["SELECT * FROM %s WHERE %s = %s AND %s > %s AND %s > %s AND %s IN (%s, %s, %s);"
           ["foo" "foo" "bar" "moo" 3 "meh" 4 "baz" 5 6 7]]
          (as-cql (-> (select :foo)
                      (where {:foo :bar

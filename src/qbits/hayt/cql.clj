@@ -85,16 +85,23 @@
                 <= "<="
                 >= ">="})
 
-(defn where-sequential-entry [[op value]]
-  (cond
-    (= :in op)
-    (str "IN " (wrap-parens (join-coma (map encode-value value))))
+(defn where-sequential-entry [column [op value]]
+  (let [col-name (encode-name column)]
+    (cond
+      (= :in op)
+      (str col-name
+           " IN "
+           (wrap-parens (join-coma (map encode-value value))))
 
-    (fn? op)
-    (str (operators op) " " (encode-value value))
+      (fn? op)
+      (str col-name
+           " " (operators op) " "
+           (encode-value value))
 
-    (keyword? op)
-    (str (name op) " " (encode-value value))))
+      (keyword? op)
+      (str col-name
+           " " (name op) " "
+           (encode-value value)))))
 
 (def emit
   {:columns
@@ -107,11 +114,11 @@
    (fn [q clauses]
      (->> clauses
           (map (fn [[k v]]
-                 (str (encode-name k) " " ;; col name
-                      (if (sequential? v) ;; sequence, we do the complex thing first
-                        (where-sequential-entry v)
-                        ;; else we just append if its a simple map val
-                        (str "= " (encode-value v))))))
+                 (if (sequential? v) ;; sequence, we do the complex thing first
+                   (where-sequential-entry k v)
+                   ;; else we just append if its a simple map val
+                   (format-eq (encode-name k)
+                              (encode-value v)))))
           join-and
           (str "WHERE ")))
 
