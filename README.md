@@ -1,13 +1,15 @@
 # hayt
 
-A Clojure library designed to ... well, that part is up to you.
+Nothing to see for now.
+
+[Discussion here] (https://github.com/mpenet/hayt/wiki/Ideas)
 
 ## Usage
 
-FIXME
+Thou shalt not use this lib yet.
 
 ## License
 
-Copyright © 2013 FIXME
+Copyright © 2013 mpenet
 
 Distributed under the Eclipse Public License, the same as Clojure.
