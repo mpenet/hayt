@@ -1,4 +1,4 @@
-# hayt [![Build Status](https://secure.travis-ci.org/mpenet/alia.png?branch=master)](http://travis-ci.org/mpenet/alia)
+# hayt [![Build Status](https://secure.travis-ci.org/mpenet/hayt.png?branch=master)](http://travis-ci.org/mpenet/hayt)
 
 Small library to help with CQL qery generation from Clojure.
 
