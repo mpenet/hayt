@@ -2,13 +2,7 @@
   "http://cassandra.apache.org/doc/cql3/CQL.html"
   (:require [clojure.string :as string]))
 
-;; not this is just examples for now, some stuff can be optmized to
-;; reduce the number of iterations here and there.
-
 (def ^:dynamic *param-stack*)
-
-;; we'll just overwrite this for prepared statements, yeah it's a dyn
-;; var, sucks, maybe it's better to do that from an argument
 (def ^:dynamic *param-placeholder* "%s")
 (def ^:dynamic *raw-values* true)
 
@@ -19,7 +13,6 @@
   `(do (swap! *param-stack* conj ~x)
        *param-placeholder*))
 
-;; string manip helpers
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join " " %))
 (def join-coma #(string/join ", " %))
@@ -28,11 +21,6 @@
 (def quote-string #(str \' (string/escape % {\" "\""}) \'))
 (def wrap-parens #(str "(" % ")"))
 (def terminate #(str % ";"))
-
-;; about quoting and escaping stuff: java-driver expects raw values on
-;; prepared-statements .bind, doing stuff such as string escaping is
-;; not necessary welcomed in this case. Maybe something to handle from
-;; an option again. not sure yet.
 
 (defprotocol CQLEntities
   (cql-identifier [x] "table names etc, maybe it's too paranoid, but this also
@@ -72,8 +60,6 @@
       (->> (map (fn [[k v]]
                   (format-kv (cql-value k) (cql-value v)))
                 x)
-           join-coma
-           #(str "{" % "}"))))
 
   clojure.lang.Sequential
   (cql-value [x]
@@ -186,10 +172,6 @@
           (str "WITH ")))})
 
 (def emit-catch-all (fn [q x] (cql-identifier x)))
-
-;; everything else is considered unsafe just define an emit for a
-;; placeholder if you want to bypass this, stuff such as limit is
-;; considered safe
 
 (defn apply-template
   [query template]
