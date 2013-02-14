@@ -32,9 +32,21 @@
   (Query. ["TRUNCATE" :table]
           {:table table}))
 
-(defn drop [x]
-  (Query. (str "DROP " (name x))
-          {}))
+(defn drop-keyspace [keyspace]
+  (Query. ["DROP KEYSPACE" :keyspace]
+          {:keyspace keyspace}))
+
+(defn drop-table [table]
+  (Query. ["DROP TABLE" :table]
+          {:table table}))
+
+(defn drop-index [index]
+  (Query. ["DROP INDEX" :index]
+          {:index index}))
+
+(defn create-index [table column]
+  (Query. ["CREATE INDEX" :index-name "ON" :table "(" :column ")"]
+          {:table table :column column}))
 
 ;; (defn create-table [table]
 ;;   (Query. ["CREATE COLUMNFAMILY" :table :defs :with]
@@ -44,9 +56,7 @@
 ;;   (Query. ["CREATE KEYSPACE" :ks :defs :with]
 ;;           {:ks ks}))
 
-;; (defn create-index [table col-name]
-;;   (Query. ["CREATE INDEX" :index-name "ON" :table "(" :col-name ")"]
-;;           {:table table :col-name col-name}))
+
 
 
 
@@ -81,8 +91,8 @@
 ;; (defn def-pk [q & values]
 ;;   (assoc-in q [:query :defs :pk] values))
 
-;; (defn with [q values]
-;;   (assoc-in q [:query :with] values))
+(defn with [q values]
+  (assoc-in q [:query :with] values))
 
-;; (defn index-name [q value]
-;;   (assoc-in q [:query :index-name] value))
+(defn index-name [q value]
+  (assoc-in q [:query :index-name] value))
