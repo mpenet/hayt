@@ -8,7 +8,7 @@
 (defrecord Query [template query]
   PQuery
   (as-cql [this]
-    (cql/apply-template (:query this) template)))
+    (cql/apply-template query template)))
 
 (defn select [table]
   (Query. ["SELECT" :columns "FROM" :table :where :order-by :limit]
