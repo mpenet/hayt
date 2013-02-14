@@ -2,6 +2,7 @@
   "http://cassandra.apache.org/doc/cql3/CQL.html"
   (:require [clojure.string :as string]))
 
+(declare emit-query)
 (def ^:dynamic *param-stack*)
 (def ^:dynamic *prepared-statement* true)
 
@@ -17,6 +18,7 @@
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join " " %))
 (def join-coma #(string/join ", " %))
+(def join-lf #(string/join "\n" %))
 (def format-eq (partial format "%s = %s"))
 (def format-kv (partial format "%s : %s"))
 (def quote-string #(str \' (string/escape % {\" "\""}) \'))
@@ -172,7 +174,16 @@
             (format-eq (cql-identifier k)
                        (cql-value v)))
           join-and
-          (str "WITH ")))})
+          (str "WITH ")))
+
+   :queries
+   (fn [q queries]
+     (let [subqs (map (fn [{:keys [template query]}]
+                        (emit-query query template))
+                      queries)]
+       (if *prepared-statement*
+         [(join-lf subqs) @*param-stack*])
+       (join-lf subqs)))})
 
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 

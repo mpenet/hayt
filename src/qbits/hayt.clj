@@ -70,13 +70,12 @@
   (Query. ["CREATE INDEX" :index-name "ON" :table "(" :column ")"]
           {:table table :column column}))
 
-;; (defn create-table [table]
-;;   (Query. ["CREATE COLUMNFAMILY" :table :defs :with]
-;;           {:table table}))
 
-;; (defn create-keyspace [ks]
-;;   (Query. ["CREATE KEYSPACE" :ks :defs :with]
-;;           {:ks ks}))
+(defn batch
+  ""
+  [& queries]
+  (Query. ["BATCH" :using "\n" :queries  "\nAPPLY BATCH"]
+          {:queries queries}))
 
 
 ;; clauses
