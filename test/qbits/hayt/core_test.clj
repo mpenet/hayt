@@ -47,4 +47,12 @@
                      (set {:bar 1
                            :baz [:+= 2] })))))
 
-  )
+    (is (= ["UPDATE %s SET %s = %s, %s = %s  %s WHERE %s = %s AND %s > %s AND %s > %s AND %s IN (%s, %s, %s);"
+            ["foo" "bar" 1 "baz" "baz" 2 "foo" "bar" "moo" 3 "meh" 4 "baz" 5 6 7]]
+         (as-cql (-> (update :foo)
+                     (set {:bar 1
+                           :baz [:+= 2] })
+                     (where {:foo :bar
+                             :moo [> 3]
+                             :meh [:> 4]
+                             :baz [:in [5 6 7]]}))))))
