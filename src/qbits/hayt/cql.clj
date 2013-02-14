@@ -181,7 +181,7 @@
    :queries
    (fn [q queries]
      (let [subqs (map (fn [query]
-                        (emit-query query (template q)))
+                        (emit-query query))
                       queries)]
        (if *prepared-statement*
          [(join-lf subqs) @*param-stack*])
@@ -189,13 +189,13 @@
 
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 
-(defn emit-query [query template]
+(defn emit-query [query]
   (->> (map (fn [token]
               (if (string? token)
                 token
                 (when-let [context (token query)]
                   ((get emit token emit-catch-all) query context))))
-            template)
+            (template query))
        (filter identity)
        join-spaced
        terminate))
