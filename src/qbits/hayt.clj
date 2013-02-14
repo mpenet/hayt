@@ -3,9 +3,8 @@
   (:require [qbits.hayt.cql :as cql]))
 
 (defprotocol PQuery
-  (as-cql [this] "Returns the 2 arg vector dependent of the *raw-values* binding")
-  (as-prepared [this] "Returns a 2 arg vector ready to be used as prepared
-                             statement (*raw-values* = true)"))
+  (as-cql [this] "Returns the query as raw string")
+  (as-prepared [this] "Returns a 2 arg vector [query values-vector] ready to be used as prepared statement, the values are raw (still java/clojure natives"))
 
 (defrecord Query [template query]
   PQuery

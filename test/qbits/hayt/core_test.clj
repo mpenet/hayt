@@ -95,8 +95,7 @@
                              :meh [:> 4]
                              :baz [:in [5 6 7]]})))))
 
-
-  (is (= ["UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"]
+  (is (= "UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
          (as-cql (-> (update :foo)
                           (set {:bar 1
                                 :baz [+ 2] })
