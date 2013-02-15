@@ -15,8 +15,8 @@
 
   ;;
   (is (= ["SELECT ?, ? FROM ?;" ["bar" "baz" "foo"]]
-         (as-prepared (-> (select :foo
-                                  (columns :bar "baz"))))))
+         (as-prepared (select :foo
+                              (columns :bar "baz")))))
 
   (is (= "SELECT bar, baz FROM foo;"
          (as-cql (select :foo
@@ -163,3 +163,20 @@
                                 (using :timestamp 100000
                                        :ttl 200000)))
                        (using :timestamp 1234))))))
+
+(deftest recompose-query-test
+  (let [q (select :foo)]
+    (is (= "SELECT bar, baz FROM foo;")
+        (recompose-query q
+                         (columns :bar "baz"))))
+
+
+  (let [q (insert :foo)
+        q2 (recompose-query q
+                            (values {"a" "b" "c" "d"}))]
+    (is (= "INSERT INTO foo (a, c) VALUES ('b', 'd');"
+           (as-cql q2)))
+    (is (= "INSERT INTO foo (a, c) VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;"
+           (as-cql (recompose-query q2
+                                    (using :timestamp 100000
+                                           :ttl 200000)))))))

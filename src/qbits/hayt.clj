@@ -146,3 +146,7 @@
   ""
   [value]
   {:index-name value})
+
+(defn recompose-query
+  [q & clauses]
+  (apply merge q clauses))
