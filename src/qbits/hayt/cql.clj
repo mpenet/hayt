@@ -21,8 +21,8 @@
 (def join-spaced #(string/join " " %))
 (def join-coma #(string/join ", " %))
 (def join-lf #(string/join "\n" %))
-(def format-eq (partial format "%s = %s"))
-(def format-kv (partial format "%s : %s"))
+(def format-eq #(format "%s = %s" %1 %2))
+(def format-kv #(format "%s : %s"  %1 %2))
 (def quote-string #(str \' (string/escape % {\" "\""}) \'))
 (def wrap-parens #(str "(" % ")"))
 (def terminate #(str % ";"))
@@ -150,7 +150,7 @@
             " VALUES "
             (wrap-parens (join-coma (map cql-value values))))))
 
-   :set
+   :set-fields
    (fn [q values]
      (->> (map (fn [[k v]]
                  ;; counter (we need to support maps/set/list updates

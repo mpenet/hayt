@@ -1,5 +1,4 @@
 (ns qbits.hayt
-  (:refer-clojure :exlude [set])
   (:require [qbits.hayt.cql :as cql]))
 
 (defn as-cql [query]
@@ -37,7 +36,7 @@
 (defn update
   ""
   [table & clauses]
-  (query ["UPDATE" :table :using :set :where]
+  (query ["UPDATE" :table :using :set-fields :where]
          {:table table}
          clauses))
 
@@ -126,10 +125,10 @@
   [values]
   {:values values})
 
-(defn set
+(defn set-fields
   ""
   [values]
-  {:set values})
+  {:set-fields values})
 
 ;; (defn def-cols [q values]
 ;;   (update-in q [:query :defs] merge values))
@@ -147,6 +146,6 @@
   [value]
   {:index-name value})
 
-(defn recompose-query
+(defn q->
   [q & clauses]
   (apply merge q clauses))

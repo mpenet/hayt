@@ -1,5 +1,4 @@
 (ns qbits.hayt.core-test
-  (:refer-clojure :exclude [set])
   (:use clojure.test
         qbits.hayt
         qbits.hayt.cql))
@@ -76,20 +75,20 @@
   ;;
   (is (= ["UPDATE ? SET ? = ?, ? = ? + ?;" ["foo" "bar" 1 "baz" "baz" 2]]
          (as-prepared (update :foo
-                              (set {:bar 1
-                                    :baz [+ 2] })))))
+                              (set-fields {:bar 1
+                                           :baz [+ 2] })))))
 
   (is (= "UPDATE foo SET bar = 1, baz = baz + 2;"
-         (as-cql(update :foo
-                        (set {:bar 1
-                              :baz [+ 2] })))))
+         (as-cql (update :foo
+                         (set-fields {:bar 1
+                                      :baz [+ 2] })))))
 
   ;;
   (is (= ["UPDATE ? SET ? = ?, ? = ? + ? WHERE ? = ? AND ? > ? AND ? > ? AND ? IN (?, ?, ?);"
           ["foo" "bar" 1 "baz" "baz" 2 "foo" "bar" "moo" 3 "meh" 4 "baz" 5 6 7]]
          (as-prepared (update :foo
-                              (set {:bar 1
-                                    :baz [+ 2] })
+                              (set-fields {:bar 1
+                                           :baz [+ 2] })
                               (where {:foo :bar
                                       :moo [> 3]
                                       :meh [:> 4]
@@ -97,12 +96,13 @@
 
   (is (= "UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
          (as-cql (update :foo
-                         (set {:bar 1
-                               :baz [+ 2] })
+                         (set-fields {:bar 1
+                                      :baz [+ 2] })
                          (where {:foo :bar
                                  :moo [> 3]
                                  :meh [:> 4]
                                  :baz [:in [5 6 7]]}))))))
+
 
 
 (deftest test-delete
@@ -144,8 +144,8 @@
          (as-cql (batch
                   (queries
                    (update :foo
-                           (set {:bar 1
-                                 :baz [+ 2] }))
+                           (set-fields {:bar 1
+                                        :baz [+ 2] }))
                    (insert :foo
                            (values {"a" "b" "c" "d"})
                            (using :timestamp 100000
@@ -156,27 +156,27 @@
          (as-prepared (batch
                        (queries
                         (update :foo
-                                (set {:bar 1
-                                      :baz [+ 2] }))
+                                (set-fields {:bar 1
+                                             :baz [+ 2] }))
                         (insert :foo
                                 (values {"a" "b" "c" "d"})
                                 (using :timestamp 100000
                                        :ttl 200000)))
                        (using :timestamp 1234))))))
 
-(deftest recompose-query-test
+(deftest q->-test
   (let [q (select :foo)]
     (is (= "SELECT bar, baz FROM foo;")
-        (recompose-query q
-                         (columns :bar "baz"))))
+        (q-> q
+             (columns :bar "baz"))))
 
 
   (let [q (insert :foo)
-        q2 (recompose-query q
-                            (values {"a" "b" "c" "d"}))]
+        q2 (q-> q
+                (values {"a" "b" "c" "d"}))]
     (is (= "INSERT INTO foo (a, c) VALUES ('b', 'd');"
            (as-cql q2)))
     (is (= "INSERT INTO foo (a, c) VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;"
-           (as-cql (recompose-query q2
-                                    (using :timestamp 100000
-                                           :ttl 200000)))))))
+           (as-cql (q-> q2
+                        (using :timestamp 100000
+                               :ttl 200000)))))))
