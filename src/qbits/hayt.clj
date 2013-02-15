@@ -144,4 +144,5 @@
 
 (defn q->
   [q & clauses]
-  (apply merge q clauses))
+  (-> (into q clauses)
+      (with-meta (meta q))))
