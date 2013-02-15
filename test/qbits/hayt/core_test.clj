@@ -176,6 +176,12 @@
          (->prepared (select :foo
                        (where {:ts (now)})))))
 
+  (is (= "SELECT WRITETIME(bar) FROM foo;"
+         (->cql (select :foo (columns (writetime "bar"))))))
+
+  (is (= "SELECT TTL(bar) FROM foo;"
+         (->cql (select :foo (columns (ttl "bar"))))))
+
   (is (= "SELECT * FROM foo WHERE token(user-id) > token('tom');"
          (->cql (select :foo
                   (where {(token :user-id) [> (token "tom")]})))))
