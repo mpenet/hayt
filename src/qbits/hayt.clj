@@ -10,43 +10,43 @@
     [(cql/emit-query query)
      @cql/*param-stack*]))
 
+(defn merge-parts
+  [q parts]
+  (apply merge q parts))
+
 (defn query
-  ([template query-map]
-     (query template query-map nil))
-  ([template query-map clauses]
-     (vary-meta
-      (apply merge query-map clauses)
-      assoc :template template)))
+  [template query-map]
+  (vary-meta query-map assoc :template template))
 
 (defn select
   ""
   [table & clauses]
   (query ["SELECT" :columns "FROM" :table :where :order-by :limit]
-         {:table table
-          :columns []}
-         clauses))
+         (merge-parts {:table table
+                       :columns []}
+                      clauses)))
 
 (defn insert
   ""
   [table & clauses]
   (query ["INSERT INTO" :table :values :using]
-         {:table table}
-         clauses))
+         (merge-parts {:table table}
+                      clauses)))
 
 (defn update
   ""
   [table & clauses]
   (query ["UPDATE" :table :using :set-fields :where]
-         {:table table}
-         clauses))
+         (merge-parts {:table table}
+                      clauses)))
 
 (defn delete
   ""
   [table & clauses]
   (query ["DELETE" :columns "FROM" :table :using :where]
-         {:table table
-          :columns []}
-         clauses))
+         (merge-parts {:table table
+                       :columns []}
+                      clauses)))
 
 (defn truncate
   ""
@@ -76,16 +76,16 @@
   ""
   [table column & clauses]
   (query ["CREATE INDEX" :index-name "ON" :table "(" :column ")"]
-         {:table table :column column}
-         clauses))
+         (merge-parts {:table table
+                       :column column}
+                      clauses)))
 
 
 (defn batch
   ""
   [& clauses]
   (query ["BATCH" :using "\n" :queries  "\nAPPLY BATCH"]
-         {}
-         clauses))
+         (merge-parts {} clauses)))
 
 
 ;; clauses
@@ -148,4 +148,4 @@
 
 (defn q->
   [q & clauses]
-  (apply merge q clauses))
+  (merge-parts q clauses))
