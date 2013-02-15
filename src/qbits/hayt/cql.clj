@@ -150,7 +150,7 @@
             " VALUES "
             (wrap-parens (join-coma (map cql-value values))))))
 
-   :set
+   :set-fields
    (fn [q values]
      (->> (map (fn [[k v]]
                  ;; counter (we need to support maps/set/list updates

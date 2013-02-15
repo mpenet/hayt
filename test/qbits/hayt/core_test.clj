@@ -1,5 +1,4 @@
 (ns qbits.hayt.core-test
-  (:refer-clojure :exclude [set])
   (:use clojure.test
         qbits.hayt
         qbits.hayt.cql))
@@ -76,20 +75,20 @@
   ;;
   (is (= ["UPDATE ? SET ? = ?, ? = ? + ?;" ["foo" "bar" 1 "baz" "baz" 2]]
          (as-prepared (-> (update :foo)
-                          (set {:bar 1
-                                :baz [+ 2] })))))
+                          (set-fields {:bar 1
+                                       :baz [+ 2] })))))
 
   (is (= "UPDATE foo SET bar = 1, baz = baz + 2;"
          (as-cql (-> (update :foo)
-                     (set {:bar 1
-                           :baz [+ 2] })))))
+                     (set-fields {:bar 1
+                                  :baz [+ 2] })))))
 
   ;;
   (is (= ["UPDATE ? SET ? = ?, ? = ? + ? WHERE ? = ? AND ? > ? AND ? > ? AND ? IN (?, ?, ?);"
           ["foo" "bar" 1 "baz" "baz" 2 "foo" "bar" "moo" 3 "meh" 4 "baz" 5 6 7]]
          (as-prepared (-> (update :foo)
-                          (set {:bar 1
-                                :baz [+ 2] })
+                          (set-fields {:bar 1
+                                       :baz [+ 2] })
                           (where {:foo :bar
                                   :moo [> 3]
                                   :meh [:> 4]
@@ -97,8 +96,8 @@
 
   (is (= "UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
          (as-cql (-> (update :foo)
-                     (set {:bar 1
-                           :baz [+ 2] })
+                     (set-fields {:bar 1
+                                  :baz [+ 2] })
                      (where {:foo :bar
                              :moo [> 3]
                              :meh [:> 4]
@@ -143,8 +142,8 @@
   (is (= "BATCH USING TIMESTAMP 2134 \n UPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (a, c) VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000; \nAPPLY BATCH;"
          (as-cql (-> (batch
                       (-> (update :foo)
-                          (set {:bar 1
-                                :baz [+ 2] }))
+                          (set-fields {:bar 1
+                                       :baz [+ 2] }))
                       (-> (insert :foo)
                           (values {"a" "b" "c" "d"})
                           (using :timestamp 100000
@@ -154,8 +153,8 @@
   (is (= ["BATCH USING TIMESTAMP ? \n UPDATE ? SET ? = ?, ? = ? + ?;\nINSERT INTO ? (?, ?) VALUES (?, ?) USING TIMESTAMP ? AND TTL ?; \nAPPLY BATCH;" [1234 "foo" "bar" 1 "baz" "baz" 2 "foo" "a" "c" "b" "d" 100000 200000]]
          (as-prepared (-> (batch
                            (-> (update :foo)
-                               (set {:bar 1
-                                     :baz [+ 2] }))
+                               (set-fields {:bar 1
+                                            :baz [+ 2] }))
                            (-> (insert :foo)
                                (values {"a" "b" "c" "d"})
                                (using :timestamp 100000
