@@ -64,15 +64,6 @@
                    (set-fields {:bar 1
                                 :baz [+ 2] })))))
 
-  (prn (as-prepared (update :foo
-                      (set-fields {:bar 1
-                                   :baz [+ 2] })
-                      (where {:foo :bar
-                              :moo [> 3]
-                              :meh [:> 4]
-                              :baz [:in [5 6 7]]}))))
-
-  ;;
   (is (= ["UPDATE foo SET bar = ?, baz = baz + ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
           [1 2 "bar" 3 4 5 6 7]]
          (as-prepared (update :foo
@@ -173,36 +164,21 @@
                             :ttl 200000)))))))
 
 
-;; (deftest test-functions
-;;   (is (= "SELECT count(*) FROM foo;"
-;;          (as-cql (select :foo
-;;                    (columns (count*))))))
+(deftest test-functions
+  (is (= "SELECT count(*) FROM foo;"
+         (as-cql (select :foo (columns (count*))))))
 
-;;   (is (= ["SELECT count(*) FROM ?;" ["foo"]]
-;;          (as-prepared (select :foo
-;;                         (columns (count*))))))
+  (is (= "SELECT * FROM foo WHERE ts = now();"
+         (as-cql (select :foo
+                   (where {:ts (now)})))))
 
+  (is (= "SELECT * FROM foo WHERE token(user-id) > token('tom');"
+         (as-cql (select :foo
+                   (where {(token :user-id) [> (token "tom")]})))))
 
-
-;;   (is (= "SELECT * FROM foo WHERE ts = now();"
-;;          (as-cql (select :foo
-;;                    (where {:ts (now)})))))
-
-;;   (is (= ["SELECT * FROM ? WHERE ? = now();" ["foo" "ts"]]
-;;          (as-prepared (select :foo
-;;                         (columns (count*))))))
-
-
-;;   (is (= "SELECT * FROM foo WHERE token(user-id) > token('tom');"
-;;          (as-cql (select :foo
-;;                    (where {(token :user-id) [> (token "tom" true)]})))))
-
-;;   (is (= ["SELECT * FROM ? WHERE token(?) > token(?);" ["foo" "user-id" "tom"]]
-;;          (as-prepared (select :foo
-;;                         (where {(token :user-id) [> (token "tom" true)]})))))
-
-
-;;   )
+  (is (= ["SELECT * FROM foo WHERE token(user-id) > token(?);" ["tom"]]
+         (as-prepared (select :foo
+                        (where {(token :user-id) [> (token "tom")]}))))))
 
 ;; (prn (token 1) )
 

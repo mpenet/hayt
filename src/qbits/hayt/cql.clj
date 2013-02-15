@@ -78,16 +78,14 @@
   CQLFn
   (cql-identifier [{:keys [value template]}]
     ;; function are always safe, their arguments might not be though
-    (let [value (cql-identifier value)]
-      (if template
-        (format template value)
-        value)))
+    (if template
+      (format template (cql-identifier value))
+      value))
   (cql-value [{:keys [value template]}]
     ;; function are always safe, their arguments might not be though
-    (let [value (cql-value value)]
-      (if template
-        (format template value)
-        value)))
+    (if template
+      (format template (cql-value value))
+      value))
 
   Object
   (cql-identifier [x] x)

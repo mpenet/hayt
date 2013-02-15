@@ -154,11 +154,11 @@
 ;; CQL3 functions
 
 (def now (constantly (cql/map->CQLFn {:value "now()"})))
-;; no really need to wrap this one but anyway, but lets be consistent
+
+;; no need to wrap this one but anyway... lets be consistent
 (def count* (constantly (cql/map->CQLFn {:value "count(*)"})))
 
-;; FiXME: No seconds resolution wtf? we need to investigate CQL3 spec in
-;;        detail to be sure.
+;; FiXME: No seconds resolution wtf? we need to investigate CQL3 spec
 (def ^SimpleDateFormat uuid-date-format
   (SimpleDateFormat. "yyyy-MM-dd hh:mmZ"))
 
