@@ -80,7 +80,7 @@
 (defn batch
   ""
   [& clauses]
-  (query ["BATCH" :using "\n" :queries  "\nAPPLY BATCH"]
+  (query ["BATCH" :using :queries  "APPLY BATCH"]
          (into {} clauses)))
 
 

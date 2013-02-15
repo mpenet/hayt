@@ -2,7 +2,6 @@
 
 Small library to help with CQL query generation from Clojure.
 
-[Discussion here] (https://github.com/mpenet/hayt/wiki/Ideas)
 
 ## Usage
 

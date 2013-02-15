@@ -140,7 +140,7 @@
 
 
 (deftest test-batch
-  (is (= "BATCH USING TIMESTAMP 2134 \n UPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (a, c) VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000; \nAPPLY BATCH;"
+  (is (= "BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (a, c) VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
          (as-cql (batch
                   (queries
                    (update :foo
@@ -152,7 +152,7 @@
                                   :ttl 200000)))
                   (using :timestamp 2134)))))
 
-  (is (= ["BATCH USING TIMESTAMP ? \n UPDATE ? SET ? = ?, ? = ? + ?;\nINSERT INTO ? (?, ?) VALUES (?, ?) USING TIMESTAMP ? AND TTL ?; \nAPPLY BATCH;" [1234 "foo" "bar" 1 "baz" "baz" 2 "foo" "a" "c" "b" "d" 100000 200000]]
+  (is (= ["BATCH USING TIMESTAMP ? \nUPDATE ? SET ? = ?, ? = ? + ?;\nINSERT INTO ? (?, ?) VALUES (?, ?) USING TIMESTAMP ? AND TTL ?;\n APPLY BATCH;" [1234 "foo" "bar" 1 "baz" "baz" 2 "foo" "a" "c" "b" "d" 100000 200000]]
          (as-prepared (batch
                        (queries
                         (update :foo

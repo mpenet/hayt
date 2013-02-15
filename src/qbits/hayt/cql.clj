@@ -180,10 +180,11 @@
 
    :queries
    (fn [q queries]
-     (let [subqs (map emit-query queries)]
-       (if *prepared-statement*
-         [(join-lf subqs) @*param-stack*])
-       (join-lf subqs)))})
+     (->> (let [subqs (map emit-query queries)]
+           (if *prepared-statement*
+             [(join-lf subqs) @*param-stack*])
+           (join-lf subqs))
+          (format "\n%s\n")))})
 
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 
