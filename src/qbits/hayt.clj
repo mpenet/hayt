@@ -14,6 +14,12 @@
   [template query-map]
   (vary-meta query-map assoc :template template))
 
+(defn create-table
+  [table]
+  (query ["CREATE TABLE" :table :column-definitions :primary-key]
+         {:table table
+          :columns []}))
+
 (defn select
   ""
   [table]
@@ -85,6 +91,16 @@
   ""
   [q & columns]
   (assoc q :columns columns))
+
+(defn column-definitions
+  ""
+  [q column-definitions]
+  (assoc q :column-definitions column-definitions))
+
+(defn primary-key
+  ""
+  [q & primary-key]
+  (assoc q :primary-key primary-key))
 
 (defn using
   ""

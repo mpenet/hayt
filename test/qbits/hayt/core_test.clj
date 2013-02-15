@@ -160,3 +160,16 @@
                                (using :timestamp 100000
                                       :ttl 200000)))
                           (using :timestamp 1234))))))
+
+(deftest test-create-table
+  (is (= "CREATE TABLE foo (a varchar, b int) PRIMARY KEY (a);"
+         (as-cql (-> (create-table :foo)
+                     (column-definitions {:a :varchar
+                                          :b :int})
+                     (primary-key :a)))))
+
+  (is (= "CREATE TABLE foo (a varchar, b int) PRIMARY KEY (a, b);"
+         (as-cql (-> (create-table :foo)
+                     (column-definitions {:a :varchar
+                                          :b :int})
+                     (primary-key :a :b))))))

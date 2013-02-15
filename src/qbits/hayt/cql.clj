@@ -21,12 +21,16 @@
 (def join-spaced #(string/join " " %))
 (def join-coma #(string/join ", " %))
 (def join-lf #(string/join "\n" %))
-(def format-eq #(format "%s = %s" %1 %2))
-(def format-kv #(format "%s : %s"  %1 %2))
+
 (def quote-string #(str \' (string/escape % {\" "\""}) \'))
 (def wrap-parens #(str "(" % ")"))
 (def terminate #(str % ";"))
 
+(def format-eq #(format "%s = %s" %1 %2))
+(def format-kv #(format "%s : %s"  %1 %2))
+(def format-cd (fn [[k v]] (join-spaced
+                            [(cql-identifier k)
+                             (cql-identifier v)])))
 (defprotocol CQLEntities
   (cql-identifier [x] "table names etc, maybe it's too paranoid, but this also
                     allows their parameterisation")
@@ -136,6 +140,16 @@
                  (join-spaced (map cql-identifier col-values))))
           join-coma
           (str "ORDER BY ")))
+
+   :primary-key
+   (fn [q primary-key]
+     (str "PRIMARY KEY "
+          (wrap-parens (join-coma (map cql-identifier primary-key)))))
+
+   :column-definitions
+   (fn [q column-definitions]
+     (wrap-parens
+      (join-coma (map format-cd column-definitions))))
 
    :limit
    (fn [q limit]
