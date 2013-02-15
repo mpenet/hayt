@@ -10,7 +10,7 @@
     [(cql/emit-query query)
      @cql/*param-stack*]))
 
-(defn merge-parts
+(defn merge-clauses
   [q parts]
   (apply merge q parts))
 
@@ -22,37 +22,37 @@
   ""
   [table & clauses]
   (query ["SELECT" :columns "FROM" :table :where :order-by :limit]
-         (merge-parts {:table table
-                       :columns []}
-                      clauses)))
+         (merge-clauses {:table table
+                         :columns []}
+                        clauses)))
 
 (defn insert
   ""
   [table & clauses]
   (query ["INSERT INTO" :table :values :using]
-         (merge-parts {:table table}
-                      clauses)))
+         (merge-clauses {:table table}
+                        clauses)))
 
 (defn update
   ""
   [table & clauses]
   (query ["UPDATE" :table :using :set-fields :where]
-         (merge-parts {:table table}
-                      clauses)))
+         (merge-clauses {:table table}
+                        clauses)))
 
 (defn delete
   ""
   [table & clauses]
   (query ["DELETE" :columns "FROM" :table :using :where]
-         (merge-parts {:table table
-                       :columns []}
-                      clauses)))
+         (merge-clauses {:table table
+                         :columns []}
+                        clauses)))
 
 (defn truncate
   ""
   [table]
   (query ["TRUNCATE" :table]
-          {:table table}))
+         {:table table}))
 
 (defn drop-keyspace
   ""
@@ -76,16 +76,16 @@
   ""
   [table column & clauses]
   (query ["CREATE INDEX" :index-name "ON" :table "(" :column ")"]
-         (merge-parts {:table table
-                       :column column}
-                      clauses)))
+         (merge-clauses {:table table
+                         :column column}
+                        clauses)))
 
 
 (defn batch
   ""
   [& clauses]
   (query ["BATCH" :using "\n" :queries  "\nAPPLY BATCH"]
-         (merge-parts {} clauses)))
+         (merge-clauses {} clauses)))
 
 
 ;; clauses
@@ -148,4 +148,4 @@
 
 (defn q->
   [q & clauses]
-  (merge-parts q clauses))
+  (merge-clauses q clauses))
