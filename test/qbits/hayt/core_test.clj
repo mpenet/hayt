@@ -168,7 +168,11 @@
   (let [q (select :foo)]
     (is (= "SELECT bar, baz FROM foo;")
         (as-cql (q-> q
-                     (columns :bar "baz")))))
+                     (columns :bar "baz"))))
+
+    (is (= ["SELECT ?, ? FROM ?;" ["foo" "bar" "baz"]])
+        (as-prepared (q-> q
+                          (columns :bar "baz")))))
 
   (let [q (insert :foo)
         q2 (q-> q
