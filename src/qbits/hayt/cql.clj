@@ -10,12 +10,12 @@
 
 ;; this has to be an atom, we cannot bash a transient in place (we
 ;; could but it's marked as sin in the docs ("an implementation detail")
-(defmacro set-param!
+(defn set-param!
   [x]
-  `(if *prepared-statement*
-     (do (swap! *param-stack* conj ~x)
-         "?")
-     ~x))
+  (if *prepared-statement*
+    (do (swap! *param-stack* conj x)
+        "?")
+    x))
 
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join " " %))
