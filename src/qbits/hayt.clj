@@ -4,11 +4,15 @@
    [java.util Date]
    [java.text SimpleDateFormat]))
 
-(defn ->cql [query]
+(defn ->cql
+  ""
+  [query]
   (binding [qbits.hayt.cql/*prepared-statement* false]
     (cql/emit-query query)))
 
-(defn ->prepared [query]
+(defn ->prepared
+  ""
+  [query]
   (binding [cql/*param-stack* (atom [])]
     [(cql/emit-query query)
      @cql/*param-stack*]))
@@ -147,6 +151,7 @@
   {:index-name value})
 
 (defn q->
+  ""
   [q & clauses]
   (-> (into q clauses)
       (with-meta (meta q))))
@@ -174,21 +179,26 @@
   (cql/->CQLFn (.format uuid-date-format date) "minTimeuuid(%s)"))
 
 (defn token
+  ""
   [token]
   (cql/->CQLFn token "token(%s)"))
 
 (defn writetime
+  ""
   [x]
   (cql/->CQLFn x "WRITETIME(%s)"))
 
 (defn ttl
+  ""
   [x]
   (cql/->CQLFn x "TTL(%s)"))
 
 (defn unix-timestamp-of
+  ""
   [x]
   (cql/->CQLFn x "unixTimestampOf(%s)"))
 
 (defn date-of
+  ""
   [x]
   (cql/->CQLFn x "dateOf(%s)"))
