@@ -176,3 +176,11 @@
 (defn token
   [token]
   (cql/->CQLFn token "token(%s)"))
+
+(defn writetime
+  [token]
+  (cql/->CQLFn token "WRITETIME(%s)"))
+
+(defn ttl
+  [token]
+  (cql/->CQLFn token "TTL(%s)"))
