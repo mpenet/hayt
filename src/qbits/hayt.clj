@@ -10,10 +10,6 @@
     [(cql/emit-query query)
      @cql/*param-stack*]))
 
-(defn merge-clauses
-  [q parts]
-  (apply merge q parts))
-
 (defn query
   [template query-map]
   (vary-meta query-map assoc :template template))
@@ -22,31 +18,31 @@
   ""
   [table & clauses]
   (query ["SELECT" :columns "FROM" :table :where :order-by :limit]
-         (merge-clauses {:table table
-                         :columns []}
-                        clauses)))
+         (into {:table table
+                :columns []}
+               clauses)))
 
 (defn insert
   ""
   [table & clauses]
   (query ["INSERT INTO" :table :values :using]
-         (merge-clauses {:table table}
-                        clauses)))
+         (into {:table table}
+               clauses)))
 
 (defn update
   ""
   [table & clauses]
   (query ["UPDATE" :table :using :set-fields :where]
-         (merge-clauses {:table table}
-                        clauses)))
+         (into {:table table}
+               clauses)))
 
 (defn delete
   ""
   [table & clauses]
   (query ["DELETE" :columns "FROM" :table :using :where]
-         (merge-clauses {:table table
-                         :columns []}
-                        clauses)))
+         (into {:table table
+                :columns []}
+               clauses)))
 
 (defn truncate
   ""
@@ -76,16 +72,16 @@
   ""
   [table column & clauses]
   (query ["CREATE INDEX" :index-name "ON" :table "(" :column ")"]
-         (merge-clauses {:table table
-                         :column column}
-                        clauses)))
+         (into {:table table
+                :column column}
+               clauses)))
 
 
 (defn batch
   ""
   [& clauses]
   (query ["BATCH" :using "\n" :queries  "\nAPPLY BATCH"]
-         (merge-clauses {} clauses)))
+         (into {} clauses)))
 
 
 ;; clauses
@@ -148,4 +144,4 @@
 
 (defn q->
   [q & clauses]
-  (merge-clauses q clauses))
+  (apply merge q clauses))

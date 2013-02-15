@@ -164,12 +164,11 @@
                                        :ttl 200000)))
                        (using :timestamp 1234))))))
 
-(deftest q->-test
+(deftest test-q->
   (let [q (select :foo)]
     (is (= "SELECT bar, baz FROM foo;")
-        (q-> q
-             (columns :bar "baz"))))
-
+        (as-cql (q-> q
+                     (columns :bar "baz")))))
 
   (let [q (insert :foo)
         q2 (q-> q
