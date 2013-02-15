@@ -5,45 +5,26 @@
 
 (deftest test-select
 
-  ;;
-  (is (= ["SELECT * FROM ?;" ["foo"]]
-         (as-prepared (select :foo))))
-
   (is (= "SELECT * FROM foo;"
          (as-cql (select :foo))))
 
-  ;;
-  (is (= ["SELECT ?, ? FROM ?;" ["bar" "baz" "foo"]]
-         (as-prepared (select :foo
-                              (columns :bar "baz")))))
 
   (is (= "SELECT bar, baz FROM foo;"
          (as-cql (select :foo
                          (columns :bar "baz")))))
-
-  ;;
-  (is (= ["SELECT ?, ? FROM ? LIMIT 100;" ["bar" "baz" "foo"]]
-         (as-prepared (select :foo
-                              (columns :bar "baz")
-                              (limit 100)))))
 
   (is (= "SELECT bar, baz FROM foo LIMIT 100;"
          (as-cql (select :foo
                          (columns :bar "baz")
                          (limit 100)))))
 
-  ;;
-  (is (= ["SELECT * FROM ? ORDER BY ? ?;" ["foo" "bar" "desc"]]
-         (as-prepared (select :foo
-                              (order-by [:bar :desc])))))
-
   (is (= "SELECT * FROM foo ORDER BY bar desc;"
          (as-cql (select :foo
                          (order-by [:bar :desc])))))
 
   ;;
-  (is (= ["SELECT * FROM ? WHERE ? = ? AND ? > ? AND ? > ? AND ? IN (?, ?, ?);"
-          ["foo" "foo" "bar" "moo" 3 "meh" 4 "baz" 5 6 7]]
+  (is (= ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
+          ["bar" 3 4 5 6 7]]
          (as-prepared (select :foo
                               (where {:foo :bar
                                       :moo [> 3]
@@ -58,8 +39,8 @@
                                  :baz [:in [5 6 7]]}))))))
 
 (deftest test-insert
-  (is (= ["INSERT INTO ? (?, ?) VALUES (?, ?) USING TIMESTAMP ? AND TTL ?;"
-          ["foo" "a" "c" "b" "d" 100000 200000]]
+  (is (= ["INSERT INTO foo (a, c) VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;"
+          ["b" "d"]]
          (as-prepared (insert :foo
                               (values {"a" "b" "c" "d"})
                               (using :timestamp 100000
@@ -73,7 +54,7 @@
 
 (deftest test-update
   ;;
-  (is (= ["UPDATE ? SET ? = ?, ? = ? + ?;" ["foo" "bar" 1 "baz" "baz" 2]]
+  (is (= ["UPDATE foo SET bar = ?, baz = baz + ?;" [1 2]]
          (as-prepared (update :foo
                               (set-fields {:bar 1
                                            :baz [+ 2] })))))
@@ -84,8 +65,8 @@
                                       :baz [+ 2] })))))
 
   ;;
-  (is (= ["UPDATE ? SET ? = ?, ? = ? + ? WHERE ? = ? AND ? > ? AND ? > ? AND ? IN (?, ?, ?);"
-          ["foo" "bar" 1 "baz" "baz" 2 "foo" "bar" "moo" 3 "meh" 4 "baz" 5 6 7]]
+  (is (= ["UPDATE foo SET bar = ?, baz = baz + ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
+          [1 2 "foo" "bar" "moo" 3 "meh" 4 "baz" 5 6 7]]
          (as-prepared (update :foo
                               (set-fields {:bar 1
                                            :baz [+ 2] })
@@ -131,12 +112,12 @@
          (as-prepared (drop-table :foo)))))
 
 (deftest test-create-index
-  (is (= ["CREATE INDEX ON ? ( ? );" ["foo" "bar"]]
-         (as-prepared (create-index :foo :bar))))
+  (is (= "CREATE INDEX ON foo ( bar );"
+         (as-cql (create-index :foo :bar))))
 
-  (is (= ["CREATE INDEX ? ON ? ( ? );" ["baz" "foo" "bar"]]
-         (as-prepared (create-index :foo :bar
-                                    (index-name "baz"))))))
+  (is (= "CREATE INDEX baz ON foo ( bar );"
+         (as-cql (create-index :foo :bar
+                   (index-name "baz"))))))
 
 
 (deftest test-batch
@@ -183,3 +164,40 @@
            (as-cql (q-> q2
                         (using :timestamp 100000
                                :ttl 200000)))))))
+
+
+;; (deftest test-functions
+;;   (is (= "SELECT count(*) FROM foo;"
+;;          (as-cql (select :foo
+;;                    (columns (count*))))))
+
+;;   (is (= ["SELECT count(*) FROM ?;" ["foo"]]
+;;          (as-prepared (select :foo
+;;                         (columns (count*))))))
+
+
+
+;;   (is (= "SELECT * FROM foo WHERE ts = now();"
+;;          (as-cql (select :foo
+;;                    (where {:ts (now)})))))
+
+;;   (is (= ["SELECT * FROM ? WHERE ? = now();" ["foo" "ts"]]
+;;          (as-prepared (select :foo
+;;                         (columns (count*))))))
+
+
+;;   (is (= "SELECT * FROM foo WHERE token(user-id) > token('tom');"
+;;          (as-cql (select :foo
+;;                    (where {(token :user-id) [> (token "tom" true)]})))))
+
+;;   (is (= ["SELECT * FROM ? WHERE token(?) > token(?);" ["foo" "user-id" "tom"]]
+;;          (as-prepared (select :foo
+;;                         (where {(token :user-id) [> (token "tom" true)]})))))
+
+
+;;   )
+
+;; (prn (token 1) )
+
+;; (prn (as-prepared (select :foo
+;;                (where {(token :user-id) [> (token "tom")]}))))

@@ -8,6 +8,9 @@
 
 (defn template [q] (-> q meta :template))
 
+;; no metadata on strings, so a record will do, marks a value to skip escaping
+(defrecord CQLFn [value template])
+
 ;; this has to be an atom, we cannot bash a transient in place (we
 ;; could but it's marked as sin in the docs ("an implementation detail")
 (defn set-param!
@@ -40,7 +43,7 @@
 (extend-protocol CQLEntities
 
   String
-  (cql-identifier [x] (set-param! (name x)))
+  (cql-identifier [x] x)
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
@@ -72,8 +75,22 @@
       (set-param! x)
       (str "[" (join-coma (map cql-value x)) "]")))
 
+  CQLFn
+  (cql-identifier [{:keys [value template]}]
+    ;; function are always safe, their arguments might not be though
+    (let [value (cql-identifier value)]
+      (if template
+        (format template value)
+        value)))
+  (cql-value [{:keys [value template]}]
+    ;; function are always safe, their arguments might not be though
+    (let [value (cql-value value)]
+      (if template
+        (format template value)
+        value)))
+
   Object
-  (cql-identifier [x] (set-param! x))
+  (cql-identifier [x] x)
   (cql-value [x] (set-param! x)))
 
 (def operators {= "="
@@ -184,7 +201,9 @@
            (if *prepared-statement*
              [(join-lf subqs) @*param-stack*])
            (join-lf subqs))
-          (format "\n%s\n")))})
+          (format "\n%s\n")))
+
+   })
 
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 

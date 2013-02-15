@@ -1,5 +1,8 @@
 (ns qbits.hayt
-  (:require [qbits.hayt.cql :as cql]))
+  (:require [qbits.hayt.cql :as cql])
+  (:import
+   [java.util Date]
+   [java.text SimpleDateFormat]))
 
 (defn as-cql [query]
   (binding [qbits.hayt.cql/*prepared-statement* false]
@@ -76,12 +79,13 @@
                 :column column}
                clauses)))
 
-
 (defn batch
   ""
   [& clauses]
-  (query ["BATCH" :using :queries  "APPLY BATCH"]
+  (query ["BATCH" :using :queries "APPLY BATCH"]
          (into {} clauses)))
+
+
 
 
 ;; clauses
@@ -146,3 +150,28 @@
   [q & clauses]
   (-> (into q clauses)
       (with-meta (meta q))))
+
+;; CQL3 functions
+
+(def now (constantly (cql/map->CQLFn {:value "now()"})))
+;; no really need to wrap this one but anyway, but lets be consistent
+(def count* (constantly (cql/map->CQLFn {:value "count(*)"})))
+
+;; FiXME: No seconds resolution wtf? we need to investigate CQL3 spec in
+;;        detail to be sure.
+(def ^SimpleDateFormat uuid-date-format
+  (SimpleDateFormat. "yyyy-MM-dd hh:mmZ"))
+
+(defn max-time-uuid
+  ""
+  [^Date date]
+  (cql/->CQLFn (.format uuid-date-format date) "maxTimeuuid('%s')"))
+
+(defn min-time-uuid
+  ""
+  [^Date date]
+  (cql/->CQLFn (.format uuid-date-format date) "minTimeuuid('%s')"))
+
+(defn token
+  [token]
+  (cql/->CQLFn token "token(%s)"))
