@@ -178,9 +178,17 @@
   (cql/->CQLFn token "token(%s)"))
 
 (defn writetime
-  [token]
-  (cql/->CQLFn token "WRITETIME(%s)"))
+  [x]
+  (cql/->CQLFn x "WRITETIME(%s)"))
 
 (defn ttl
-  [token]
-  (cql/->CQLFn token "TTL(%s)"))
+  [x]
+  (cql/->CQLFn x "TTL(%s)"))
+
+(defn unix-timestamp-of
+  [x]
+  (cql/->CQLFn x "unixTimestampOf(%s)"))
+
+(defn date-of
+  [x]
+  (cql/->CQLFn x "dateOf(%s)"))
