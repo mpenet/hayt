@@ -166,10 +166,10 @@
      (->> (map (fn [[k v]]
                  ;; Counter
                  ;; FIXME we need to support maps/set/list update
-                     (if (vector? v)
-                       (counter k v)
-                       (format-eq (cql-identifier k) (cql-value v))))
-                 values)
+                 (if (vector? v)
+                   (counter k v)
+                   (format-eq (cql-identifier k) (cql-value v))))
+               values)
           join-coma
           (str "SET ")))
 
