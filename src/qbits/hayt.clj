@@ -12,35 +12,42 @@
      @cql/*param-stack*]))
 
 (defn query
-  [template query-map]
-  (vary-meta query-map assoc :template template))
+  ([template query-map]
+     (query template query-map nil))
+  ([template query-map clauses]
+     (vary-meta
+      (apply merge query-map clauses)
+      assoc :template template)))
 
 (defn select
   ""
-  [table]
-  (query
-   ["SELECT" :columns "FROM" :table :where :order-by :limit]
-   {:table table
-    :columns []}))
+  [table & clauses]
+  (query ["SELECT" :columns "FROM" :table :where :order-by :limit]
+         {:table table
+          :columns []}
+         clauses))
 
 (defn insert
   ""
-  [table]
+  [table & clauses]
   (query ["INSERT INTO" :table :values :using]
-         {:table table}))
+         {:table table}
+         clauses))
 
 (defn update
   ""
-  [table]
+  [table & clauses]
   (query ["UPDATE" :table :using :set :where]
-         {:table table}))
+         {:table table}
+         clauses))
 
 (defn delete
   ""
-  [table]
+  [table & clauses]
   (query ["DELETE" :columns "FROM" :table :using :where]
          {:table table
-          :columns []}))
+          :columns []}
+         clauses))
 
 (defn truncate
   ""
@@ -68,54 +75,61 @@
 
 (defn create-index
   ""
-  [table column]
+  [table column & clauses]
   (query ["CREATE INDEX" :index-name "ON" :table "(" :column ")"]
-         {:table table :column column}))
+         {:table table :column column}
+         clauses))
 
 
 (defn batch
   ""
-  [& queries]
+  [& clauses]
   (query ["BATCH" :using "\n" :queries  "\nAPPLY BATCH"]
-         {:queries queries}))
+         {}
+         clauses))
 
 
 ;; clauses
 
 (defn columns
   ""
-  [q & columns]
-  (assoc q :columns columns))
+  [& columns]
+  {:columns columns})
 
 (defn using
   ""
-  [q & args]
-  (assoc q :using args))
+  [& args]
+  {:using args})
 
 (defn limit
   ""
-  [q n]
-  (assoc q :limit n))
+  [n]
+  {:limit n})
 
 (defn order-by
   ""
-  [q & fields]
-  (assoc q :order-by fields))
+  [& fields]
+  {:order-by fields})
+
+(defn queries
+  ""
+  [& queries]
+  {:queries queries})
 
 (defn where
   ""
-  [q args]
-  (assoc q :where args))
+  [args]
+  {:where args})
 
 (defn values
   ""
-  [q values]
-  (assoc q :values values))
+  [values]
+  {:values values})
 
 (defn set
   ""
-  [q values]
-  (assoc q :set values))
+  [values]
+  {:set values})
 
 ;; (defn def-cols [q values]
 ;;   (update-in q [:query :defs] merge values))
@@ -125,10 +139,10 @@
 
 (defn with
   ""
-  [q values]
-  (assoc q :with values))
+  [values]
+  {:with values})
 
 (defn index-name
   ""
-  [q value]
-  (assoc q :index-name value))
+  [value]
+  {:index-name value})
