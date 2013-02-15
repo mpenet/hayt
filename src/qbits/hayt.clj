@@ -4,11 +4,11 @@
    [java.util Date]
    [java.text SimpleDateFormat]))
 
-(defn as-cql [query]
+(defn ->cql [query]
   (binding [qbits.hayt.cql/*prepared-statement* false]
     (cql/emit-query query)))
 
-(defn as-prepared [query]
+(defn ->prepared [query]
   (binding [cql/*param-stack* (atom [])]
     [(cql/emit-query query)
      @cql/*param-stack*]))
