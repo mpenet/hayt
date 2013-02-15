@@ -75,14 +75,13 @@
       (set-param! x)
       (str "[" (join-coma (map cql-value x)) "]")))
 
+  ;; function are always safe, their arguments might not be though
   CQLFn
   (cql-identifier [{:keys [value template]}]
-    ;; function are always safe, their arguments might not be though
     (if template
       (format template (cql-identifier value))
       value))
   (cql-value [{:keys [value template]}]
-    ;; function are always safe, their arguments might not be though
     (if template
       (format template (cql-value value))
       value))
@@ -196,9 +195,9 @@
    :queries
    (fn [q queries]
      (->> (let [subqs (map emit-query queries)]
-           (if *prepared-statement*
-             [(join-lf subqs) @*param-stack*])
-           (join-lf subqs))
+            (if *prepared-statement*
+              [(join-lf subqs) @*param-stack*])
+            (join-lf subqs))
           (format "\n%s\n")))
 
    })

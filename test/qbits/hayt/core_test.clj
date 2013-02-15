@@ -172,15 +172,22 @@
          (as-cql (select :foo
                    (where {:ts (now)})))))
 
+    (is (= ["SELECT * FROM foo WHERE ts = now();" []]
+           (as-prepared (select :foo
+                          (where {:ts (now)})))))
+
   (is (= "SELECT * FROM foo WHERE token(user-id) > token('tom');"
          (as-cql (select :foo
                    (where {(token :user-id) [> (token "tom")]})))))
 
   (is (= ["SELECT * FROM foo WHERE token(user-id) > token(?);" ["tom"]]
          (as-prepared (select :foo
-                        (where {(token :user-id) [> (token "tom")]}))))))
+                        (where {(token :user-id) [> (token "tom")]})))))
 
-;; (prn (token 1) )
 
-;; (prn (as-prepared (select :foo
-;;                (where {(token :user-id) [> (token "tom")]}))))
+  (let [d (java.util.Date. 0)
+        ds (str (.format uuid-date-format d))]
+    (is (= "SELECT * FROM foo WHERE ts > maxTimeuuid('1970-01-01 01:00+0100') AND ts < minTimeuuid('1970-01-01 01:00+0100');"
+           (as-cql (select :foo
+                     (where [[:ts  [> (max-time-uuid d)]]
+                             [:ts  [< (min-time-uuid d)]]])))))))
