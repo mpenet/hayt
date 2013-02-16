@@ -165,7 +165,7 @@
 
 
 (deftest test-functions
-  (is (= "SELECT count(*) FROM foo;"
+  (is (= "SELECT COUNT(*) FROM foo;"
          (->cql (select :foo (columns (count*))))))
 
   (is (= "SELECT * FROM foo WHERE ts = now();"
@@ -209,6 +209,6 @@
   ;;       ds (str (.format uuid-date-format d))]
   ;;   (is (= "SELECT * FROM foo WHERE ts > maxTimeuuid('1970-01-01 01:00+0100') AND ts < minTimeuuid('1970-01-01 01:00+0100');"
   ;;          (cql (select :foo
-  ;;                    (where [[:ts  [> (max-time-uuid d)]]
-  ;;                            [:ts  [< (min-time-uuid d)]]]))))))
+  ;;                    (where [[:ts  [> (max-timeuuid d)]]
+  ;;                            [:ts  [< (min-timeuuid d)]]]))))))
   ;; )

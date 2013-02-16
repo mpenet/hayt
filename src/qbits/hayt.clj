@@ -161,19 +161,19 @@
 (def now (constantly (cql/map->CQLFn {:value "now()"})))
 
 ;; no need to wrap this one but anyway... lets be consistent
-(def count* (constantly (cql/map->CQLFn {:value "count(*)"})))
+(def count* (constantly (cql/map->CQLFn {:value "COUNT(*)"})))
 
 ;; FiXME: No seconds resolution wtf (probably the example in the spec
 ;; that is misleading)? we need to investigate CQL3 spec
 (def ^SimpleDateFormat uuid-date-format
   (SimpleDateFormat. "yyyy-MM-dd hh:mmZ"))
 
-(defn max-time-uuid
+(defn max-timeuuid
   ""
   [^Date date]
   (cql/->CQLFn (.format uuid-date-format date) "maxTimeuuid(%s)"))
 
-(defn min-time-uuid
+(defn min-timeuuid
   ""
   [^Date date]
   (cql/->CQLFn (.format uuid-date-format date) "minTimeuuid(%s)"))
