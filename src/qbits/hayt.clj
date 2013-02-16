@@ -162,12 +162,6 @@
   [values]
   {:set-columns values})
 
-;; (defn def-cols [q values]
-;;   (update-in q [:query :defs] merge values))
-
-;; (defn def-pk [q & values]
-;;   (assoc-in q [:query :defs :pk] values))
-
 (defn with
   ""
   [values]
@@ -187,9 +181,8 @@
 ;; CQL3 functions
 
 (def now (constantly (cql/map->CQLFn {:value "now()"})))
-
-;; no need to wrap this one but anyway... lets be consistent
 (def count* (constantly (cql/map->CQLFn {:value "COUNT(*)"})))
+(def count1 (constantly (cql/map->CQLFn {:value "COUNT(1)"})))
 
 ;; FiXME: No seconds resolution wtf (probably the example in the spec
 ;; that is misleading)? we need to investigate CQL3 spec
