@@ -216,9 +216,9 @@
 (defn blob->bigint
   ""
   [x]
-  (cql/->CQLFn x "blobAsBigInt(%s)"))
+  (cql/->CQLFn x "blobAsBigint(%s)"))
 
 (defn bigint->blob
   ""
   [x]
-  (cql/->CQLFn x "blobAsBigint(%s)"))
+  (cql/->CQLFn x "bigintAsBlob(%s)"))
