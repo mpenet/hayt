@@ -169,9 +169,9 @@
         (->cql (q-> q
                     (columns :bar "baz"))))
 
-    (is (= ["SELECT ?, ? FROM ?;" ["foo" "bar" "baz"]])
+    (is (= ["SELECT bar, baz FROM foo;" []])
         (->prepared (q-> q
-                         (columns :bar "baz")))))
+                      (columns :bar "baz")))))
 
   (let [q (insert :foo)
         q2 (q-> q
