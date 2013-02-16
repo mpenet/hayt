@@ -4,23 +4,34 @@
         qbits.hayt.cql))
 
 (deftest test-select
+  (are [expected query] (= expected (->cql query))
+       "SELECT * FROM foo;"
+       (select :foo)
 
-  (is (= "SELECT * FROM foo;"
-         (->cql (select :foo))))
+       "SELECT bar, baz FROM foo;"
+       (select :foo
+               (columns :bar "baz"))
 
+       "SELECT bar, baz FROM foo LIMIT 100;"
+       (select :foo
+               (columns :bar "baz")
+               (limit 100))
 
-  (is (= "SELECT bar, baz FROM foo;"
-         (->cql (select :foo
-                        (columns :bar "baz")))))
+       "SELECT * FROM foo ORDER BY bar desc;"
+       (select :foo
+               (order-by [:bar :desc]))
 
-  (is (= "SELECT bar, baz FROM foo LIMIT 100;"
-         (->cql (select :foo
-                        (columns :bar "baz")
-                        (limit 100)))))
+       "SELECT * FROM foo WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
+       (select :foo
+               (where {:foo :bar
+                       :moo [> 3]
+                       :meh [:> 4]
+                       :baz [:in [5 6 7]]}))
 
-  (is (= "SELECT * FROM foo ORDER BY bar desc;"
-         (->cql (select :foo
-                        (order-by [:bar :desc])))))
+       "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
+       (select :foo
+               (where [[:foo  [> 1]]
+                       [:foo  [< 10]]])))
 
   ;;
   (is (= ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
@@ -29,19 +40,10 @@
                              (where {:foo :bar
                                      :moo [> 3]
                                      :meh [:> 4]
-                                     :baz [:in [5 6 7]]})))))
+                                     :baz [:in [5 6 7]]}))))))
 
-  (is (= "SELECT * FROM foo WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
-         (->cql (select :foo
-                        (where {:foo :bar
-                                :moo [> 3]
-                                :meh [:> 4]
-                                :baz [:in [5 6 7]]}))))))
 
-  (is (= "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
-         (->cql (select :foo
-                        (where [[:foo  [> 1]]
-                                [:foo  [< 10]]])))))
+
 
 (deftest test-insert
   (is (= ["INSERT INTO foo (a, c) VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;"
@@ -58,35 +60,37 @@
                                :ttl 200000))))))
 
 (deftest test-update
-  ;;
-  (is (= ["UPDATE foo SET bar = ?, baz = baz + ?;" [1 2]]
-         (->prepared (update :foo
-                             (set-columns {:bar 1
-                                           :baz [+ 2] })))))
+  (are [expected query] (= expected (->cql query))
+       "UPDATE foo SET bar = 1, baz = baz + 2;"
+       (update :foo
+               (set-columns {:bar 1
+                             :baz [+ 2] }))
 
-  (is (= "UPDATE foo SET bar = 1, baz = baz + 2;"
-         (->cql (update :foo
-                        (set-columns {:bar 1
-                                      :baz [+ 2] })))))
+       "UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
+       (update :foo
+               (set-columns {:bar 1
+                             :baz [+ 2] })
+               (where {:foo :bar
+                       :moo [> 3]
+                       :meh [:> 4]
+                       :baz [:in [5 6 7]]})))
 
-  (is (= ["UPDATE foo SET bar = ?, baz = baz + ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-          [1 2 "bar" 3 4 5 6 7]]
-         (->prepared (update :foo
-                             (set-columns {:bar 1
-                                           :baz [+ 2] })
-                             (where {:foo :bar
-                                     :moo [> 3]
-                                     :meh [:> 4]
-                                     :baz [:in [5 6 7]]})))))
 
-  (is (= "UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
-         (->cql (update :foo
-                        (set-columns {:bar 1
-                                      :baz [+ 2] })
-                        (where {:foo :bar
-                                :moo [> 3]
-                                :meh [:> 4]
-                                :baz [:in [5 6 7]]}))))))
+  (are [expected query] (= expected (->prepared query))
+       ["UPDATE foo SET bar = ?, baz = baz + ?;" [1 2]]
+       (update :foo
+               (set-columns {:bar 1
+                             :baz [+ 2] }))
+
+       ["UPDATE foo SET bar = ?, baz = baz + ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
+        [1 2 "bar" 3 4 5 6 7]]
+       (update :foo
+               (set-columns {:bar 1
+                             :baz [+ 2] })
+               (where {:foo :bar
+                       :moo [> 3]
+                       :meh [:> 4]
+                       :baz [:in [5 6 7]]}))))
 
 
 
@@ -106,22 +110,24 @@
          (->cql (truncate :foo)))))
 
 (deftest test-drop
-  (is (= "DROP INDEX foo;"
-         (->cql (drop-index :foo))))
+  (are [expected query] (= expected (->cql query))
+       "DROP INDEX foo;"
+       (drop-index :foo)
 
-  (is (= "DROP KEYSPACE foo;"
-         (->cql (drop-keyspace :foo))))
+       "DROP KEYSPACE foo;"
+       (drop-keyspace :foo)
 
-  (is (= "DROP TABLE foo;"
-         (->cql (drop-table :foo)))))
+       "DROP TABLE foo;"
+       (drop-table :foo)))
 
 (deftest test-create-index
-  (is (= "CREATE INDEX ON foo (bar);"
-         (->cql (create-index :foo :bar))))
+  (are [expected query] (= expected (->cql query))
+       "CREATE INDEX ON foo (bar);"
+       (create-index :foo :bar)
 
-  (is (= "CREATE INDEX baz ON foo (bar);"
-         (->cql (create-index :foo :bar
-                              (index-name "baz"))))))
+       "CREATE INDEX baz ON foo (bar);"
+       (create-index :foo :bar
+                     (index-name "baz"))))
 
 (deftest test-batch
   (is (= "BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (a, c) VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
@@ -146,43 +152,45 @@
                                (values {"a" "b" "c" "d"})
                                (using :timestamp 100000
                                       :ttl 200000)))
-                          (using :timestamp 1234))))))
+                      (using :timestamp 1234))))))
 
 (deftest test-create-table
-  (is (= "CREATE TABLE foo (a varchar, b int, PRIMARY KEY (a));"
-         (->cql (create-table :foo
-                              (column-definitions {:a :varchar
-                                                   :b :int
-                                                   :primary-key :a})))))
+  (are [expected query] (= expected (->cql query))
+       "CREATE TABLE foo (a varchar, b int, PRIMARY KEY (a));"
+       (create-table :foo
+                     (column-definitions {:a :varchar
+                                          :b :int
+                                          :primary-key :a}))
 
-  (is (= "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar));"
-         (->cql (create-table :foo
-                              (column-definitions {:foo :varchar
-                                                   :bar :int
-                                                   :primary-key [:foo :bar]})))))
+       "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar));"
+       (create-table :foo
+                     (column-definitions {:foo :varchar
+                                          :bar :int
+                                          :primary-key [:foo :bar]}))
 
-  (is (= "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar)) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
-         (->cql (create-table :foo
-                              (column-definitions {:foo :varchar
-                                                   :bar :int
-                                                   :primary-key [:foo :bar]})
-                              (with {:compact-storage true
-                                     :clustering-order [[:bar :asc]]}))))))
+       "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar)) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
+       (create-table :foo
+                     (column-definitions {:foo :varchar
+                                          :bar :int
+                                          :primary-key [:foo :bar]})
+                     (with {:compact-storage true
+                            :clustering-order [[:bar :asc]]}))))
 
 (deftest test-create-alter-keyspace
-  (is (= "CREATE KEYPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
-         (->cql (create-keyspace :foo
-                  (with {:replication
-                         {:class "SimpleStrategy"
-                          :replication_factor 3 }})))))
+  (are [expected query] (= expected (->cql query))
+       "CREATE KEYPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
+       (create-keyspace :foo
+                        (with {:replication
+                               {:class "SimpleStrategy"
+                                :replication_factor 3 }}))
 
-  (is (= "ALTER KEYPACE foo WITH something-else = 'foo' AND something = 1 AND replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
-         (->cql (alter-keyspace :foo
-                                (with {:replication
-                                       {:class "SimpleStrategy"
-                                        :replication_factor 3 }
-                                       :something 1
-                                       :something-else "foo"}))))))
+       "ALTER KEYPACE foo WITH something-else = 'foo' AND something = 1 AND replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
+       (alter-keyspace :foo
+                       (with {:replication
+                              {:class "SimpleStrategy"
+                               :replication_factor 3 }
+                              :something 1
+                              :something-else "foo"}))))
 
 (deftest test-q->
   (let [q (select :foo)]
@@ -192,7 +200,7 @@
 
     (is (= ["SELECT bar, baz FROM foo;" []])
         (->prepared (q-> q
-                      (columns :bar "baz")))))
+                         (columns :bar "baz")))))
 
   (let [q (insert :foo)
         q2 (q-> q
@@ -206,50 +214,52 @@
 
 
 (deftest test-functions
-  (is (= "SELECT COUNT(*) FROM foo;"
-         (->cql (select :foo (columns (count*))))))
+  (are [expected query] (= expected (->cql query))
+       "SELECT COUNT(*) FROM foo;"
+       (select :foo (columns (count*)))
 
-  (is (= "SELECT * FROM foo WHERE ts = now();"
-         (->cql (select :foo
-                        (where {:ts (now)})))))
+       "SELECT * FROM foo WHERE ts = now();"
+       (select :foo
+               (where {:ts (now)}))
 
-  (is (= ["SELECT * FROM foo WHERE ts = now();" []]
-         (->prepared (select :foo
-                             (where {:ts (now)})))))
+       "SELECT WRITETIME(bar) FROM foo;"
+       (select :foo (columns (writetime "bar")))
 
-  (is (= "SELECT WRITETIME(bar) FROM foo;"
-         (->cql (select :foo (columns (writetime "bar"))))))
+       "SELECT TTL(bar) FROM foo;"
+       (select :foo (columns (ttl "bar")))
 
-  (is (= "SELECT TTL(bar) FROM foo;"
-         (->cql (select :foo (columns (ttl "bar"))))))
+       "SELECT unixTimestampOf(bar), dateOf(bar) FROM foo;"
+       (select :foo (columns (unix-timestamp-of "bar")
+                             (date-of "bar")))
 
-  (is (= "SELECT unixTimestampOf(bar), dateOf(bar) FROM foo;"
-         (->cql (select :foo (columns (unix-timestamp-of "bar")
-                                      (date-of "bar"))))))
+       "SELECT * FROM foo WHERE token(user-id) > token('tom');"
+       (select :foo
+               (where {(token :user-id) [> (token "tom")]})))
 
-  (is (= "SELECT * FROM foo WHERE token(user-id) > token('tom');"
-         (->cql (select :foo
-                        (where {(token :user-id) [> (token "tom")]})))))
+  (are [expected query] (= expected (->prepared query))
+       ["SELECT * FROM foo WHERE ts = now();" []]
+       (select :foo
+               (where {:ts (now)}))
 
-  (is (= ["SELECT * FROM foo WHERE token(user-id) > token(?);" ["tom"]]
-         (->prepared (select :foo
-                             (where {(token :user-id) [> (token "tom")]})))))
+       ["SELECT * FROM foo WHERE token(user-id) > token(?);" ["tom"]]
+       (select :foo
+               (where {(token :user-id) [> (token "tom")]})))
 
   (let [d (java.util.Date. 0)]
     (is (= "SELECT * FROM foo WHERE ts > maxTimeuuid(0) AND ts < minTimeuuid(0);"
            (->cql (select :foo
-                    (where [[:ts  [> (max-timeuuid d)]]
-                            [:ts  [< (min-timeuuid d)]]])))))))
+                          (where [[:ts  [> (max-timeuuid d)]]
+                                  [:ts  [< (min-timeuuid d)]]])))))))
 
 (deftest test-coll-lookup
   (is (= "DELETE bar[2] FROM foo WHERE baz = 1;"
          (->cql (delete :foo
-                  (columns {:bar 2})
-                  (where {:baz 1})))))
+                        (columns {:bar 2})
+                        (where {:baz 1})))))
   (is (= ["DELETE bar[?] FROM foo WHERE baz = ?;" [2 1]]
          (->prepared (delete :foo
-                       (columns {:bar 2})
-                       (where {:baz 1}))))))
+                             (columns {:bar 2})
+                             (where {:baz 1}))))))
 
 (deftest test-cql-identifier
   (are [expected identifier] (= expected (cql-identifier identifier))
