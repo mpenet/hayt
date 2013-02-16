@@ -214,21 +214,18 @@
          (->prepared (select :foo
                              (where {(token :user-id) [> (token "tom")]})))))
 
-  (deftest test-coll-lookup
-    (is (= "DELETE bar[2] FROM foo WHERE baz = 1;"
-           (->cql (delete :foo
-                          (columns {:bar 2})
-                          (where {:baz 1})))))
-    (is (= ["DELETE bar[?] FROM foo WHERE baz = ?;" [2 1]]
-           (->prepared (delete :foo
-                               (columns {:bar 2})
-                               (where {:baz 1})))))))
+  (let [d (java.util.Date. 0)]
+    (is (= "SELECT * FROM foo WHERE ts > maxTimeuuid(0) AND ts < minTimeuuid(0);"
+           (->cql (select :foo
+                    (where [[:ts  [> (max-timeuuid d)]]
+                            [:ts  [< (min-timeuuid d)]]])))))))
 
-;; FIXME Locale issues, maybe the approach is just wrong
-;; (let [d (java.util.Date. 0)
-;;       ds (str (.format uuid-date-format d))]
-;;   (is (= "SELECT * FROM foo WHERE ts > maxTimeuuid('1970-01-01 01:00+0100') AND ts < minTimeuuid('1970-01-01 01:00+0100');"
-;;          (cql (select :foo
-;;                    (where [[:ts  [> (max-timeuuid d)]]
-;;                            [:ts  [< (min-timeuuid d)]]]))))))
-;; )
+(deftest test-coll-lookup
+  (is (= "DELETE bar[2] FROM foo WHERE baz = 1;"
+         (->cql (delete :foo
+                  (columns {:bar 2})
+                  (where {:baz 1})))))
+  (is (= ["DELETE bar[?] FROM foo WHERE baz = ?;" [2 1]]
+         (->prepared (delete :foo
+                       (columns {:bar 2})
+                       (where {:baz 1}))))))
