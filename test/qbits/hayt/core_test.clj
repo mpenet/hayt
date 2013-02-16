@@ -73,7 +73,13 @@
                (where {:foo :bar
                        :moo [> 3]
                        :meh [:> 4]
-                       :baz [:in [5 6 7]]})))
+                       :baz [:in [5 6 7]]}))
+
+       "UPDATE foo SET bar = 1, baz = baz + {'key' : 'value'} WHERE foo = 'bar';"
+       (update :foo
+               (set-columns {:bar 1
+                             :baz [+ {"key" "value"}] })
+               (where {:foo :bar})))
 
 
   (are [expected query] (= expected (->prepared query))
@@ -275,4 +281,5 @@
        "{'a' : 'b', 'c' : 'd'}" {:a :b :c :d}
        "['a', 'b', 'c', 'd']" ["a" "b" "c" "d"]
        "['a', 'b', 'c', 'd']" '("a" "b" "c" "d")
+       "{'a', 'b', 'c', 'd'}" #{"a" "b" "c" "d"}
        1 1))
