@@ -100,10 +100,7 @@ for a more up to date version "
 
   Object
   (cql-identifier [x] x)
-  (cql-value [x]
-    (if *prepared-statement*
-      (set-param! x)
-      (str x))))
+  (cql-value [x] (set-param! x)))
 
 (defn format-column-definition
   [[k v]]
