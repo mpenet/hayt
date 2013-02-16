@@ -110,7 +110,7 @@ for a more up to date version "
     x
     (quote-string (name x))))
 
-(defn config-map [m]
+(defn config-options [m]
   (->> m
        (map (fn [[k v]]
               (format-kv (quote-string (name k))
@@ -210,7 +210,7 @@ for a more up to date version "
      (->> (for [[k v] value-map]
             (format-eq (cql-identifier k)
                        (if (map? v)
-                         (config-map v)
+                         (config-options v)
                          (format-eq k (config-value v)))))
           join-and
           (str "WITH ")))
