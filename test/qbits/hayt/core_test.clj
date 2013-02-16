@@ -194,6 +194,14 @@
          (->prepared (select :foo
                        (where {(token :user-id) [> (token "tom")]})))))
 
+(deftest test-coll-lookup
+    (is (= "DELETE bar[2] FROM foo WHERE baz = 1;" (->cql (delete :foo
+                       (columns [:bar 2])
+                       (where {:baz 1})))))
+    (is (= ["DELETE bar[?] FROM foo WHERE baz = ?;" [2 1]]
+           (->prepared (delete :foo
+                         (columns {:bar 2})
+                         (where {:baz 1})))))))
 
   ;; FIXME Locale issues, maybe the approach is just wrong
   ;; (let [d (java.util.Date. 0)
@@ -202,4 +210,4 @@
   ;;          (cql (select :foo
   ;;                    (where [[:ts  [> (max-time-uuid d)]]
   ;;                            [:ts  [< (min-time-uuid d)]]]))))))
-  )
+  ;; )

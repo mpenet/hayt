@@ -58,6 +58,12 @@
       (str "{" (join-coma (map cql-value x)) "}")))
 
   clojure.lang.IPersistentMap
+  (cql-identifier [x]
+    (let [[coll k] (first x) ]
+      ;; handles foo['bar'] lookups
+      (format "%s[%s]"
+              (cql-identifier coll)
+              (cql-value k))))
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
