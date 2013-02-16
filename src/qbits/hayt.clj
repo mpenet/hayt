@@ -11,7 +11,8 @@
 (defn ->prepared
   ""
   [query]
-  (binding [cql/*param-stack* (atom [])]
+  (binding [cql/*prepared-statement* true
+            cql/*param-stack* (atom [])]
     [(cql/emit-query query)
      @cql/*param-stack*]))
 
