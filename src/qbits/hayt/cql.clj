@@ -28,7 +28,7 @@ for a more up to date version "
 (def format-eq #(format "%s = %s" %1 %2))
 (def format-kv #(format "%s : %s"  %1 %2))
 (def quote-string #(str \' % \'))
-(def escape-string #(quote-string (string/escape % {\" "\""}) \'))
+(def escape-string #(quote-string (string/escape % {\" "\""})))
 (def wrap-parens #(str "(" % ")"))
 (def wrap-brackets #(str "{" % "}"))
 (def wrap-sqbrackets #(str "[" % "]"))
