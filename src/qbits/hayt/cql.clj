@@ -34,6 +34,9 @@ for a more up to date version "
 (def wrap-sqbrackets #(str "[" % "]"))
 (def terminate #(str % ";"))
 
+(def format-eq #(format "%s = %s" %1 %2))
+(def format-kv #(format "%s : %s"  %1 %2))
+
 (defprotocol CQLEntities
   (cql-identifier [x]
     "Encodes CQL identifiers")
@@ -95,6 +98,12 @@ for a more up to date version "
   Object
   (cql-identifier [x] x)
   (cql-value [x] (set-param! x)))
+
+(defn format-coumn-definition
+  [[k v]]
+  (join-spaced
+   [(cql-identifier k)
+    (cql-identifier v)]))
 
 (def operators {= "="
                 > ">"
@@ -172,6 +181,19 @@ for a more up to date version "
           join-coma
           (str "ORDER BY ")))
 
+   :primary-key
+   (fn [q primary-key]
+     (str "PRIMARY KEY "
+          (wrap-parens (join-coma (map cql-identifier (flatten [primary-key]))))))
+
+   :column-definitions
+   (fn [q {:keys [primary-key] :as column-definitions}]
+     (wrap-parens
+      (join-coma
+       (conj
+        (vec (map format-coumn-definition (dissoc column-definitions :primary-key)))
+        ((:primary-key emit) q primary-key)))))
+
    :limit
    (fn [q limit]
      (assert (number? limit) "Limit only accepts numbers")
@@ -205,13 +227,28 @@ for a more up to date version "
           join-and
           (str "USING ")))
 
+   :compact-storage
+   (fn [q compact-storage]
+     "COMPACT STORAGE")
+
+   :clustering-order
+   (fn [q columns]
+     (->> columns
+          (map (fn [col-values] ;; Values are a pair of col and order
+                 (join-spaced (map cql-identifier col-values))))
+          join-coma
+          wrap-parens
+          (str "CLUSTERING ORDER BY ")))
+
    :with
    (fn [q value-map]
      (->> (for [[k v] value-map]
-            (format-eq (cql-identifier k)
-                       (if (map? v)
-                         (config-options v)
-                         (config-value v))))
+            (if-let [with-entry (k emit)]
+              (with-entry q v)
+              (format-eq (cql-identifier k)
+                           (if (map? v)
+                             (config-options v)
+                             (config-value v)))))
           join-and
           (str "WITH ")))
 
