@@ -1,8 +1,6 @@
 (ns qbits.hayt
   (:require [qbits.hayt.cql :as cql])
-  (:import
-   [java.util Date]
-   [java.text SimpleDateFormat]))
+  (:import [java.util Date]))
 
 (defn ->cql
   ""
@@ -188,20 +186,19 @@
 (def count* (constantly (cql/map->CQLFn {:value "COUNT(*)"})))
 (def count1 (constantly (cql/map->CQLFn {:value "COUNT(1)"})))
 
-;; FiXME: No seconds resolution wtf (probably the example in the spec
-;; that is misleading)? we need to investigate CQL3 spec
-(def ^SimpleDateFormat uuid-date-format
-  (SimpleDateFormat. "yyyy-MM-dd hh:mmZ"))
+(defn date->epoch
+  [d]
+  (.getTime ^Date d))
 
 (defn max-timeuuid
   ""
   [^Date date]
-  (cql/->CQLFn (.format uuid-date-format date) "maxTimeuuid(%s)"))
+  (cql/->CQLFn (date->epoch date) "maxTimeuuid(%s)"))
 
 (defn min-timeuuid
   ""
   [^Date date]
-  (cql/->CQLFn (.format uuid-date-format date) "minTimeuuid(%s)"))
+  (cql/->CQLFn (date->epoch date) "minTimeuuid(%s)"))
 
 (defn token
   ""
