@@ -91,10 +91,10 @@
                clauses)))
 
 (defn create-table
-  ""
+  "not complete, no tests"
   [table & clauses]
   (query ["CREATE TABLE" :table :table-schema :with]
-         (into {:keyspace ks}
+         (into {:table table}
                clauses)))
 
 (defn alter-keyspace
