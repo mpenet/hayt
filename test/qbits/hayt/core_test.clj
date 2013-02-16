@@ -38,6 +38,11 @@
                                 :meh [:> 4]
                                 :baz [:in [5 6 7]]}))))))
 
+  (is (= "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
+         (->cql (select :foo
+                        (where [[:foo  [> 1]]
+                                [:foo  [< 10]]])))))
+
 (deftest test-insert
   (is (= ["INSERT INTO foo (a, c) VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;"
           ["b" "d"]]
