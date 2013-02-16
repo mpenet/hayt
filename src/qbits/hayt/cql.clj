@@ -1,5 +1,7 @@
 (ns qbits.hayt.cql
-  "http://cassandra.apache.org/doc/cql3/CQL.html"
+  "CQL3 ref: http://cassandra.apache.org/doc/cql3/CQL.html or
+https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
+for a more up to date version "
   (:require [clojure.string :as string]))
 
 (declare emit-query)
