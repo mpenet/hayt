@@ -104,13 +104,17 @@ for a more up to date version "
                 + "+"
                 - "-"})
 
-(defn format-config-map [m]
+(defn config-value
+  [x]
+  (if (number? x)
+    x
+    (quote-string (name x))))
+
+(defn config-map [m]
   (->> m
        (map (fn [[k v]]
               (format-kv (quote-string (name k))
-                         (if (number? v)
-                           v
-                           (quote-string v)))))
+                         (config-value v))))
        join-coma
        wrap-brackets))
 
@@ -203,10 +207,11 @@ for a more up to date version "
 
    :with
    (fn [q value-map]
-
      (->> (for [[k v] value-map]
             (format-eq (cql-identifier k)
-                       (format-config-map v)))
+                       (if (map? v)
+                         (config-map v)
+                         (format-eq k (config-value v)))))
           join-and
           (str "WITH ")))
 

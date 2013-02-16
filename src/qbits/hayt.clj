@@ -97,6 +97,13 @@
          (into {:table table}
                clauses)))
 
+(defn alter-table
+  "not complete, no tests"
+  [table & clauses]
+  (query ["ALTER TABLE" :table :table-type :with]
+         (into {:table table}
+               clauses)))
+
 (defn alter-keyspace
   ""
   [ks & clauses]
