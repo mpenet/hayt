@@ -90,6 +90,20 @@
          (into {:keyspace ks}
                clauses)))
 
+(defn create-table
+  ""
+  [table & clauses]
+  (query ["CREATE TABLE" :table :table-schema :with]
+         (into {:keyspace ks}
+               clauses)))
+
+(defn alter-keyspace
+  ""
+  [ks & clauses]
+  (query ["ALTER KEYPACE" :keyspace :with]
+         (into {:keyspace ks}
+               clauses)))
+
 (defn batch
   ""
   [& clauses]

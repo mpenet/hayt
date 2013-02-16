@@ -148,12 +148,19 @@
                                       :ttl 200000)))
                       (using :timestamp 1234))))))
 
-(deftest test-create-keyspace
+(deftest test-create-alter-keyspace
   (is (= "CREATE KEYPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
          (->cql (create-keyspace :foo
                   (with {:replication
                          {:class "SimpleStrategy"
-                          :replication_factor 3 }}))))))
+                          :replication_factor 3 }})))))
+
+  (is (= "ALTER KEYPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
+         (->cql (alter-keyspace :foo
+                                (with {:replication
+                                       {:class "SimpleStrategy"
+                                        :replication_factor 3 }})))))
+  )
 
 (deftest test-q->
   (let [q (select :foo)]
