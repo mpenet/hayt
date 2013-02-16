@@ -116,10 +116,10 @@
          (->cql (drop-table :foo)))))
 
 (deftest test-create-index
-  (is (= "CREATE INDEX ON foo ( bar );"
+  (is (= "CREATE INDEX ON foo (bar);"
          (->cql (create-index :foo :bar))))
 
-  (is (= "CREATE INDEX baz ON foo ( bar );"
+  (is (= "CREATE INDEX baz ON foo (bar);"
          (->cql (create-index :foo :bar
                               (index-name "baz"))))))
 

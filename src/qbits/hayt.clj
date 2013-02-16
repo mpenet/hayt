@@ -77,10 +77,10 @@
 
 (defn create-index
   ""
-  [table column & clauses]
-  (query ["CREATE INDEX" :index-name "ON" :table "(" :column ")"]
+  [table index-column & clauses]
+  (query ["CREATE INDEX" :index-name "ON" :table :index-column]
          (into {:table table
-                :column column}
+                :index-column index-column}
                clauses)))
 
 (defn batch

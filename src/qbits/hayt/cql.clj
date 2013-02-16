@@ -29,6 +29,7 @@ for a more up to date version "
 (def format-kv #(format "%s : %s"  %1 %2))
 (def quote-string #(str \' (string/escape % {\" "\""}) \'))
 (def wrap-parens #(str "(" % ")"))
+(def wrap-brackets #(str "{" % "}"))
 (def terminate #(str % ";"))
 
 (defprotocol CQLEntities
@@ -196,6 +197,10 @@ for a more up to date version "
                        (cql-value v)))
           join-and
           (str "WITH ")))
+
+   :index-column
+   (fn [q index-column]
+     (wrap-parens (cql-identifier index-column)))
 
    :queries
    (fn [q queries]
