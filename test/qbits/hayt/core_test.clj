@@ -155,11 +155,13 @@
                          {:class "SimpleStrategy"
                           :replication_factor 3 }})))))
 
-  (is (= "ALTER KEYPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
+  (is (= "ALTER KEYPACE foo WITH something-else = 'foo' AND something = 1 AND replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
          (->cql (alter-keyspace :foo
                                 (with {:replication
                                        {:class "SimpleStrategy"
-                                        :replication_factor 3 }})))))
+                                        :replication_factor 3 }
+                                       :something 1
+                                       :something-else "foo"})))))
   )
 
 (deftest test-q->

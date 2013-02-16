@@ -211,7 +211,7 @@ for a more up to date version "
             (format-eq (cql-identifier k)
                        (if (map? v)
                          (config-options v)
-                         (format-eq k (config-value v)))))
+                         (config-value v))))
           join-and
           (str "WITH ")))
 
