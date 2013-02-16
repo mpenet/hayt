@@ -149,17 +149,25 @@
                           (using :timestamp 1234))))))
 
 (deftest test-create-table
-  (is (= "CREATE TABLE foo (a varchar, b int) PRIMARY KEY (a);"
+  (is (= "CREATE TABLE foo (a varchar, b int, PRIMARY KEY (a));"
          (->cql (create-table :foo
                               (column-definitions {:a :varchar
-                                                   :b :int})
-                              (primary-key :a)))))
+                                                   :b :int
+                                                   :primary-key :a})))))
 
-  (is (= "CREATE TABLE foo (a varchar, b int) PRIMARY KEY (a, b);"
+  (is (= "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar));"
          (->cql (create-table :foo
-                              (column-definitions {:a :varchar
-                                                   :b :int})
-                              (primary-key :a :b))))))
+                              (column-definitions {:foo :varchar
+                                                   :bar :int
+                                                   :primary-key [:foo :bar]})))))
+
+  (is (= "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar)) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
+         (->cql (create-table :foo
+                              (column-definitions {:foo :varchar
+                                                   :bar :int
+                                                   :primary-key [:foo :bar]})
+                              (with {:compact-storage true
+                                     :clustering-order [[:bar :asc]]}))))))
 
 (deftest test-create-alter-keyspace
   (is (= "CREATE KEYPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
