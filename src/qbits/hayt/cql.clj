@@ -30,6 +30,7 @@ for a more up to date version "
 (def quote-string #(str \' (string/escape % {\" "\""}) \'))
 (def wrap-parens #(str "(" % ")"))
 (def wrap-brackets #(str "{" % "}"))
+(def wrap-sqbrackets #(str "[" % "]"))
 (def terminate #(str % ";"))
 
 (defprotocol CQLEntities
@@ -58,15 +59,14 @@ for a more up to date version "
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
-      (str "{" (join-coma (map cql-value x)) "}")))
+      (wrap-brackets (join-coma (map cql-value x)))))
 
   clojure.lang.IPersistentMap
   (cql-identifier [x]
     (let [[coll k] (first x) ]
       ;; handles foo['bar'] lookups
-      (format "%s[%s]"
-              (cql-identifier coll)
-              (cql-value k))))
+      (str (cql-identifier coll)
+           (wrap-sqbrackets (cql-value k)))))
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
@@ -78,7 +78,7 @@ for a more up to date version "
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
-      (str "[" (join-coma (map cql-value x)) "]")))
+      (wrap-sqbrackets (join-coma (map cql-value x)))))
 
   ;; CQL Function are always safe, their arguments might not be though
   CQLFn
