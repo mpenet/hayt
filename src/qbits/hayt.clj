@@ -83,6 +83,13 @@
                 :index-column index-column}
                clauses)))
 
+(defn create-keyspace
+  ""
+  [ks & clauses]
+  (query ["CREATE KEYPACE" :keyspace :with]
+         (into {:keyspace ks}
+               clauses)))
+
 (defn batch
   ""
   [& clauses]

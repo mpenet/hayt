@@ -27,7 +27,8 @@ for a more up to date version "
 (def join-lf #(string/join "\n" %))
 (def format-eq #(format "%s = %s" %1 %2))
 (def format-kv #(format "%s : %s"  %1 %2))
-(def quote-string #(str \' (string/escape % {\" "\""}) \'))
+(def quote-string #(str \' % \'))
+(def escape-string #(quote-string (string/escape % {\" "\""}) \'))
 (def wrap-parens #(str "(" % ")"))
 (def wrap-brackets #(str "{" % "}"))
 (def wrap-sqbrackets #(str "[" % "]"))
@@ -102,6 +103,16 @@ for a more up to date version "
                 >= ">="
                 + "+"
                 - "-"})
+
+(defn format-config-map [m]
+  (->> m
+       (map (fn [[k v]]
+              (format-kv (quote-string (name k))
+                         (if (number? v)
+                           v
+                           (quote-string v)))))
+       join-coma
+       wrap-brackets))
 
 (defn where-sequential-entry [column [op value]]
   (let [col-name (cql-identifier column)]
@@ -192,9 +203,10 @@ for a more up to date version "
 
    :with
    (fn [q value-map]
+
      (->> (for [[k v] value-map]
             (format-eq (cql-identifier k)
-                       (cql-value v)))
+                       (format-config-map v)))
           join-and
           (str "WITH ")))
 
