@@ -128,10 +128,10 @@
 
 (def emit
   {:columns
-   (fn [q fields]
-     (if (empty? fields)
+   (fn [q columns]
+     (if (empty? columns)
        "*"
-       (join-coma (map cql-identifier fields))))
+       (join-coma (map cql-identifier columns))))
 
    :where
    (fn [q clauses]
@@ -167,7 +167,7 @@
             " VALUES "
             (wrap-parens (join-coma (map cql-value values))))))
 
-   :set-fields
+   :set-columns
    (fn [q values]
      (->> (map (fn [[k v]]
                  ;; Counter

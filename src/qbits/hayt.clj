@@ -39,7 +39,7 @@
 (defn update
   ""
   [table & clauses]
-  (query ["UPDATE" :table :using :set-fields :where]
+  (query ["UPDATE" :table :using :set-columns :where]
          (into {:table table}
                clauses)))
 
@@ -111,8 +111,8 @@
 
 (defn order-by
   ""
-  [& fields]
-  {:order-by fields})
+  [& columns]
+  {:order-by columns})
 
 (defn queries
   ""
@@ -129,10 +129,10 @@
   [values]
   {:values values})
 
-(defn set-fields
+(defn set-columns
   ""
   [values]
-  {:set-fields values})
+  {:set-columns values})
 
 ;; (defn def-cols [q values]
 ;;   (update-in q [:query :defs] merge values))
