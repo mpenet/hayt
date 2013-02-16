@@ -5,7 +5,7 @@
 (defn ->cql
   ""
   [query]
-  (binding [qbits.hayt.cql/*prepared-statement* false]
+  (binding [cql/*prepared-statement* false]
     (cql/emit-query query)))
 
 (defn ->prepared
@@ -89,11 +89,10 @@
                clauses)))
 
 (defn create-table
-  "not complete, no tests"
   [table & clauses]
-  (query ["CREATE TABLE" :table :table-schema :with]
-         (into {:table table}
-               clauses)))
+  (query ["CREATE TABLE" :table :column-definitions :with]
+         (into  {:table table}
+                clauses)))
 
 (defn alter-table
   "not complete, no tests"
@@ -124,6 +123,11 @@
   ""
   [& columns]
   {:columns columns})
+
+(defn column-definitions
+  ""
+  [column-definitions]
+  {:column-definitions column-definitions})
 
 (defn using
   ""
