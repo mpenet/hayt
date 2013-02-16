@@ -202,3 +202,23 @@
   ""
   [x]
   (cql/->CQLFn x "dateOf(%s)"))
+
+(defn blob->type
+  ""
+  [x]
+  (cql/->CQLFn x "blobAsType(%s)"))
+
+(defn type->blob
+  ""
+  [x]
+  (cql/->CQLFn x "typeAsBlob(%s)"))
+
+(defn blob->bigint
+  ""
+  [x]
+  (cql/->CQLFn x "blobAsBigInt(%s)"))
+
+(defn bigint->blob
+  ""
+  [x]
+  (cql/->CQLFn x "blobAsBigint(%s)"))
