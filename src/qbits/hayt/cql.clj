@@ -6,7 +6,7 @@ for a more up to date version "
 
 (declare emit-query)
 (def ^:dynamic *param-stack*)
-(def ^:dynamic *prepared-statement* true)
+(def ^:dynamic *prepared-statement* false)
 
 (defn template [q] (-> q meta :template))
 
@@ -23,7 +23,7 @@ for a more up to date version "
 
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join " " %))
-(def join-coma #(string/join ", " %))
+(def join-comma #(string/join ", " %))
 (def join-lf #(string/join "\n" %))
 (def format-eq #(format "%s = %s" %1 %2))
 (def format-kv #(format "%s : %s"  %1 %2))
@@ -33,9 +33,6 @@ for a more up to date version "
 (def wrap-brackets #(str "{" % "}"))
 (def wrap-sqbrackets #(str "[" % "]"))
 (def terminate #(str % ";"))
-
-(def format-eq #(format "%s = %s" %1 %2))
-(def format-kv #(format "%s : %s"  %1 %2))
 
 (defprotocol CQLEntities
   (cql-identifier [x]
@@ -63,7 +60,9 @@ for a more up to date version "
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
-      (wrap-brackets (join-coma (map cql-value x)))))
+      (->> (map cql-value x)
+           join-comma
+           wrap-brackets)))
 
   clojure.lang.IPersistentMap
   (cql-identifier [x]
@@ -74,15 +73,19 @@ for a more up to date version "
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
-      (map (fn [[k v]]
-             (format-kv (cql-value k) (cql-value v)))
-           x)))
+      (->> (map (fn [[k v]]
+                         (format-kv (cql-value k) (cql-value v)))
+                x)
+           join-comma
+           wrap-brackets)))
 
   clojure.lang.Sequential
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
-      (wrap-sqbrackets (join-coma (map cql-value x)))))
+      (->> (map cql-value x)
+           join-comma
+           wrap-sqbrackets)))
 
   ;; CQL Function are always safe, their arguments might not be though
   CQLFn
@@ -97,9 +100,12 @@ for a more up to date version "
 
   Object
   (cql-identifier [x] x)
-  (cql-value [x] (set-param! x)))
+  (cql-value [x]
+    (if *prepared-statement*
+      (set-param! x)
+      (str x))))
 
-(defn format-coumn-definition
+(defn format-column-definition
   [[k v]]
   (join-spaced
    [(cql-identifier k)
@@ -124,7 +130,7 @@ for a more up to date version "
        (map (fn [[k v]]
               (format-kv (quote-string (name k))
                          (config-value v))))
-       join-coma
+       join-comma
        wrap-brackets))
 
 (defn where-sequential-entry [column [op value]]
@@ -133,7 +139,9 @@ for a more up to date version "
       (= :in op)
       (str col-name
            " IN "
-           (wrap-parens (join-coma (map cql-value value))))
+           (->> (map cql-value value)
+                join-comma
+                wrap-parens))
 
       (fn? op)
       (str col-name
@@ -158,7 +166,7 @@ for a more up to date version "
    (fn [q columns]
      (if (empty? columns)
        "*"
-       (join-coma (map cql-identifier columns))))
+       (join-comma (map cql-identifier columns))))
 
    :where
    (fn [q clauses]
@@ -178,20 +186,20 @@ for a more up to date version "
      (->> columns
           (map (fn [col-values] ;; Values are a pair of col and order
                  (join-spaced (map cql-identifier col-values))))
-          join-coma
+          join-comma
           (str "ORDER BY ")))
 
    :primary-key
    (fn [q primary-key]
      (str "PRIMARY KEY "
-          (wrap-parens (join-coma (map cql-identifier (flatten [primary-key]))))))
+          (wrap-parens (join-comma (map cql-identifier (flatten [primary-key]))))))
 
    :column-definitions
    (fn [q {:keys [primary-key] :as column-definitions}]
      (wrap-parens
-      (join-coma
+      (join-comma
        (conj
-        (vec (map format-coumn-definition (dissoc column-definitions :primary-key)))
+        (vec (map format-column-definition (dissoc column-definitions :primary-key)))
         ((:primary-key emit) q primary-key)))))
 
    :limit
@@ -203,9 +211,9 @@ for a more up to date version "
    (fn [q values-map]
      (let [columns (keys values-map)
            values (vals values-map)]
-       (str (wrap-parens (join-coma (map cql-identifier columns)))
+       (str (wrap-parens (join-comma (map cql-identifier columns)))
             " VALUES "
-            (wrap-parens (join-coma (map cql-value values))))))
+            (wrap-parens (join-comma (map cql-value values))))))
 
    :set-columns
    (fn [q values]
@@ -216,7 +224,7 @@ for a more up to date version "
                    (counter k v)
                    (format-eq (cql-identifier k) (cql-value v))))
                values)
-          join-coma
+          join-comma
           (str "SET ")))
 
    :using
@@ -236,7 +244,7 @@ for a more up to date version "
      (->> columns
           (map (fn [col-values] ;; Values are a pair of col and order
                  (join-spaced (map cql-identifier col-values))))
-          join-coma
+          join-comma
           wrap-parens
           (str "CLUSTERING ORDER BY ")))
 

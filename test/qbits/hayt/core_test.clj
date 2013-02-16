@@ -250,3 +250,18 @@
          (->prepared (delete :foo
                        (columns {:bar 2})
                        (where {:baz 1}))))))
+
+(deftest test-cql-identifier
+  (are [expected identifier] (= expected (cql-identifier identifier))
+       "a" "a"
+       "a" :a
+       "a[2]" {:a 2}
+       "a['b']" {:a "b"}
+       "blobAsBigint(1)" (blob->bigint "1"))
+
+  (are [expected value] (= expected (cql-value value))
+       "'a'" "a"
+       "{'a' : 'b', 'c' : 'd'}" {:a :b :c :d}
+       "['a', 'b', 'c', 'd']" ["a" "b" "c" "d"]
+       "['a', 'b', 'c', 'd']" '("a" "b" "c" "d")
+       "1" 1))
