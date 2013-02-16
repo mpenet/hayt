@@ -195,9 +195,10 @@
                        (where {(token :user-id) [> (token "tom")]})))))
 
 (deftest test-coll-lookup
-    (is (= "DELETE bar[2] FROM foo WHERE baz = 1;" (->cql (delete :foo
-                       (columns [:bar 2])
-                       (where {:baz 1})))))
+    (is (= "DELETE bar[2] FROM foo WHERE baz = 1;"
+           (->cql (delete :foo
+                    (columns {:bar 2})
+                    (where {:baz 1})))))
     (is (= ["DELETE bar[?] FROM foo WHERE baz = ?;" [2 1]]
            (->prepared (delete :foo
                          (columns {:bar 2})
