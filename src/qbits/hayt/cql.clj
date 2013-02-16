@@ -74,7 +74,7 @@ for a more up to date version "
     (if *prepared-statement*
       (set-param! x)
       (->> (map (fn [[k v]]
-                         (format-kv (cql-value k) (cql-value v)))
+                  (format-kv (cql-value k) (cql-value v)))
                 x)
            join-comma
            wrap-brackets)))
@@ -251,9 +251,9 @@ for a more up to date version "
             (if-let [with-entry (k emit)]
               (with-entry q v)
               (format-eq (cql-identifier k)
-                           (if (map? v)
-                             (config-options v)
-                             (config-value v)))))
+                         (if (map? v)
+                           (config-options v)
+                           (config-value v)))))
           join-and
           (str "WITH ")))
 
