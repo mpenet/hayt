@@ -1,5 +1,7 @@
 (ns qbits.hayt.cql
-  "http://cassandra.apache.org/doc/cql3/CQL.html"
+  "CQL3 ref: http://cassandra.apache.org/doc/cql3/CQL.html or
+https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
+for a more up to date version "
   (:require [clojure.string :as string]))
 
 (declare emit-query)
@@ -8,43 +10,44 @@
 
 (defn template [q] (-> q meta :template))
 
-;; this has to be an atom, we cannot bash a transient in place (we
-;; could but it's marked as sin in the docs ("an implementation detail")
-(defmacro set-param!
+;; Wraps a CQL function (a template to clj.core/format and its
+;; argument for later encoding.
+(defrecord CQLFn [value template])
+
+(defn set-param!
   [x]
-  `(if *prepared-statement*
-     (do (swap! *param-stack* conj ~x)
-         "?")
-     ~x))
+  (if *prepared-statement*
+    (do (swap! *param-stack* conj x)
+        "?")
+    x))
 
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join " " %))
 (def join-coma #(string/join ", " %))
 (def join-lf #(string/join "\n" %))
-
-(def quote-string #(str \' (string/escape % {\" "\""}) \'))
+(def format-eq #(format "%s = %s" %1 %2))
+(def format-kv #(format "%s : %s"  %1 %2))
+(def quote-string #(str \' % \'))
+(def escape-string #(quote-string (string/escape % {\" "\""})))
 (def wrap-parens #(str "(" % ")"))
+(def wrap-brackets #(str "{" % "}"))
+(def wrap-sqbrackets #(str "[" % "]"))
 (def terminate #(str % ";"))
 
 (def format-eq #(format "%s = %s" %1 %2))
 (def format-kv #(format "%s : %s"  %1 %2))
-(def format-cd (fn [[k v]] (join-spaced
-                            [(cql-identifier k)
-                             (cql-identifier v)])))
+
 (defprotocol CQLEntities
-  (cql-identifier [x] "table names etc, maybe it's too paranoid, but this also
-                    allows their parameterisation")
-  (cql-value [x] "Encodes a value for query consumption, pushing
-                  parameters to a separate stack, and replacing its
-                  value with a placeholder, the placeholder can be
-                  specified and be either %s or ?, allowing use
-                  with clojure.core/format for raw queries or as
-                  prepared statements"))
+  (cql-identifier [x]
+    "Encodes CQL identifiers")
+  (cql-value [x]
+    "Encodes a CQL value, pushing it to *param-stack* if
+     it's a prepared statement and replacing it with ?"))
 
 (extend-protocol CQLEntities
 
   String
-  (cql-identifier [x] (set-param! (name x)))
+  (cql-identifier [x] x)
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
@@ -54,15 +57,20 @@
   (cql-identifier [x] (cql-identifier (name x)))
   (cql-value [x] (cql-value (name x)))
 
-  ;; collections are just for cassandra collection types, not to
-  ;; generate query parts, ex in where clause
+  ;; Collections are just for cassandra collection types, not to
+  ;; generate query parts
   clojure.lang.IPersistentSet
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
-      (str "{" (join-coma (map cql-value x)) "}")))
+      (wrap-brackets (join-coma (map cql-value x)))))
 
   clojure.lang.IPersistentMap
+  (cql-identifier [x]
+    (let [[coll k] (first x) ]
+      ;; handles foo['bar'] lookups
+      (str (cql-identifier coll)
+           (wrap-sqbrackets (cql-value k)))))
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
@@ -74,11 +82,28 @@
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
-      (str "[" (join-coma (map cql-value x)) "]")))
+      (wrap-sqbrackets (join-coma (map cql-value x)))))
+
+  ;; CQL Function are always safe, their arguments might not be though
+  CQLFn
+  (cql-identifier [{:keys [value template]}]
+    (if template
+      (format template (cql-identifier value))
+      value))
+  (cql-value [{:keys [value template]}]
+    (if template
+      (format template (cql-value value))
+      value))
 
   Object
-  (cql-identifier [x] (set-param! x))
+  (cql-identifier [x] x)
   (cql-value [x] (set-param! x)))
+
+(defn format-coumn-definition
+  [[k v]]
+  (join-spaced
+   [(cql-identifier k)
+    (cql-identifier v)]))
 
 (def operators {= "="
                 > ">"
@@ -87,6 +112,20 @@
                 >= ">="
                 + "+"
                 - "-"})
+
+(defn config-value
+  [x]
+  (if (number? x)
+    x
+    (quote-string (name x))))
+
+(defn config-options [m]
+  (->> m
+       (map (fn [[k v]]
+              (format-kv (quote-string (name k))
+                         (config-value v))))
+       join-coma
+       wrap-brackets))
 
 (defn where-sequential-entry [column [op value]]
   (let [col-name (cql-identifier column)]
@@ -108,7 +147,7 @@
 
 (defn counter [column [op value]]
   (format-eq (cql-identifier column)
-             ;; we cannot cache the col-name value, since there is a
+             ;; We cannot cache the col-name value, since there is a
              ;; stack update behind this call
              (join-spaced [(cql-identifier column)
                            (operators op)
@@ -116,16 +155,17 @@
 
 (def emit
   {:columns
-   (fn [q fields]
-     (if (empty? fields)
+   (fn [q columns]
+     (if (empty? columns)
        "*"
-       (join-coma (map cql-identifier fields))))
+       (join-coma (map cql-identifier columns))))
 
    :where
    (fn [q clauses]
      (->> clauses
           (map (fn [[k v]]
-                 (if (sequential? v) ;; sequence, we do the complex thing first
+                 (if (sequential? v)
+                   ;; Sequence, we do the complex thing first
                    (where-sequential-entry k v)
                    ;; else we just append if its a simple map val
                    (format-eq (cql-identifier k)
@@ -136,7 +176,7 @@
    :order-by
    (fn [q columns]
      (->> columns
-          (map (fn [col-values] ;; values are a pair of col name and order (DESC, ASC)
+          (map (fn [col-values] ;; Values are a pair of col and order
                  (join-spaced (map cql-identifier col-values))))
           join-coma
           (str "ORDER BY ")))
@@ -149,7 +189,7 @@
    :column-definitions
    (fn [q column-definitions]
      (wrap-parens
-      (join-coma (map format-cd column-definitions))))
+      (join-coma (map format-coumn-definition column-definitions))))
 
    :limit
    (fn [q limit]
@@ -164,11 +204,11 @@
             " VALUES "
             (wrap-parens (join-coma (map cql-value values))))))
 
-   :set-fields
+   :set-columns
    (fn [q values]
      (->> (map (fn [[k v]]
-                 ;; counter (we need to support maps/set/list updates
-                 ;; too, so this is kind of a hack now)
+                 ;; Counter
+                 ;; FIXME we need to support maps/set/list update
                  (if (vector? v)
                    (counter k v)
                    (format-eq (cql-identifier k) (cql-value v))))
@@ -188,16 +228,23 @@
    (fn [q value-map]
      (->> (for [[k v] value-map]
             (format-eq (cql-identifier k)
-                       (cql-value v)))
+                       (if (map? v)
+                         (config-options v)
+                         (config-value v))))
           join-and
           (str "WITH ")))
 
+   :index-column
+   (fn [q index-column]
+     (wrap-parens (cql-identifier index-column)))
+
    :queries
    (fn [q queries]
-     (let [subqs (map emit-query queries)]
-       (if *prepared-statement*
-         [(join-lf subqs) @*param-stack*])
-       (join-lf subqs)))})
+     (->> (let [subqs (join-lf (map emit-query queries))]
+            (if *prepared-statement*
+              [subqs @*param-stack*])
+            subqs)
+          (format "\n%s\n")))})
 
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 
