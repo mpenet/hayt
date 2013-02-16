@@ -161,8 +161,7 @@
                                        {:class "SimpleStrategy"
                                         :replication_factor 3 }
                                        :something 1
-                                       :something-else "foo"})))))
-  )
+                                       :something-else "foo"}))))))
 
 (deftest test-q->
   (let [q (select :foo)]
