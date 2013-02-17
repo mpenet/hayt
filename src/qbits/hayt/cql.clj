@@ -211,7 +211,6 @@ for a more up to date version "
 
    :limit
    (fn [q limit]
-     (assert (number? limit) "Limit only accepts numbers")
      (str "LIMIT " limit))
 
    :values
