@@ -149,7 +149,7 @@
 
 (defn where
   ""
-  [args]
+  [& args]
   {:where args})
 
 (defn values

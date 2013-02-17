@@ -184,7 +184,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
    :where
    (fn [q clauses]
-     (->> clauses
+     (->> (partition 2 clauses)
           (map (fn [[k v]]
                  (if (sequential? v)
                    ;; Sequence, we do the complex thing first

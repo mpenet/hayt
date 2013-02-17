@@ -1,4 +1,3 @@
-
 (ns qbits.hayt.core-test
   (:use clojure.test
         qbits.hayt
@@ -24,24 +23,24 @@
 
        "SELECT * FROM foo WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
        (select :foo
-               (where {:foo :bar
-                       :moo [> 3]
-                       :meh [:> 4]
-                       :baz [:in [5 6 7]]}))
+               (where :foo :bar
+                      :moo [> 3]
+                      :meh [:> 4]
+                      :baz [:in [5 6 7]]))
 
        "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
        (select :foo
-               (where [[:foo  [> 1]]
-                       [:foo  [< 10]]])))
+               (where :foo [> 1]
+                      :foo [< 10])))
 
   ;;
   (is (= ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
           [:bar 3 4 5 6 7]]
          (->prepared (select :foo
-                             (where {:foo :bar
-                                     :moo [> 3]
-                                     :meh [:> 4]
-                                     :baz [:in [5 6 7]]}))))))
+                             (where :foo :bar
+                                    :moo [> 3]
+                                    :meh [:> 4]
+                                    :baz [:in [5 6 7]]))))))
 
 
 (deftest test-insert
@@ -69,21 +68,21 @@
        (update :foo
                (set-columns {:bar 1
                              :baz [+ 2] })
-               (where {:foo :bar
-                       :moo [> 3]
-                       :meh [:> 4]
-                       :baz [:in [5 6 7]]}))
+               (where :foo :bar
+                      :moo [> 3]
+                      :meh [:> 4]
+                      :baz [:in [5 6 7]]))
 
        "UPDATE foo SET bar = 1, baz = baz + {'key' : 'value'} WHERE foo = 'bar';"
        (update :foo
                (set-columns {:bar 1
                              :baz [+ {"key" "value"}] })
-               (where {:foo :bar}))
+               (where :foo :bar))
 
        "UPDATE foo SET baz = ['prepended'] + baz WHERE foo = 'bar';"
        (update :foo
                (set-columns {:baz [["prepended"] +] })
-               (where {:foo :bar})))
+               (where :foo :bar)))
 
 
   (are [expected query] (= expected (->prepared query))
@@ -97,10 +96,10 @@
        (update :foo
                (set-columns {:bar 1
                              :baz [+ 2] })
-               (where {:foo :bar
-                       :moo [> 3]
-                       :meh [:> 4]
-                       :baz [:in [5 6 7]]}))))
+               (where :foo :bar
+                      :moo [> 3]
+                      :meh [:> 4]
+                      :baz [:in [5 6 7]]))))
 
 
 
@@ -110,10 +109,10 @@
          (->prepared (delete :foo
                              (using :timestamp 100000
                                     :ttl 200000)
-                             (where {:foo :bar
-                                     :moo [> 3]
-                                     :meh [:> 4]
-                                     :baz [:in [5 6 7]]}))))))
+                             (where :foo :bar
+                                    :moo [> 3]
+                                    :meh [:> 4]
+                                    :baz [:in [5 6 7]]))))))
 
 (deftest test-use-keyspace
   (is (= "USE foo;"
@@ -197,15 +196,15 @@
 
        "ALTER TABLE foo ALTER bar TYPE int ADD baz text;"
        (alter-table :foo
-         (alter :bar :int)
-         (add :baz :text))
+                    (alter :bar :int)
+                    (add :baz :text))
 
        "ALTER TABLE foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
        (alter-table :foo
-         (alter :bar :int)
-         (add :baz :text)
-         (with {:compact-storage true
-                :clustering-order [[:bar :asc]]}))))
+                    (alter :bar :int)
+                    (add :baz :text)
+                    (with {:compact-storage true
+                           :clustering-order [[:bar :asc]]}))))
 
 (deftest test-alter-column-family
   (are [expected query] (= expected (->raw query))
@@ -214,15 +213,15 @@
 
        "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text;"
        (alter-column-family :foo
-         (alter :bar :int)
-         (add :baz :text))
+                            (alter :bar :int)
+                            (add :baz :text))
 
        "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
        (alter-column-family :foo
-         (alter :bar :int)
-         (add :baz :text)
-         (with {:compact-storage true
-                :clustering-order [[:bar :asc]]}))))
+                            (alter :bar :int)
+                            (add :baz :text)
+                            (with {:compact-storage true
+                                   :clustering-order [[:bar :asc]]}))))
 
 (deftest test-create-alter-keyspace
   (are [expected query] (= expected (->raw query))
@@ -266,7 +265,7 @@
 
        "SELECT * FROM foo WHERE ts = now();"
        (select :foo
-               (where {:ts (now)}))
+               (where :ts (now)))
 
        "SELECT WRITETIME(bar) FROM foo;"
        (select :foo (columns (writetime :bar)))
@@ -280,32 +279,32 @@
 
        "SELECT * FROM foo WHERE token(user-id) > token('tom');"
        (select :foo
-               (where {(token :user-id) [> (token "tom")]})))
+               (where (token :user-id) [> (token "tom")])))
 
   (are [expected query] (= expected (->prepared query))
        ["SELECT * FROM foo WHERE ts = now();" []]
        (select :foo
-               (where {:ts (now)}))
+               (where :ts (now)))
 
        ["SELECT * FROM foo WHERE token(user-id) > token(?);" ["tom"]]
        (select :foo
-               (where {(token :user-id) [> (token "tom")]})))
+               (where (token :user-id) [> (token "tom")])))
 
   (let [d (java.util.Date. 0)]
     (is (= "SELECT * FROM foo WHERE ts > maxTimeuuid(0) AND ts < minTimeuuid(0);"
            (->raw (select :foo
-                          (where [[:ts  [> (max-timeuuid d)]]
-                                  [:ts  [< (min-timeuuid d)]]])))))))
+                          (where :ts [> (max-timeuuid d)]
+                                 :ts [< (min-timeuuid d)])))))))
 
 (deftest test-coll-lookup
   (is (= "DELETE bar[2] FROM foo WHERE baz = 1;"
          (->raw (delete :foo
                         (columns {:bar 2})
-                        (where {:baz 1})))))
+                        (where :baz 1)))))
   (is (= ["DELETE bar[?] FROM foo WHERE baz = ?;" [2 1]]
          (->prepared (delete :foo
                              (columns {:bar 2})
-                             (where {:baz 1}))))))
+                             (where :baz 1))))))
 
 (deftest test-cql-identifier
   (are [expected identifier] (= expected (cql-identifier identifier))
@@ -331,8 +330,8 @@
 
 (deftest test-prepare-map
   (let [query (->prepared (select :foo
-                            (where {:a :a1
-                                    :b :b1
-                                    :c :c1})))]
-    (is (= ["SELECT * FROM foo WHERE a = ? AND c = ? AND b = ?;" [100 300 200]]
+                                  (where :a :a1
+                                         :b :b1
+                                         :c :c1)))]
+    (is (= ["SELECT * FROM foo WHERE a = ? AND b = ? AND c = ?;" [100 200 300]]
            (apply-map query {:a1 100 :b1 200 :c1 300})))))
