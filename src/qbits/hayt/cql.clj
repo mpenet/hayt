@@ -301,12 +301,12 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 
 (defn emit-query [query]
-  (->> (map (fn [token]
+  (->> (template query)
+       (map (fn [token]
               (if (string? token)
                 token
                 (when-let [context (token query)]
-                  ((get emit token emit-catch-all) query context))))
-            (template query))
+                  ((get emit token emit-catch-all) query context)))))
        (filter identity)
        join-spaced
        terminate))
