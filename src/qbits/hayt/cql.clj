@@ -246,6 +246,18 @@ for a more up to date version "
 
    :compact-storage (constantly "COMPACT STORAGE")
 
+   :alter
+   (fn [q [identifier type]]
+     (format "ALTER %s TYPE %s"
+             (cql-identifier identifier)
+             (cql-identifier type)))
+
+   :add
+   (fn [q [identifier type]]
+     (format "ADD %s %s"
+             (cql-identifier identifier)
+             (cql-identifier type)))
+
    :clustering-order
    (fn [q columns]
      (->> columns

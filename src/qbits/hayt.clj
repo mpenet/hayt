@@ -1,4 +1,5 @@
 (ns qbits.hayt
+  (:refer-clojure :exclude [alter])
   (:require [qbits.hayt.cql :as cql])
   (:import [java.util Date]))
 
@@ -86,10 +87,14 @@
          (into {:table table} clauses)))
 
 (defn alter-table
-  "not complete, no tests"
   [table & clauses]
-  (query ["ALTER TABLE" :table :table-type :with]
+  (query ["ALTER TABLE" :table :alter-column-definition :alter :add :with]
          (into {:table table} clauses)))
+
+(defn alter-column-family
+  [cf & clauses]
+  (query ["ALTER COLUMNFAMILY" :column-family :alter-column-definition :with]
+         (into {:column-family cf} clauses)))
 
 (defn alter-keyspace
   ""
@@ -160,6 +165,16 @@
   ""
   [value]
   {:index-name value})
+
+(defn alter
+  ""
+  [& args]
+  {:alter args})
+
+(defn add
+  ""
+  [& args]
+  {:add args})
 
 (defn q->
   ""
