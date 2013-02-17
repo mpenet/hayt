@@ -239,7 +239,6 @@
 ;; Sugar for collection types
 
 (defn coll-type
-  ""
   [t & spec]
   (format "%s<%s>"
           (name t)
