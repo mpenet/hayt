@@ -294,3 +294,12 @@
   (is (= "set<int>" (set-type :int)))
   (is (= "list<int>" (list-type :int)))
   (is (= "map<int, text>" (map-type :int :text))))
+
+
+(deftest test-prepare-map
+  (let [query (->prepared (select :foo
+                            (where {:a :a1
+                                    :b :b1
+                                    :c :c1})))]
+    (is (= ["SELECT * FROM foo WHERE a = ? AND c = ? AND b = ?;" [100 300 200]]
+           (apply-map query {:a1 100 :b1 200 :c1 300})))))

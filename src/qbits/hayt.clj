@@ -104,10 +104,7 @@
   (query ["BATCH" :using :queries "APPLY BATCH"]
          (into {} clauses)))
 
-
-
-
-;; clauses
+;; Clauses
 
 (defn columns
   ""
@@ -247,3 +244,11 @@
 (def map-type (partial coll-type :map))
 (def list-type (partial coll-type :list))
 (def set-type (partial coll-type :set))
+
+;; Utilities
+
+(defn apply-map
+  "Takes a generated prepared query with its arg vector containing
+  keywords for placeholders and maps the supplied map to it"
+  [[query placeholders] parameter-map]
+  [query (replace parameter-map placeholders)])
