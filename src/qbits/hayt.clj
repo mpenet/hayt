@@ -2,7 +2,7 @@
   (:require [qbits.hayt.cql :as cql])
   (:import [java.util Date]))
 
-(defn ->cql
+(defn ->raw
   ""
   [query]
   (binding [cql/*prepared-statement* false]

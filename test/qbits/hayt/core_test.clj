@@ -4,7 +4,7 @@
         qbits.hayt.cql))
 
 (deftest test-select
-  (are [expected query] (= expected (->cql query))
+  (are [expected query] (= expected (->raw query))
        "SELECT * FROM foo;"
        (select :foo)
 
@@ -54,13 +54,13 @@
                                     :ttl 200000)))))
 
   (is (= "INSERT INTO foo (a, c) VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;"
-         (->cql (insert :foo
+         (->raw (insert :foo
                         (values {"a" "b" "c" "d"})
                         (using :timestamp 100000
                                :ttl 200000))))))
 
 (deftest test-update
-  (are [expected query] (= expected (->cql query))
+  (are [expected query] (= expected (->raw query))
        "UPDATE foo SET bar = 1, baz = baz + 2;"
        (update :foo
                (set-columns {:bar 1
@@ -118,10 +118,10 @@
 
 (deftest test-truncate
   (is (= "TRUNCATE foo;"
-         (->cql (truncate :foo)))))
+         (->raw (truncate :foo)))))
 
 (deftest test-drop
-  (are [expected query] (= expected (->cql query))
+  (are [expected query] (= expected (->raw query))
        "DROP INDEX foo;"
        (drop-index :foo)
 
@@ -132,7 +132,7 @@
        (drop-table :foo)))
 
 (deftest test-create-index
-  (are [expected query] (= expected (->cql query))
+  (are [expected query] (= expected (->raw query))
        "CREATE INDEX ON foo (bar);"
        (create-index :foo :bar)
 
@@ -142,7 +142,7 @@
 
 (deftest test-batch
   (is (= "BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (a, c) VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
-         (->cql (batch
+         (->raw (batch
                  (queries
                   (update :foo
                           (set-columns {:bar 1
@@ -166,7 +166,7 @@
                       (using :timestamp 1234))))))
 
 (deftest test-create-table
-  (are [expected query] (= expected (->cql query))
+  (are [expected query] (= expected (->raw query))
        "CREATE TABLE foo (a varchar, b int, PRIMARY KEY (a));"
        (create-table :foo
                      (column-definitions {:a :varchar
@@ -188,7 +188,7 @@
                             :clustering-order [[:bar :asc]]}))))
 
 (deftest test-create-alter-keyspace
-  (are [expected query] (= expected (->cql query))
+  (are [expected query] (= expected (->raw query))
        "CREATE KEYPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
        (create-keyspace :foo
                         (with {:replication
@@ -206,7 +206,7 @@
 (deftest test-q->
   (let [q (select :foo)]
     (is (= "SELECT bar, baz FROM foo;")
-        (->cql (q-> q
+        (->raw (q-> q
                     (columns :bar "baz"))))
 
     (is (= ["SELECT bar, baz FROM foo;" []])
@@ -217,15 +217,15 @@
         q2 (q-> q
                 (values {"a" "b" "c" "d"}))]
     (is (= "INSERT INTO foo (a, c) VALUES ('b', 'd');"
-           (->cql q2)))
+           (->raw q2)))
     (is (= "INSERT INTO foo (a, c) VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;"
-           (->cql (q-> q2
+           (->raw (q-> q2
                        (using :timestamp 100000
                               :ttl 200000)))))))
 
 
 (deftest test-functions
-  (are [expected query] (= expected (->cql query))
+  (are [expected query] (= expected (->raw query))
        "SELECT COUNT(*) FROM foo;"
        (select :foo (columns (count*)))
 
@@ -258,13 +258,13 @@
 
   (let [d (java.util.Date. 0)]
     (is (= "SELECT * FROM foo WHERE ts > maxTimeuuid(0) AND ts < minTimeuuid(0);"
-           (->cql (select :foo
+           (->raw (select :foo
                           (where [[:ts  [> (max-timeuuid d)]]
                                   [:ts  [< (min-timeuuid d)]]])))))))
 
 (deftest test-coll-lookup
   (is (= "DELETE bar[2] FROM foo WHERE baz = 1;"
-         (->cql (delete :foo
+         (->raw (delete :foo
                         (columns {:bar 2})
                         (where {:baz 1})))))
   (is (= ["DELETE bar[?] FROM foo WHERE baz = ?;" [2 1]]
