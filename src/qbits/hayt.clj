@@ -109,6 +109,12 @@
   (query ["BATCH" :using :queries "APPLY BATCH"]
          (into {} clauses)))
 
+(defn use-keyspace
+  ""
+  [keyspace]
+  (query ["USE" :keyspace]
+         {:keyspace keyspace}))
+
 ;; Clauses
 
 (defn columns
