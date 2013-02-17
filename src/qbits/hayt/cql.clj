@@ -27,8 +27,8 @@ for a more up to date version "
 (def join-lf #(string/join "\n" %))
 (def format-eq #(format "%s = %s" %1 %2))
 (def format-kv #(format "%s : %s"  %1 %2))
-(def quote-string #(str \' % \'))
-(def escape-string #(quote-string (string/escape % {\" "\""})))
+(def quote-string #(str "'" (string/replace % "'" "''") \'))
+(def dquote-string #(str "\"" (string/replace % "\" " "\"\"") "\""))
 (def wrap-parens #(str "(" % ")"))
 (def wrap-brackets #(str "{" % "}"))
 (def wrap-sqbrackets #(str "[" % "]"))
@@ -44,7 +44,7 @@ for a more up to date version "
 (extend-protocol CQLEntities
 
   String
-  (cql-identifier [x] (quote-string x))
+  (cql-identifier [x] (dquote-string x))
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)

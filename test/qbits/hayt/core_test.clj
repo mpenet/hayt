@@ -9,11 +9,11 @@
        "SELECT * FROM foo;"
        (select :foo)
 
-       "SELECT bar, 'baz' FROM foo;"
+       "SELECT bar, \"baz\" FROM foo;"
        (select :foo
                (columns :bar "baz"))
 
-       "SELECT bar, 'baz' FROM foo LIMIT 100;"
+       "SELECT bar, \"baz\" FROM foo LIMIT 100;"
        (select :foo
                (columns :bar "baz")
                (limit 100))
@@ -44,17 +44,15 @@
                                      :baz [:in [5 6 7]]}))))))
 
 
-
-
 (deftest test-insert
-  (is (= ["INSERT INTO foo ('c', a) VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;"
+  (is (= ["INSERT INTO foo (\"c\", a) VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;"
           ["d" "b"]]
          (->prepared (insert :foo
                              (values {"c" "d" :a "b" })
                              (using :timestamp 100000
                                     :ttl 200000)))))
 
-  (is (= "INSERT INTO foo ('c', a) VALUES ('d', 'b') USING TIMESTAMP 100000 AND TTL 200000;"
+  (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') USING TIMESTAMP 100000 AND TTL 200000;"
          (->raw (insert :foo
                         (values {"c" "d" :a "b"})
                         (using :timestamp 100000
@@ -141,12 +139,12 @@
        "CREATE INDEX ON foo (bar);"
        (create-index :foo :bar)
 
-       "CREATE INDEX 'baz' ON foo (bar);"
+       "CREATE INDEX \"baz\" ON foo (bar);"
        (create-index :foo :bar
                      (index-name "baz"))))
 
 (deftest test-batch
-  (is (= "BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo ('a', 'c') VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
+  (is (= "BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
          (->raw (batch
                  (queries
                   (update :foo
@@ -158,7 +156,7 @@
                                  :ttl 200000)))
                  (using :timestamp 2134)))))
 
-  (is (= ["BATCH USING TIMESTAMP 1234 \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo ('a', 'c') VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;" [1 2 "b" "d"]]
+  (is (= ["BATCH USING TIMESTAMP 1234 \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo (\"a\", \"c\") VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;" [1 2 "b" "d"]]
          (->prepared (batch
                       (queries
                        (update :foo
@@ -244,18 +242,18 @@
 
 (deftest test-q->
   (let [q (select :foo)]
-    (is (= "SELECT bar, 'baz' FROM foo;")
+    (is (= "SELECT bar, \"baz\" FROM foo;")
         (->raw (q-> q (columns :bar "baz"))))
 
-    (is (= ["SELECT bar, 'baz' FROM foo;" []])
+    (is (= ["SELECT bar, \"baz\" FROM foo;" []])
         (->prepared (q-> q (columns :bar "baz")))))
 
   (let [q (insert :foo)
         q2 (q-> q
                 (values  {:a "b" "c" "d"}))]
-    (is (= "INSERT INTO foo ('c', a) VALUES ('d', 'b');"
+    (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b');"
            (->raw q2)))
-    (is (= "INSERT INTO foo ('c', a) VALUES ('d', 'b') USING TIMESTAMP 100000 AND TTL 200000;"
+    (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') USING TIMESTAMP 100000 AND TTL 200000;"
            (->raw (q-> q2
                        (using :timestamp 100000
                               :ttl 200000)))))))
@@ -273,10 +271,10 @@
        "SELECT WRITETIME(bar) FROM foo;"
        (select :foo (columns (writetime :bar)))
 
-       "SELECT TTL('bar') FROM foo;"
+       "SELECT TTL(\"bar\") FROM foo;"
        (select :foo (columns (ttl "bar")))
 
-       "SELECT unixTimestampOf('bar'), dateOf(bar) FROM foo;"
+       "SELECT unixTimestampOf(\"bar\"), dateOf(bar) FROM foo;"
        (select :foo (columns (unix-timestamp-of "bar")
                              (date-of :bar)))
 
@@ -311,7 +309,7 @@
 
 (deftest test-cql-identifier
   (are [expected identifier] (= expected (cql-identifier identifier))
-       "'a'" "a"
+       "\"a\"" "a"
        "a" :a
        "a[2]" {:a 2}
        "a['b']" {:a "b"}
