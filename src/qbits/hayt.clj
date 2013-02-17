@@ -88,12 +88,12 @@
 
 (defn alter-table
   [table & clauses]
-  (query ["ALTER TABLE" :table :alter-column-definition :alter :add :with]
+  (query ["ALTER TABLE" :table :alter :add :with]
          (into {:table table} clauses)))
 
 (defn alter-column-family
   [cf & clauses]
-  (query ["ALTER COLUMNFAMILY" :column-family :alter-column-definition :with]
+  (query ["ALTER COLUMNFAMILY" :column-family :alter :add :with]
          (into {:column-family cf} clauses)))
 
 (defn alter-keyspace
