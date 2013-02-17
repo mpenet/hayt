@@ -1,3 +1,4 @@
+
 (ns qbits.hayt.core-test
   (:use clojure.test
         qbits.hayt
@@ -37,7 +38,7 @@
   (is (= ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
           ["bar" 3 4 5 6 7]]
          (->prepared (select :foo
-                             (where {:foo :bar
+                             (where {:foo "bar"
                                      :moo [> 3]
                                      :meh [:> 4]
                                      :baz [:in [5 6 7]]}))))))
@@ -70,7 +71,7 @@
        (update :foo
                (set-columns {:bar 1
                              :baz [+ 2] })
-               (where {:foo :bar
+               (where {:foo "bar"
                        :moo [> 3]
                        :meh [:> 4]
                        :baz [:in [5 6 7]]}))
@@ -94,7 +95,7 @@
                              :baz [+ 2] }))
 
        ["UPDATE foo SET bar = ?, baz = baz + ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-        [1 2 "bar" 3 4 5 6 7]]
+        [1 2 :bar 3 4 5 6 7]]
        (update :foo
                (set-columns {:bar 1
                              :baz [+ 2] })
@@ -111,7 +112,7 @@
          (->prepared (delete :foo
                              (using :timestamp 100000
                                     :ttl 200000)
-                             (where {:foo :bar
+                             (where {:foo "bar"
                                      :moo [> 3]
                                      :meh [:> 4]
                                      :baz [:in [5 6 7]]}))))))

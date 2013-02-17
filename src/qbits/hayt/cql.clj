@@ -52,7 +52,10 @@ for a more up to date version "
 
   clojure.lang.Keyword
   (cql-identifier [x] (cql-identifier (name x)))
-  (cql-value [x] (cql-value (name x)))
+  (cql-value [x]
+    (if *prepared-statement*
+      (set-param! x)
+      (cql-value (name x))))
 
   ;; Collections are just for cassandra collection types, not to
   ;; generate query parts
