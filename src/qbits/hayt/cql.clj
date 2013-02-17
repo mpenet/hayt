@@ -150,21 +150,18 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
   (let [col-name (cql-identifier column)]
     (cond
       (= :in op)
-      (str col-name
-           " IN "
-           (->> (map cql-value value)
-                join-comma
-                wrap-parens))
+      (join-spaced
+       [col-name
+        "IN"
+        (->> (map cql-value value)
+             join-comma
+             wrap-parens)])
 
       (fn? op)
-      (str col-name
-           " " (operators op) " "
-           (cql-value value))
+      (join-spaced [col-name (operators op) (cql-value value)])
 
       (keyword? op)
-      (str col-name
-           " " (name op) " "
-           (cql-value value)))))
+      (join-spaced [col-name (name op) (cql-value value)]))))
 
 ;; x and y can be an operator or a value
 (defn counter [column [x y]]
