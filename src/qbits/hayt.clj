@@ -243,7 +243,7 @@
   [t & spec]
   (format "%s<%s>"
           (name t)
-          (clojure.string/join "," (map name spec))))
+          (cql/join-comma (map name spec))))
 
 (def map-type (partial coll-type :map))
 (def list-type (partial coll-type :list))

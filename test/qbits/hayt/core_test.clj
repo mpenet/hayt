@@ -292,4 +292,4 @@
 (deftest test-col-type-sugar
   (is (= "set<int>" (set-type :int)))
   (is (= "list<int>" (list-type :int)))
-  (is (= "map<int,text>" (map-type :int :text))))
+  (is (= "map<int, text>" (map-type :int :text))))
