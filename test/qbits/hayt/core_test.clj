@@ -222,9 +222,6 @@
          (with {:compact-storage true
                 :clustering-order [[:bar :asc]]}))))
 
-(deftest test-alter-column-family
-  (is (= nil nil)))
-
 (deftest test-create-alter-keyspace
   (are [expected query] (= expected (->raw query))
        "CREATE KEYPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
