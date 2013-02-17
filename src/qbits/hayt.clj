@@ -87,12 +87,12 @@
 
 (defn alter-table
   [table & clauses]
-  (query ["ALTER TABLE" :table :alter-columns :add :with]
+  (query ["ALTER TABLE" :table :alter-column :add :with]
          (into {:table table} clauses)))
 
 (defn alter-column-family
   [cf & clauses]
-  (query ["ALTER COLUMNFAMILY" :column-family :alter-columns :add :with]
+  (query ["ALTER COLUMNFAMILY" :column-family :alter-column :add :with]
          (into {:column-family cf} clauses)))
 
 (defn alter-keyspace
@@ -171,10 +171,10 @@
   [value]
   {:index-name value})
 
-(defn alter-columns
+(defn alter-column
   ""
   [& args]
-  {:alter-columns args})
+  {:alter-column args})
 
 (defn add
   ""

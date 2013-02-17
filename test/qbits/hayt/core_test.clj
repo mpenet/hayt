@@ -192,16 +192,16 @@
 (deftest test-alter-table
   (are [expected query] (= expected (->raw query))
        "ALTER TABLE foo ALTER bar TYPE int;"
-       (alter-table :foo (alter-columns :bar :int))
+       (alter-table :foo (alter-column :bar :int))
 
        "ALTER TABLE foo ALTER bar TYPE int ADD baz text;"
        (alter-table :foo
-                    (alter-columns :bar :int)
+                    (alter-column :bar :int)
                     (add :baz :text))
 
        "ALTER TABLE foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
        (alter-table :foo
-                    (alter-columns :bar :int)
+                    (alter-column :bar :int)
                     (add :baz :text)
                     (with {:compact-storage true
                            :clustering-order [[:bar :asc]]}))))
@@ -209,16 +209,16 @@
 (deftest test-alter-column-family
   (are [expected query] (= expected (->raw query))
        "ALTER COLUMNFAMILY foo ALTER bar TYPE int;"
-       (alter-column-family :foo (alter-columns :bar :int))
+       (alter-column-family :foo (alter-column :bar :int))
 
        "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text;"
        (alter-column-family :foo
-                            (alter-columns :bar :int)
+                            (alter-column :bar :int)
                             (add :baz :text))
 
        "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
        (alter-column-family :foo
-                            (alter-columns :bar :int)
+                            (alter-column :bar :int)
                             (add :baz :text)
                             (with {:compact-storage true
                                    :clustering-order [[:bar :asc]]}))))
