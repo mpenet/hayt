@@ -288,3 +288,8 @@
        "['a', 'b', 'c', 'd']" '("a" "b" "c" "d")
        "{'a', 'b', 'c', 'd'}" #{"a" "b" "c" "d"}
        1 1))
+
+(deftest test-col-type-sugar
+  (is (= "set<int>" (set-type :int)))
+  (is (= "list<int>" (list-type :int)))
+  (is (= "map<int,text>" (map-type :int :text))))

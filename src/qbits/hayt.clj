@@ -234,3 +234,17 @@
   ""
   [x]
   (cql/->CQLFn x "bigintAsBlob(%s)"))
+
+
+;; Sugar for collection types
+
+(defn coll-type
+  ""
+  [t & spec]
+  (format "%s<%s>"
+          (name t)
+          (clojure.string/join "," (map name spec))))
+
+(def map-type (partial coll-type :map))
+(def list-type (partial coll-type :list))
+(def set-type (partial coll-type :set))
