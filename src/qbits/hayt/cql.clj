@@ -253,7 +253,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
    :compact-storage (constantly "COMPACT STORAGE")
 
-   :alter
+   :alter-columns
    (fn [q [identifier type]]
      (format "ALTER %s TYPE %s"
              (cql-identifier identifier)
