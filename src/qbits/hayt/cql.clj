@@ -27,7 +27,7 @@ for a more up to date version "
 (def join-lf #(string/join "\n" %))
 (def format-eq #(format "%s = %s" %1 %2))
 (def format-kv #(format "%s : %s"  %1 %2))
-(def quote-string #(str "'" (string/replace % "'" "''") \'))
+(def quote-string #(str "'" (string/replace % "'" "''") "'"))
 (def dquote-string #(str "\"" (string/replace % "\" " "\"\"") "\""))
 (def wrap-parens #(str "(" % ")"))
 (def wrap-brackets #(str "{" % "}"))
