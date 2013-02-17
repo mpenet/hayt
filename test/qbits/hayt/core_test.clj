@@ -224,13 +224,13 @@
 
 (deftest test-create-alter-keyspace
   (are [expected query] (= expected (->raw query))
-       "CREATE KEYPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
+       "CREATE KEYSPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
        (create-keyspace :foo
                         (with {:replication
                                {:class "SimpleStrategy"
                                 :replication_factor 3 }}))
 
-       "ALTER KEYPACE foo WITH something-else = 'foo' AND something = 1 AND replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
+       "ALTER KEYSPACE foo WITH something-else = 'foo' AND something = 1 AND replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
        (alter-keyspace :foo
                        (with {:replication
                               {:class "SimpleStrategy"
