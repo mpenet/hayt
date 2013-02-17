@@ -115,6 +115,10 @@ for a more up to date version "
                 >= ">="
                 + "+"
                 - "-"})
+(defn operator?
+  [op]
+  (or (keyword? op)
+      (not (nil? (get operators op)))))
 
 (defn config-value
   [x]
@@ -150,13 +154,19 @@ for a more up to date version "
            " " (name op) " "
            (cql-value value)))))
 
-(defn counter [column [op value]]
+;; oov stands for operator-or-value
+(defn counter [column [oov1 oov2]]
   (format-eq (cql-identifier column)
              ;; We cannot cache the col-name value, since there is a
              ;; stack update behind this call
-             (join-spaced [(cql-identifier column)
-                           (operators op)
-                           (cql-value value)])))
+             (join-spaced
+              (if (operator? oov1)
+                [(cql-identifier column)
+                 (operators oov1)
+                 (cql-value oov2)]
+                [(cql-value oov1)
+                 (operators oov2)
+                 (cql-identifier column)]))))
 
 (def emit
   {:columns

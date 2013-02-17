@@ -79,6 +79,11 @@
        (update :foo
                (set-columns {:bar 1
                              :baz [+ {"key" "value"}] })
+               (where {:foo :bar}))
+
+       "UPDATE foo SET baz = ['prepended'] + baz WHERE foo = 'bar';"
+       (update :foo
+               (set-columns {:baz [["prepended"] +] })
                (where {:foo :bar})))
 
 
