@@ -44,14 +44,14 @@ for a more up to date version "
 (extend-protocol CQLEntities
 
   String
-  (cql-identifier [x] x)
+  (cql-identifier [x] (quote-string x))
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
       (quote-string x)))
 
   clojure.lang.Keyword
-  (cql-identifier [x] (cql-identifier (name x)))
+  (cql-identifier [x] (name x))
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
