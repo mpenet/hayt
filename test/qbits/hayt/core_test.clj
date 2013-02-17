@@ -117,6 +117,10 @@
                                      :meh [:> 4]
                                      :baz [:in [5 6 7]]}))))))
 
+(deftest test-use-keyspace
+  (is (= "USE foo;"
+         (->raw (use-keyspace :foo)))))
+
 (deftest test-truncate
   (is (= "TRUNCATE foo;"
          (->raw (truncate :foo)))))
