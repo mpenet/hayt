@@ -73,9 +73,10 @@ for a more up to date version "
   (cql-value [x]
     (if *prepared-statement*
       (set-param! x)
-      (->> (map (fn [[k v]]
-                  (format-kv (cql-value k) (cql-value v)))
-                x)
+      (->> x
+           (map (fn [[k v]]
+                  (format-kv (cql-value k)
+                             (cql-value v))))
            join-comma
            wrap-brackets)))
 
@@ -102,12 +103,6 @@ for a more up to date version "
   (cql-identifier [x] x)
   (cql-value [x] (set-param! x)))
 
-(defn format-column-definition
-  [[k v]]
-  (join-spaced
-   [(cql-identifier k)
-    (cql-identifier v)]))
-
 (def operators {= "="
                 > ">"
                 < "<"
@@ -118,21 +113,28 @@ for a more up to date version "
 (defn operator?
   [op]
   (or (keyword? op)
-      (not (nil? (get operators op)))))
+      (get operators op)))
 
-(defn config-value
+(defn option-value
   [x]
   (if (number? x)
     x
     (quote-string (name x))))
 
-(defn config-options [m]
+(defn option-map [m]
   (->> m
        (map (fn [[k v]]
               (format-kv (quote-string (name k))
-                         (config-value v))))
+                         (option-value v))))
        join-comma
        wrap-brackets))
+
+
+(defn format-column-definition
+  [[k v]]
+  (join-spaced
+   [(cql-identifier k)
+    (cql-identifier v)]))
 
 (defn where-sequential-entry [column [op value]]
   (let [col-name (cql-identifier column)]
@@ -154,19 +156,14 @@ for a more up to date version "
            " " (name op) " "
            (cql-value value)))))
 
-;; oov stands for operator-or-value
-(defn counter [column [oov1 oov2]]
-  (format-eq (cql-identifier column)
-             ;; We cannot cache the col-name value, since there is a
-             ;; stack update behind this call
-             (join-spaced
-              (if (operator? oov1)
-                [(cql-identifier column)
-                 (operators oov1)
-                 (cql-value oov2)]
-                [(cql-value oov1)
-                 (operators oov2)
-                 (cql-identifier column)]))))
+;; x and y can be an operator or a value
+(defn counter [column [x y]]
+  (let [identifier (cql-identifier column)]
+    (->> (if (operator? x)
+           [identifier (operators x) (cql-value y)]
+           [(cql-value x) (operators y) identifier])
+         join-spaced
+         (format-eq identifier))))
 
 (def emit
   {:columns
@@ -183,8 +180,7 @@ for a more up to date version "
                    ;; Sequence, we do the complex thing first
                    (where-sequential-entry k v)
                    ;; else we just append if its a simple map val
-                   (format-eq (cql-identifier k)
-                              (cql-value v)))))
+                   (format-eq (cql-identifier k) (cql-value v)))))
           join-and
           (str "WHERE ")))
 
@@ -198,16 +194,20 @@ for a more up to date version "
 
    :primary-key
    (fn [q primary-key]
-     (str "PRIMARY KEY "
-          (wrap-parens (join-comma (map cql-identifier (flatten [primary-key]))))))
+     (->> (if (sequential? primary-key)
+            (map cql-identifier primary-key)
+            (cql-identifier primary-key))
+          join-comma
+          wrap-parens
+          (str "PRIMARY KEY ")))
 
    :column-definitions
    (fn [q {:keys [primary-key] :as column-definitions}]
-     (wrap-parens
-      (join-comma
-       (conj
-        (vec (map format-column-definition (dissoc column-definitions :primary-key)))
-        ((:primary-key emit) q primary-key)))))
+     (-> (mapv format-column-definition
+               (dissoc column-definitions :primary-key))
+         (conj ((:primary-key emit) q primary-key))
+         join-comma
+         wrap-parens))
 
    :limit
    (fn [q limit]
@@ -224,27 +224,25 @@ for a more up to date version "
 
    :set-columns
    (fn [q values]
-     (->> (map (fn [[k v]]
-                 ;; Counter
-                 ;; FIXME we need to support maps/set/list update
+     (->> values
+          (map (fn [[k v]]
                  (if (vector? v)
                    (counter k v)
-                   (format-eq (cql-identifier k) (cql-value v))))
-               values)
+                   (format-eq (cql-identifier k)
+                              (cql-value v)))))
           join-comma
           (str "SET ")))
 
    :using
    (fn [q args]
-     (->> (for [[n value] (partition 2 args)]
-            (str (-> n name string/upper-case)
-                 " " (cql-identifier value)))
+     (->> (partition 2 args)
+          (map (fn [[n value]]
+                 (str (-> n name string/upper-case)
+                      " " (cql-identifier value))))
           join-and
           (str "USING ")))
 
-   :compact-storage
-   (fn [q compact-storage]
-     "COMPACT STORAGE")
+   :compact-storage (constantly "COMPACT STORAGE")
 
    :clustering-order
    (fn [q columns]
@@ -262,8 +260,8 @@ for a more up to date version "
               (with-entry q v)
               (format-eq (cql-identifier k)
                          (if (map? v)
-                           (config-options v)
-                           (config-value v)))))
+                           (option-map v)
+                           (option-value v)))))
           join-and
           (str "WITH ")))
 

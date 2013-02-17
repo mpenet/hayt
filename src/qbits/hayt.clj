@@ -24,31 +24,25 @@
   ""
   [table & clauses]
   (query ["SELECT" :columns "FROM" :table :where :order-by :limit]
-         (into {:table table
-                :columns []}
-               clauses)))
+         (into {:table table :columns []} clauses)))
 
 (defn insert
   ""
   [table & clauses]
   (query ["INSERT INTO" :table :values :using]
-         (into {:table table}
-               clauses)))
+         (into {:table table}  clauses)))
 
 (defn update
   ""
   [table & clauses]
   (query ["UPDATE" :table :using :set-columns :where]
-         (into {:table table}
-               clauses)))
+         (into {:table table}  clauses)))
 
 (defn delete
   ""
   [table & clauses]
   (query ["DELETE" :columns "FROM" :table :using :where]
-         (into {:table table
-                :columns []}
-               clauses)))
+         (into {:table table :columns []} clauses)))
 
 (defn truncate
   ""
@@ -78,29 +72,24 @@
   ""
   [table index-column & clauses]
   (query ["CREATE INDEX" :index-name "ON" :table :index-column]
-         (into {:table table
-                :index-column index-column}
-               clauses)))
+         (into {:table table :index-column index-column} clauses)))
 
 (defn create-keyspace
   ""
   [ks & clauses]
   (query ["CREATE KEYPACE" :keyspace :with]
-         (into {:keyspace ks}
-               clauses)))
+         (into {:keyspace ks} clauses)))
 
 (defn create-table
   [table & clauses]
   (query ["CREATE TABLE" :table :column-definitions :with]
-         (into  {:table table}
-                clauses)))
+         (into {:table table} clauses)))
 
 (defn alter-table
   "not complete, no tests"
   [table & clauses]
   (query ["ALTER TABLE" :table :table-type :with]
-         (into {:table table}
-               clauses)))
+         (into {:table table} clauses)))
 
 (defn alter-keyspace
   ""
