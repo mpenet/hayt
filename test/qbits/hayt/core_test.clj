@@ -1,4 +1,3 @@
-
 (ns qbits.hayt.core-test
   (:use clojure.test
         qbits.hayt
@@ -193,36 +192,36 @@
 (deftest test-alter-table
   (are [expected query] (= expected (->raw query))
        "ALTER TABLE foo ALTER bar TYPE int;"
-       (alter-table :foo (alter :bar :int))
+       (alter-table :foo (alter-column :bar :int))
 
        "ALTER TABLE foo ALTER bar TYPE int ADD baz text;"
        (alter-table :foo
-         (alter :bar :int)
-         (add :baz :text))
+                    (alter-column :bar :int)
+                    (add :baz :text))
 
        "ALTER TABLE foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
        (alter-table :foo
-         (alter :bar :int)
-         (add :baz :text)
-         (with {:compact-storage true
-                :clustering-order [[:bar :asc]]}))))
+                    (alter-column :bar :int)
+                    (add :baz :text)
+                    (with {:compact-storage true
+                           :clustering-order [[:bar :asc]]}))))
 
 (deftest test-alter-column-family
   (are [expected query] (= expected (->raw query))
        "ALTER COLUMNFAMILY foo ALTER bar TYPE int;"
-       (alter-column-family :foo (alter :bar :int))
+       (alter-column-family :foo (alter-column :bar :int))
 
        "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text;"
        (alter-column-family :foo
-         (alter :bar :int)
-         (add :baz :text))
+                            (alter-column :bar :int)
+                            (add :baz :text))
 
        "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
        (alter-column-family :foo
-         (alter :bar :int)
-         (add :baz :text)
-         (with {:compact-storage true
-                :clustering-order [[:bar :asc]]}))))
+                            (alter-column :bar :int)
+                            (add :baz :text)
+                            (with {:compact-storage true
+                                   :clustering-order [[:bar :asc]]}))))
 
 (deftest test-create-alter-keyspace
   (are [expected query] (= expected (->raw query))
@@ -331,8 +330,8 @@
 
 (deftest test-prepare-map
   (let [query (->prepared (select :foo
-                            (where {:a :a1
-                                    :b :b1
-                                    :c :c1})))]
+                                  (where {:a :a1
+                                          :b :b1
+                                          :c :c1})))]
     (is (= ["SELECT * FROM foo WHERE a = ? AND c = ? AND b = ?;" [100 300 200]]
            (apply-map query {:a1 100 :b1 200 :c1 300})))))
