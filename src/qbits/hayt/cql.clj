@@ -106,8 +106,8 @@ for a more up to date version "
   (cql-value [x]
     (throw (UnsupportedOperationException.
             "'null' parameters are not allowed since CQL3 does
-not (yet) supports them (see
-https://issues.apache.org/jira/browse/CASSANDRA-3783)")))
+not (yet) supports them. See
+https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
   Object
   (cql-identifier [x] x)
