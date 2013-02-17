@@ -36,9 +36,9 @@
 
   ;;
   (is (= ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-          ["bar" 3 4 5 6 7]]
+          [:bar 3 4 5 6 7]]
          (->prepared (select :foo
-                             (where {:foo "bar"
+                             (where {:foo :bar
                                      :moo [> 3]
                                      :meh [:> 4]
                                      :baz [:in [5 6 7]]}))))))
@@ -71,7 +71,7 @@
        (update :foo
                (set-columns {:bar 1
                              :baz [+ 2] })
-               (where {:foo "bar"
+               (where {:foo :bar
                        :moo [> 3]
                        :meh [:> 4]
                        :baz [:in [5 6 7]]}))
@@ -108,11 +108,11 @@
 
 (deftest test-delete
   (is (= ["DELETE * FROM foo USING TIMESTAMP 100000 AND TTL 200000 WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-          ["bar" 3 4 5 6 7]]
+          [:bar 3 4 5 6 7]]
          (->prepared (delete :foo
                              (using :timestamp 100000
                                     :ttl 200000)
-                             (where {:foo "bar"
+                             (where {:foo :bar
                                      :moo [> 3]
                                      :meh [:> 4]
                                      :baz [:in [5 6 7]]}))))))
@@ -235,7 +235,7 @@
                (where {:ts (now)}))
 
        "SELECT WRITETIME(bar) FROM foo;"
-       (select :foo (columns (writetime "bar")))
+       (select :foo (columns (writetime :bar)))
 
        "SELECT TTL(bar) FROM foo;"
        (select :foo (columns (ttl "bar")))
@@ -294,7 +294,6 @@
   (is (= "set<int>" (set-type :int)))
   (is (= "list<int>" (list-type :int)))
   (is (= "map<int, text>" (map-type :int :text))))
-
 
 (deftest test-prepare-map
   (let [query (->prepared (select :foo
