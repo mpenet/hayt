@@ -78,7 +78,7 @@
 (defn create-keyspace
   ""
   [ks & clauses]
-  (query ["CREATE KEYPACE" :keyspace :with]
+  (query ["CREATE KEYSPACE" :keyspace :with]
          (into {:keyspace ks} clauses)))
 
 (defn create-table
@@ -99,7 +99,7 @@
 (defn alter-keyspace
   ""
   [ks & clauses]
-  (query ["ALTER KEYPACE" :keyspace :with]
+  (query ["ALTER KEYSPACE" :keyspace :with]
          (into {:keyspace ks}
                clauses)))
 
