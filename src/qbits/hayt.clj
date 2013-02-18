@@ -3,13 +3,14 @@
   (:import [java.util Date]))
 
 (defn ->raw
-  ""
+  "Compiles a hayt query into its raw/string value"
   [query]
   (binding [cql/*prepared-statement* false]
     (cql/emit-query query)))
 
 (defn ->prepared
-  ""
+  "Compiles a hayt query into a vector composed of the prepared string
+  query and a vector of parameters."
   [query]
   (binding [cql/*prepared-statement* true
             cql/*param-stack* (atom [])]
@@ -107,9 +108,9 @@ Takes a table identifier and additional clause arguments:
 
 * index-column
 * index-name"
-  [table & clauses]
+  [table index-column & clauses]
   (query ["CREATE INDEX" :index-name "ON" :table :index-column]
-         (into {:table table} clauses)))
+         (into {:table table :index-column index-column} clauses)))
 
 (defn create-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#createKeyspaceStmt
@@ -180,7 +181,7 @@ Takes a keyspace identifier"
 ;; Clauses
 
 (defn columns
-  ""
+  "Taks a list (vararg) of columns identifiers"
   [& columns]
   {:columns columns})
 
@@ -190,20 +191,20 @@ Takes a keyspace identifier"
   {:column-definitions column-definitions})
 
 (defn using
-  ""
+  "Takes keyword/value pairs for :timestamp and :ttl"
   [& args]
   {:using args})
 
 (defn limit
-  ""
+  "Takes a numeric value"
   [n]
   {:limit n})
 
 (defn order-by
-  ""
-  [& columns]
-  {:order-by columns})
-
+  "Takes vectors of 2 elements, where the first is the column
+  identifier and the second is the ordering (as a keyword,
+  ex: :asc, :desc)"
+  [& columns] {:order-by columns})
 (defn queries
   ""
   [& queries]
