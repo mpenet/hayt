@@ -8,5 +8,6 @@
              :1.5  {:dependencies [[org.clojure/clojure "1.5.0-master-SNAPSHOT"]]}
              :test {:dependencies []}}
   :codox {:src-dir-uri "https://github.com/mpenet/hayt/blob/master"
-          :src-linenum-anchor-prefix "L"}
+          :src-linenum-anchor-prefix "L"
+          :exclude qbits.hayt.cql}
   :warn-on-reflection true)
