@@ -54,7 +54,7 @@ Some examples:
          (order-by [:foo :asc]))
 ```
 
-Queries are composable using q->
+Queries are composable using `q->`
 
 ```clojure
 (def base (select :foo (where {:foo 1})))
