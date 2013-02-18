@@ -100,8 +100,7 @@
   ""
   [ks & clauses]
   (query ["ALTER KEYSPACE" :keyspace :with]
-         (into {:keyspace ks}
-               clauses)))
+         (into {:keyspace ks} clauses)))
 
 (defn batch
   ""
