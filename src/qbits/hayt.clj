@@ -29,7 +29,7 @@ Takes a table identifier and additional clause arguments:
 * columns (defaults to *)
 * where
 * order-by
-* limit)"
+* limit"
   [table & clauses]
   (query ["SELECT" :columns "FROM" :table :where :order-by :limit]
          (into {:table table :columns []} clauses)))
@@ -115,8 +115,7 @@ Takes a table identifier and additional clause arguments:
 (defn create-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#createKeyspaceStmt
 
-Takes a keyspace identifier and a with clause.
-"
+Takes a keyspace identifier and a with clause."
   [keyspace & clauses]
   (query ["CREATE KEYSPACE" :keyspace :with]
          (into {:keyspace keyspace} clauses)))
@@ -165,7 +164,7 @@ Takes a keyspace identifier and a `with` clause."
 (defn batch
   "http://cassandra.apache.org/doc/cql3/CQL.html#batchStmt
 
-Takes a list (vararg) of hayt queries and an optional `using` clause."
+Takes hayt queries and an optional `using` clause."
   [& clauses]
   (query ["BATCH" :using :queries "APPLY BATCH"]
          (into {} clauses)))
@@ -181,7 +180,7 @@ Takes a keyspace identifier"
 ;; Clauses
 
 (defn columns
-  "Clause: takes a list (vararg) of columns identifiers"
+  "Clause: takes columns identifiers"
   [& columns]
   {:columns columns})
 
@@ -202,18 +201,20 @@ Takes a keyspace identifier"
 
 (defn order-by
   "Clause: takes vectors of 2 elements, where the first is the column
-  identifier and the second is the ordering (as keyword,
-  ex: :asc, :desc)"
+  identifier and the second is the ordering as keyword.
+  ex: :asc, :desc"
   [& columns] {:order-by columns})
 
 (defn queries
-  "Clause: takes a list (vararg) of hayt queries to be executed during a batch operation."
+  "Clause: takes hayt queries to be executed during a batch operation."
   [& queries]
   {:queries queries})
 
 (defn where
   "Clause: takes a map or a vector of pairs to compose the where
-clause of a select/update/delete query" [args] {:where args})
+clause of a select/update/delete query"
+  [args]
+  {:where args})
 
 (defn values
   "Clause: "
@@ -247,7 +248,7 @@ clause of a select/update/delete query" [args] {:where args})
 
 (defn q->
   "Allows query composition, extending an existing query with new
-  clauses (varargs)"
+  clauses"
   [q & clauses]
   (-> (into q clauses)
       (with-meta (meta q))))
@@ -313,22 +314,26 @@ Returns a dateOf function with the supplied argument"
   (cql/->CQLFn x "dateOf(%s)"))
 
 (defn blob->type
-  ""
+  "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
+Only available in 3.0.2"
   [x]
   (cql/->CQLFn x "blobAsType(%s)"))
 
 (defn type->blob
-  ""
+  "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
+Only available in 3.0.2"
   [x]
   (cql/->CQLFn x "typeAsBlob(%s)"))
 
 (defn blob->bigint
-  ""
+  "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
+Only available in 3.0.2"
   [x]
   (cql/->CQLFn x "blobAsBigint(%s)"))
 
 (defn bigint->blob
-  ""
+  "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
+Only available in 3.0.2"
   [x]
   (cql/->CQLFn x "bigintAsBlob(%s)"))
 
@@ -347,17 +352,20 @@ The possible collection types are :map, :list and :set."
 (def
   ^{:doc "Generates a map type definition, takes 2 arguments, for
   key and value types"}
-  map-type (partial coll-type :map))
+  map-type
+  (partial coll-type :map))
 
 (def
   ^{:doc "Generates a list type definition, takes a single argument
   indicating the list elements type"}
-  list-type (partial coll-type :list))
+  list-type
+  (partial coll-type :list))
 
 (def
   ^{:doc "Generates a set type definition, takes a single argument
   indicating the set elements type"}
-  set-type (partial coll-type :set))
+  set-type
+  (partial coll-type :set))
 
 ;; Utilities
 
