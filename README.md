@@ -15,9 +15,9 @@ tested, and performant.
 
 There are already 3 libraries that will use this library:
 
-* [Alia](https://github.com/mpenet/alia)
-* [Cassaforte](https://github.com/clojurewerkz/cassaforte)
-* [Casyn](https://github.com/mpenet/casyn)
+* [mpenet/alia](https://github.com/mpenet/alia)
+* [clojurewerkz/cassaforte](https://github.com/clojurewerkz/cassaforte)
+* [mpenet/casyn](https://github.com/mpenet/casyn)
 
 Hayt development is the result of collaboration, thanks to our [contributors](https://github.com/mpenet/hayt/contributors).
 
