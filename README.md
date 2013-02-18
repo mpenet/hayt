@@ -19,7 +19,7 @@ There are already 3 client that will use this library:
 * [Cassaforte](https://github.com/clojurewerkz/cassaforte)
 * [Casyn](https://github.com/mpenet/casyn)
 
-Hayt development is the result of collaboration, thanks to our [contributors](https://github.com/mpenet/alia/contributors).
+Hayt development is the result of collaboration, thanks to our [contributors](https://github.com/mpenet/hayt/contributors).
 
 ## Installation
 
