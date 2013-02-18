@@ -10,7 +10,7 @@ none provides CQL3 generation yet.
 Hayt is an attempt to allow the existing and future clients to share
 this, provide a simple but extensible base to build upon.
 
-Our goals from the start where to be feature complete, idiomatic, well
+Our goals from the start were to be feature complete, idiomatic, well
 tested, and performant.
 
 There are already 3 libraries that will use this library:
