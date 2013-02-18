@@ -13,7 +13,7 @@ this, provide a simple but extensible base to build upon.
 Our goals from the start were to be feature complete, idiomatic, well
 tested, and performant.
 
-There are already 3 libraries that will use this library:
+There are already 3 libraries that will use Hayt:
 
 * [mpenet/alia](https://github.com/mpenet/alia)
 * [clojurewerkz/cassaforte](https://github.com/clojurewerkz/cassaforte)
