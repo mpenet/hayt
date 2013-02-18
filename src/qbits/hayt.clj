@@ -21,94 +21,158 @@
   (vary-meta query-map assoc :template template))
 
 (defn select
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
+
+Takes a table identifier and additional clause arguments:
+
+* columns (defaults to *)
+* where
+* order-by
+* limit)"
   [table & clauses]
   (query ["SELECT" :columns "FROM" :table :where :order-by :limit]
          (into {:table table :columns []} clauses)))
 
 (defn insert
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#insertStmt
+
+Takes a table identifier and additional clause arguments:
+
+* values
+* using"
   [table & clauses]
   (query ["INSERT INTO" :table :values :using]
          (into {:table table}  clauses)))
 
 (defn update
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#updateStmt
+
+Takes a table identifier and additional clause arguments:
+
+* using
+* set-columns
+* where"
   [table & clauses]
   (query ["UPDATE" :table :using :set-columns :where]
          (into {:table table}  clauses)))
 
 (defn delete
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#deleteStmt
+
+Takes a table identifier and additional clause arguments:
+
+* columns (defaults to *)
+* using
+* where"
   [table & clauses]
   (query ["DELETE" :columns "FROM" :table :using :where]
          (into {:table table :columns []} clauses)))
 
 (defn truncate
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#truncateStmt
+
+Takes a table identifier."
   [table]
   (query ["TRUNCATE" :table]
          {:table table}))
 
 (defn drop-keyspace
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#dropKeyspaceStmt
+
+Takes a keyspace identifier"
   [keyspace]
   (query ["DROP KEYSPACE" :keyspace]
          {:keyspace keyspace}))
 
 (defn drop-table
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#dropTableStmt
+
+Takes a table identifier"
   [table]
   (query ["DROP TABLE" :table]
          {:table table}))
 
 (defn drop-index
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#dropIndexStmt
+
+Takes an index identifier."
   [index]
   (query ["DROP INDEX" :index]
          {:index index}))
 
 (defn create-index
-  ""
-  [table index-column & clauses]
+  "http://cassandra.apache.org/doc/cql3/CQL.html#createIndexStmt
+
+Takes a table identifier and additional clause arguments:
+
+* index-column
+* index-name"
+  [table & clauses]
   (query ["CREATE INDEX" :index-name "ON" :table :index-column]
-         (into {:table table :index-column index-column} clauses)))
+         (into {:table table} clauses)))
 
 (defn create-keyspace
-  ""
-  [ks & clauses]
+  "http://cassandra.apache.org/doc/cql3/CQL.html#createKeyspaceStmt
+
+Takes a keyspace identifier and a with clause.
+"
+  [keyspace & clauses]
   (query ["CREATE KEYSPACE" :keyspace :with]
-         (into {:keyspace ks} clauses)))
+         (into {:keyspace keyspace} clauses)))
 
 (defn create-table
+  "Takes a table identifier and additional clause arguments:
+
+* column-definitions
+* with"
   [table & clauses]
   (query ["CREATE TABLE" :table :column-definitions :with]
          (into {:table table} clauses)))
 
 (defn alter-table
+  "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
+
+Takes a table identifier and additional clause arguments:
+
+* alter-column
+* add
+* with"
   [table & clauses]
   (query ["ALTER TABLE" :table :alter-column :add :with]
          (into {:table table} clauses)))
 
 (defn alter-column-family
-  [cf & clauses]
+  "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
+
+Takes a column-familiy identifier and additional clause arguments:
+
+* alter-column
+* add
+* with"
+  [column-family & clauses]
   (query ["ALTER COLUMNFAMILY" :column-family :alter-column :add :with]
-         (into {:column-family cf} clauses)))
+         (into {:column-family column-family} clauses)))
 
 (defn alter-keyspace
-  ""
-  [ks & clauses]
+  "http://cassandra.apache.org/doc/cql3/CQL.html#alterKeyspaceStmt
+
+Takes a keyspace identifier and a `with` clause."
+  [keyspace & clauses]
   (query ["ALTER KEYSPACE" :keyspace :with]
-         (into {:keyspace ks} clauses)))
+         (into {:keyspace keyspace} clauses)))
 
 (defn batch
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#batchStmt
+
+Takes a list (vararg) of hayt queries and an optional `using` clause."
   [& clauses]
   (query ["BATCH" :using :queries "APPLY BATCH"]
          (into {} clauses)))
 
 (defn use-keyspace
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#useStmt
+
+Takes a keyspace identifier"
   [keyspace]
   (query ["USE" :keyspace]
          {:keyspace keyspace}))
