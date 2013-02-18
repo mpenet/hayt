@@ -13,7 +13,7 @@ this, provide a simple but extensible base to build upon.
 Our goals from the start where to be feature complete, idiomatic, well
 tested, and performant.
 
-There are already 3 client that will use this library:
+There are already 3 libraries that will use this library:
 
 * [Alia](https://github.com/mpenet/alia)
 * [Cassaforte](https://github.com/clojurewerkz/cassaforte)
