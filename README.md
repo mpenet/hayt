@@ -1,6 +1,6 @@
 # Hayt [![Build Status](https://secure.travis-ci.org/mpenet/hayt.png?branch=master)](http://travis-ci.org/mpenet/hayt)
 
-CQL query generation from Clojure.
+CQL query generation for Clojure.
 
 ## Why?
 
@@ -28,7 +28,7 @@ Hayt development is the result of collaboration, thanks to our [contributors](ht
 ```
 
 This is still a SNAPSHOT version, but we should have a proper release
-in a matter of days, once documentation and testing are completed.
+in a matter of days, once documentation and testing are complete.
 
 ## Usage
 
