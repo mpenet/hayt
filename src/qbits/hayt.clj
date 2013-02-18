@@ -181,118 +181,134 @@ Takes a keyspace identifier"
 ;; Clauses
 
 (defn columns
-  "Taks a list (vararg) of columns identifiers"
+  "Clause: takes a list (vararg) of columns identifiers"
   [& columns]
   {:columns columns})
 
 (defn column-definitions
-  ""
+  "Clause: "
   [column-definitions]
   {:column-definitions column-definitions})
 
 (defn using
-  "Takes keyword/value pairs for :timestamp and :ttl"
+  "Clause: takes keyword/value pairs for :timestamp and :ttl"
   [& args]
   {:using args})
 
 (defn limit
-  "Takes a numeric value"
+  "Clause: takes a numeric value"
   [n]
   {:limit n})
 
 (defn order-by
-  "Takes vectors of 2 elements, where the first is the column
-  identifier and the second is the ordering (as a keyword,
+  "Clause: takes vectors of 2 elements, where the first is the column
+  identifier and the second is the ordering (as keyword,
   ex: :asc, :desc)"
   [& columns] {:order-by columns})
+
 (defn queries
-  ""
+  "Clause: takes a list (vararg) of hayt queries to be executed during a batch operation."
   [& queries]
   {:queries queries})
 
 (defn where
-  ""
-  [args]
-  {:where args})
+  "Clause: takes a map or a vector of pairs to compose the where
+clause of a select/update/delete query" [args] {:where args})
 
 (defn values
-  ""
+  "Clause: "
   [values]
   {:values values})
 
 (defn set-columns
-  ""
+  "Clause: "
   [values]
   {:set-columns values})
 
 (defn with
-  ""
+  "Clause: "
   [values]
   {:with values})
 
 (defn index-name
-  ""
+  "Clause: "
   [value]
   {:index-name value})
 
 (defn alter-column
-  ""
+  "Clause: "
   [& args]
   {:alter-column args})
 
 (defn add
-  ""
+  "Clause: "
   [& args]
   {:add args})
 
 (defn q->
-  ""
+  "Allows query composition, extending an existing query with new
+  clauses (varargs)"
   [q & clauses]
   (-> (into q clauses)
       (with-meta (meta q))))
 
 ;; CQL3 functions
 
-(def now (constantly (cql/map->CQLFn {:value "now()"})))
-(def count* (constantly (cql/map->CQLFn {:value "COUNT(*)"})))
-(def count1 (constantly (cql/map->CQLFn {:value "COUNT(1)"})))
+(def ^{:doc "Returns a now() CQL function"} now
+  (constantly (cql/map->CQLFn {:value "now()"})))
+
+(def ^{:doc "Returns a count(*) CQL function"} count*
+  (constantly (cql/map->CQLFn {:value "COUNT(*)"})))
+
+(def ^{:doc "Returns a count(1) CQL function"} count1
+  (constantly (cql/map->CQLFn {:value "COUNT(1)"})))
 
 (defn date->epoch
   [d]
   (.getTime ^Date d))
 
 (defn max-timeuuid
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid"
   [^Date date]
   (cql/->CQLFn (date->epoch date) "maxTimeuuid(%s)"))
 
 (defn min-timeuuid
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid"
   [^Date date]
   (cql/->CQLFn (date->epoch date) "minTimeuuid(%s)"))
 
 (defn token
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
+
+Returns a token function with the supplied argument"
   [token]
   (cql/->CQLFn token "token(%s)"))
 
 (defn writetime
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
+
+Returns a WRITETIME function with the supplied argument"
   [x]
   (cql/->CQLFn x "WRITETIME(%s)"))
 
 (defn ttl
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
+
+Returns a TTL function with the supplied argument"
   [x]
   (cql/->CQLFn x "TTL(%s)"))
 
 (defn unix-timestamp-of
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid
+
+Returns a unixTimestampOf function with the supplied argument"
   [x]
   (cql/->CQLFn x "unixTimestampOf(%s)"))
 
 (defn date-of
-  ""
+  "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid
+
+Returns a dateOf function with the supplied argument"
   [x]
   (cql/->CQLFn x "dateOf(%s)"))
 
@@ -320,14 +336,28 @@ Takes a keyspace identifier"
 ;; Sugar for collection types
 
 (defn coll-type
+  "Helps with the generation of Collection types definitions.
+Takes a CQL type as keyword and it's arguments: ex (coll-type :map :int :uuid).
+The possible collection types are :map, :list and :set."
   [t & spec]
   (format "%s<%s>"
           (name t)
           (cql/join-comma (map name spec))))
 
-(def map-type (partial coll-type :map))
-(def list-type (partial coll-type :list))
-(def set-type (partial coll-type :set))
+(def
+  ^{:doc "Generates a map type definition, takes 2 arguments, for
+  key and value types"}
+  map-type (partial coll-type :map))
+
+(def
+  ^{:doc "Generates a list type definition, takes a single argument
+  indicating the list elements type"}
+  list-type (partial coll-type :list))
+
+(def
+  ^{:doc "Generates a set type definition, takes a single argument
+  indicating the set elements type"}
+  set-type (partial coll-type :set))
 
 ;; Utilities
 
