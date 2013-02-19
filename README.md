@@ -1,17 +1,17 @@
 # Hayt [![Build Status](https://secure.travis-ci.org/mpenet/hayt.png?branch=master)](http://travis-ci.org/mpenet/hayt)
 
-CQL query generation for Clojure.
+CQL3 DSL for Clojure.
 
 ## Why?
 
 There are a number of clients available for Cassandra for clojure and
-none provides CQL3 generation yet.
+none provides a CQL3 DSL yet.
 
 Hayt is an attempt to allow the existing and future clients to share
 this, provide a simple but extensible base to build upon.
 
-Our goals from the start were to be feature complete, idiomatic, well
-tested, and performant.
+Our goals from the start were to be feature complete (up to CQL
+v3.0.2), idiomatic, well tested, and performant.
 
 There are already 3 libraries that will use Hayt:
 
