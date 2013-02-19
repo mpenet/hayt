@@ -14,12 +14,11 @@ for a more up to date version "
 ;; argument for later encoding.
 (defrecord CQLFn [value template])
 
-(defmacro maybe-parameterize!
-  [x & body]
-  `(if *prepared-statement*
-     (do (swap! *param-stack* conj ~x)
-         "?")
-     (do ~@body)))
+(defn maybe-parameterize!
+  [x f]
+  (if *prepared-statement*
+     (do (swap! *param-stack* conj x) "?")
+     (f x)))
 
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join " " %))
@@ -46,21 +45,21 @@ for a more up to date version "
   String
   (cql-identifier [x] (dquote-string x))
   (cql-value [x]
-    (maybe-parameterize! x (quote-string x)))
+    (maybe-parameterize! x #(quote-string %)))
 
   clojure.lang.Keyword
   (cql-identifier [x] (name x))
   (cql-value [x]
-    (maybe-parameterize! x (cql-value (name x))))
+    (maybe-parameterize! x #(cql-value (name %))))
 
   ;; Collections are just for cassandra collection types, not to
   ;; generate query parts
   clojure.lang.IPersistentSet
   (cql-value [x]
     (maybe-parameterize! x
-     (->> (map cql-value x)
-          join-comma
-          wrap-brackets)))
+      #(->> (map cql-value %)
+            join-comma
+            wrap-brackets)))
 
   clojure.lang.IPersistentMap
   (cql-identifier [x]
@@ -70,7 +69,7 @@ for a more up to date version "
            (wrap-sqbrackets (cql-value k)))))
   (cql-value [x]
     (maybe-parameterize! x
-     (->> x
+     #(->> %
           (map (fn [[k v]]
                  (format-kv (cql-value k)
                             (cql-value v))))
@@ -80,7 +79,7 @@ for a more up to date version "
   clojure.lang.Sequential
   (cql-value [x]
     (maybe-parameterize! x
-     (->> (map cql-value x)
+     #(->> (map cql-value %)
           join-comma
           wrap-sqbrackets)))
 
@@ -104,7 +103,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
   Object
   (cql-identifier [x] x)
-  (cql-value [x] (maybe-parameterize! x x)))
+  (cql-value [x] (maybe-parameterize! x identity)))
 
 (def operators {= "="
                 > ">"
