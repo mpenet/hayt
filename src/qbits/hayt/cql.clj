@@ -14,12 +14,12 @@ for a more up to date version "
 ;; argument for later encoding.
 (defrecord CQLFn [value template])
 
-(defn set-param!
-  [x]
-  (if *prepared-statement*
-    (do (swap! *param-stack* conj x)
-        "?")
-    x))
+(defmacro maybe-parameterize!
+  [x & body]
+  `(if *prepared-statement*
+     (do (swap! *param-stack* conj ~x)
+         "?")
+     (do ~@body)))
 
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join " " %))
@@ -46,26 +46,21 @@ for a more up to date version "
   String
   (cql-identifier [x] (dquote-string x))
   (cql-value [x]
-    (if *prepared-statement*
-      (set-param! x)
-      (quote-string x)))
+    (maybe-parameterize! x (quote-string x)))
 
   clojure.lang.Keyword
   (cql-identifier [x] (name x))
   (cql-value [x]
-    (if *prepared-statement*
-      (set-param! x)
-      (cql-value (name x))))
+    (maybe-parameterize! x (cql-value (name x))))
 
   ;; Collections are just for cassandra collection types, not to
   ;; generate query parts
   clojure.lang.IPersistentSet
   (cql-value [x]
-    (if *prepared-statement*
-      (set-param! x)
-      (->> (map cql-value x)
-           join-comma
-           wrap-brackets)))
+    (maybe-parameterize! x
+     (->> (map cql-value x)
+          join-comma
+          wrap-brackets)))
 
   clojure.lang.IPersistentMap
   (cql-identifier [x]
@@ -74,22 +69,20 @@ for a more up to date version "
       (str (cql-identifier coll)
            (wrap-sqbrackets (cql-value k)))))
   (cql-value [x]
-    (if *prepared-statement*
-      (set-param! x)
-      (->> x
-           (map (fn [[k v]]
-                  (format-kv (cql-value k)
-                             (cql-value v))))
-           join-comma
-           wrap-brackets)))
+    (maybe-parameterize! x
+     (->> x
+          (map (fn [[k v]]
+                 (format-kv (cql-value k)
+                            (cql-value v))))
+          join-comma
+          wrap-brackets)))
 
   clojure.lang.Sequential
   (cql-value [x]
-    (if *prepared-statement*
-      (set-param! x)
-      (->> (map cql-value x)
-           join-comma
-           wrap-sqbrackets)))
+    (maybe-parameterize! x
+     (->> (map cql-value x)
+          join-comma
+          wrap-sqbrackets)))
 
   ;; CQL Function are always safe, their arguments might not be though
   CQLFn
@@ -111,7 +104,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
   Object
   (cql-identifier [x] x)
-  (cql-value [x] (set-param! x)))
+  (cql-value [x] (maybe-parameterize! x x)))
 
 (def operators {= "="
                 > ">"
