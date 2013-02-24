@@ -31,7 +31,8 @@ Takes a table identifier and additional clause arguments:
 * order-by
 * limit"
   [table & clauses]
-  (query ["SELECT" :columns "FROM" :table :where :order-by :limit]
+  (query ["SELECT" :columns "FROM" :table :where :order-by :limit
+          :allow-filtering]
          (into {:table table :columns []} clauses)))
 
 (defn insert
@@ -245,6 +246,13 @@ clause of a select/update/delete query"
   "Clause: "
   [& args]
   {:add args})
+
+(defn allow-filtering
+  "Clause: "
+  [value]
+  {:allow-filtering value})
+
+
 
 (defn q->
   "Allows query composition, extending an existing query with new

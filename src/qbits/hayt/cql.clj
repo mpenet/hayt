@@ -243,7 +243,13 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
           join-and
           (str "USING ")))
 
-   :compact-storage (constantly "COMPACT STORAGE")
+   :compact-storage
+   (fn [q v]
+     (when v "COMPACT STORAGE"))
+
+   :allow-filtering
+   (fn [q v]
+     (when v "ALLOW FILTERING"))
 
    :alter-column
    (fn [q [identifier type]]

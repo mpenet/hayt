@@ -12,10 +12,11 @@
        (select :foo
                (columns :bar "baz"))
 
-       "SELECT bar, \"baz\" FROM foo LIMIT 100;"
+       "SELECT bar, \"baz\" FROM foo LIMIT 100 ALLOW FILTERING;"
        (select :foo
                (columns :bar "baz")
-               (limit 100))
+               (limit 100)
+               (allow-filtering true))
 
        "SELECT * FROM foo ORDER BY bar desc;"
        (select :foo
