@@ -2,7 +2,7 @@
 
 ## Identifiers vs values
 
-* CQL identifiers (table names, column names, etc) can be represented
+CQL identifiers (table names, column names, etc) can be represented
 as clojure keywords or as strings.  In the case of a keyword it
 wont be quoted, meaning it will be case insensitive and cannot include
 spaces. In string form, it will be quoted, can include spaces and will
@@ -273,7 +273,7 @@ Ex:
         :moo [> 3]
         :meh [:> 4]
         :baz [:in [5 6 7]]})
- ```
+```
 
 #### columns
 
@@ -368,6 +368,7 @@ Hayt won't generate the query until you ask for it explicitly.
 This has a few advantages, you can compose your queries using the
 `q->` function at will until you generate them.
 
+```clojure
 (def base (select :foo (where {:foo 1})))
 
 (def qa (q-> base
@@ -378,7 +379,7 @@ This has a few advantages, you can compose your queries using the
              (order-by [:bar :asc])
              (using :ttl 10000)
              (columns :bar :baz :bal)))
-
+```
 
 ### Raw
 Query generation can be achieved in two ways, if you need the raw
@@ -421,4 +422,20 @@ ex:
                            :c-placeholder 300}))
 
 >> ["SELECT * FROM foo WHERE a = ? AND c = ? AND b = ?;" [100 300 200]]
+```
+
+
+### Sugar for collection type definitions
+
+These can be used with `column-definitions` and `alter-column`.
+
+```clojure
+(map-type :int :text)
+>> "map<int, text>"
+
+(set-type :int)
+>> "set<int>"
+
+(list-type :int)
+>> "list<int>"
 ```
