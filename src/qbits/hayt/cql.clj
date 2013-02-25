@@ -121,7 +121,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
   [x]
   (cond
    (number? x) x
-   (= java.lang.Boolean (type x)) (str x)
+   (instance? java.lang.Boolean x) x
    :else (quote-string (name x))))
 
 (defn option-map [m]
