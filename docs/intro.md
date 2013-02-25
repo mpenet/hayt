@@ -408,7 +408,7 @@ an argument in the list of parameters to feed it to your client lib.,
 a way to prevent this is using `apply-map`.
 
 It takes a generated prepared query with its arg vector containing
-keywords for placeholders and maps the supplied map to it.
+keywords for value placeholders and maps the supplied clojure map to it.
 
 ex:
 ```clojure
