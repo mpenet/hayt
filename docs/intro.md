@@ -276,6 +276,14 @@ Ex:
         :baz [:in [5 6 7]]})
 ```
 
+The second case (sequence of pairs) that allow multiple checks on the
+same column:
+
+```clojure
+(where [[:foo [> 1]]
+        [:foo [< 100]]])
+```
+
 #### columns
 
 `columns` is quite simple, it just accepts column identifiers to be
@@ -319,7 +327,20 @@ identifier and the second is the ordering as keyword as :desc or :asc
 
 #### queries
 
-#### where
+`queries` can only be used with batch, and takes the queries that will
+be sent with the parent `batch`
+
+```clojure
+ (queries
+   (update :foo
+            (set-columns {:bar 1
+                          :baz [+ 2] }))
+   (insert :foo
+           (values {"a" "b" "c" "d"})
+           (using :timestamp 100000
+                  :ttl 200000)))
+```
+
 
 #### values
 
@@ -334,6 +355,7 @@ identifier and the second is the ordering as keyword as :desc or :asc
 #### add
 
 #### allow-filtering
+
 
 ## Functions
 
