@@ -119,10 +119,10 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
 (defn option-value
   [x]
-  (cond
-   (number? x) x
-   (instance? Boolean x) x
-   :else (quote-string (name x))))
+  (if (or (number? x)
+          (instance? Boolean x))
+    x
+    (quote-string (name x))))
 
 (defn option-map [m]
   (->> m
