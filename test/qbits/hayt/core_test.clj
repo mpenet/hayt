@@ -232,6 +232,10 @@
                                {:class "SimpleStrategy"
                                 :replication_factor 3 }}))
 
+       "CREATE KEYSPACE foo WITH durable_writes = true;"
+       (create-keyspace :foo
+                        (with {:durable_writes true}))
+
        "ALTER KEYSPACE foo WITH something-else = 'foo' AND something = 1 AND replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
        (alter-keyspace :foo
                        (with {:replication
