@@ -269,7 +269,8 @@ The values can take different forms:
 
 Ex:
 
-```clojure (where {:foo :bar
+```clojure
+(where {:foo :bar
         :moo [> 3]
         :meh [:> 4]
         :baz [:in [5 6 7]]})
