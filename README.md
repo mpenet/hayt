@@ -78,6 +78,17 @@ To compile the queries just use `->raw` or `->prepared`
 If you are curious about what else it can do head to the [very
 incomplete documentation](http://mpenet.github.com/hayt/codox/qbits.hayt.html) or the [tests](https://github.com/mpenet/hayt/blob/master/test/qbits/hayt/core_test.clj).
 
+## Hayt?
+
+Nope, it doesn't stand for "How Are You Today" :)
+
+Hayt is a gola, a manufactured clone in
+[Dune](http://en.wikipedia.org/wiki/Dune_universe), made from cells of
+a (deceased) person,
+[Duncan Idaho](http://en.wikipedia.org/wiki/Duncan_Idaho) in this
+instance.
+Long (and complex) story short, he eventually becomes the husband of
+[Alia](http://en.wikipedia.org/wiki/Alia_Atreides).
 
 ## License
 
