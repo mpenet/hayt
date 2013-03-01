@@ -1,7 +1,9 @@
 (ns qbits.hayt.cql
   "CQL3 ref: http://cassandra.apache.org/doc/cql3/CQL.html or
 https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
-for a more up to date version
+
+This one is really up to date:
+https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g#L384
 
 TODO: add undocumented auth stuff: create/drop user, grant/revoke"
   (:require [clojure.string :as string]))
