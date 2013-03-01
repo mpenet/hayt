@@ -156,6 +156,19 @@
                                  :ttl 200000)))
                  (using :timestamp 2134)))))
 
+  (is (= "BEGIN UNLOGGED BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
+         (->raw (batch
+                 (queries
+                  (update :foo
+                          (set-columns {:bar 1
+                                        :baz [+ 2] }))
+                  (insert :foo
+                          (values {"a" "b" "c" "d"})
+                          (using :timestamp 100000
+                                 :ttl 200000)))
+                 (logged false)
+                 (using :timestamp 2134)))))
+
   (is (= ["BEGIN COUNTER BATCH USING TIMESTAMP 1234 \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo (\"a\", \"c\") VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;" [1 2 "b" "d"]]
          (->prepared (batch
                       (queries
