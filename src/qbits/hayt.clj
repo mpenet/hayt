@@ -165,7 +165,10 @@ Takes a keyspace identifier and a `with` clause."
 (defn batch
   "http://cassandra.apache.org/doc/cql3/CQL.html#batchStmt
 
-Takes hayt queries and an optional `using` clause."
+Takes hayt queries  optional clauses:
+* using
+* counter
+* logged "
   [& clauses]
   (query [:begin-batch :using :queries "APPLY BATCH"]
          (into {:begin-batch {} :logged true} clauses)))
