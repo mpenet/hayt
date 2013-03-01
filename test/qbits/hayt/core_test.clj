@@ -1,7 +1,7 @@
 (ns qbits.hayt.core-test
   (:use clojure.test
         qbits.hayt
-        qbits.hayt.cql))
+        [qbits.hayt.cql :only [cql-value cql-identifier]]))
 
 (deftest test-select
   (are [expected query] (= expected (->raw query))
@@ -144,7 +144,7 @@
                      (index-name "baz"))))
 
 (deftest test-batch
-  (is (= "BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
+  (is (= "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
          (->raw (batch
                  (queries
                   (update :foo
@@ -156,7 +156,7 @@
                                  :ttl 200000)))
                  (using :timestamp 2134)))))
 
-  (is (= ["BATCH USING TIMESTAMP 1234 \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo (\"a\", \"c\") VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;" [1 2 "b" "d"]]
+  (is (= ["BEGIN COUNTER BATCH USING TIMESTAMP 1234 \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo (\"a\", \"c\") VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;" [1 2 "b" "d"]]
          (->prepared (batch
                       (queries
                        (update :foo
@@ -166,6 +166,7 @@
                                (values {"a" "b" "c" "d"})
                                (using :timestamp 100000
                                       :ttl 200000)))
+                      (counter true)
                       (using :timestamp 1234))))))
 
 (deftest test-create-table

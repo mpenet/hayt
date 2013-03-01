@@ -1,7 +1,9 @@
 (ns qbits.hayt.cql
   "CQL3 ref: http://cassandra.apache.org/doc/cql3/CQL.html or
 https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
-for a more up to date version "
+for a more up to date version
+
+TODO: add undocumented auth stuff: create/drop user, grant/revoke"
   (:require [clojure.string :as string]))
 
 (declare emit-query)
@@ -288,6 +290,13 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
    :index-column
    (fn [q index-column]
      (wrap-parens (cql-identifier index-column)))
+
+   :begin-batch
+   (fn [{:keys [logged counter]} _]
+     (str "BEGIN"
+          (when-not logged " UNLOGGED")
+          (when counter " COUNTER")
+          " BATCH"))
 
    :queries
    (fn [q queries]

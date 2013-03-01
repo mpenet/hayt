@@ -167,8 +167,8 @@ Takes a keyspace identifier and a `with` clause."
 
 Takes hayt queries and an optional `using` clause."
   [& clauses]
-  (query ["BATCH" :using :queries "APPLY BATCH"]
-         (into {} clauses)))
+  (query [:begin-batch :using :queries "APPLY BATCH"]
+         (into {:begin-batch {} :logged true} clauses)))
 
 (defn use-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#useStmt
@@ -252,7 +252,13 @@ clause of a select/update/delete query"
   [value]
   {:allow-filtering value})
 
+(defn logged
+  [value]
+  {:logged value})
 
+(defn counter
+  [value]
+  {:counter value})
 
 (defn q->
   "Allows query composition, extending an existing query with new
