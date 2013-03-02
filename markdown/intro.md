@@ -254,6 +254,105 @@ Ex:
 (use-keyspace :foo)
 ```
 
+
+#### grant
+
+The `grant` fn takes clauses:
+
+* [permission](#permission)
+* [resource](#resource)
+* [user](#user)
+
+Ex:
+```clojure
+(grant (permission :FULL_ACCESS)
+       (resource :bar)
+       (user :baz))
+```
+
+#### revoke
+
+The `revoke` fn takes clauses:
+
+* [permission](#permission)
+* [resource](#resource)
+* [user](#user)
+
+Ex:
+```clojure
+(revoke (permission :FULL_ACCESS)
+       (resource :bar)
+       (user :baz))
+```
+
+#### create-user
+
+The `create-user` fn takes clauses:
+
+* [user](#user)
+* [password](#password)
+* [superuser](#superuser)
+
+Ex:
+```clojure
+(create-user :foo
+             (password :bar)
+             (superuser true))
+```
+
+#### alter-user
+
+The `alter-user` fn takes clauses:
+
+* [user](#user)
+* [password](#password)
+* [superuser](#superuser)
+
+Ex:
+```clojure
+(alter-user :foo
+            (password :bar)
+            (superuser true))
+```
+
+#### drop-user
+
+The `drop-user` fn takes a user name:
+
+Ex:
+```clojure
+(drop-user :foo)
+(drop-user "bar")
+```
+
+
+#### list-users
+
+The `list-users` takes no argument
+
+Ex:
+```clojure
+(list-users)
+```
+
+#### list-permissions
+
+The `list-permissions` fn takes clauses:
+
+* [permission](#permission)
+* [resource](#resource)
+* [user](#user)
+* [recursive](#recursive) (defaults to true)
+
+Ex:
+```clojure
+(list-permissions (permission :ALTER)
+                  (resource :bar)
+                  (user :baz)
+                  (recursive false))
+```
+
+
 ### Clauses
 
 #### where
@@ -352,9 +451,27 @@ be sent with the parent `batch`
 
 #### alter-column
 
-#### add
+#### add-column
+
+#### rename-column
 
 #### allow-filtering
+
+#### logged
+
+#### counter
+
+#### resource
+
+#### user
+
+#### superuser
+
+#### password
+
+#### permission
+
+#### recursive
 
 
 ## Functions
