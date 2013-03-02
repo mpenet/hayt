@@ -340,6 +340,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
               (if (string? token)
                 token
                 (let [context (token query)]
+                  ;; we need to checks nils explicitely since we can get booleans
                   (when-not (nil? context)
                     ((get emit token emit-catch-all) query context))))))
        (filter identity)
