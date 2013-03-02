@@ -473,6 +473,12 @@ be sent with the parent `batch`
 
 #### recursive
 
+#### table
+
+#### column-family
+
+#### keyspace
+
 
 ## Functions
 
