@@ -157,20 +157,20 @@
 
        "CREATE USER foo WITH PASSWORD bar NOSUPERUSER;"
        (create-user :foo
-              (with-password :bar))
+              (password :bar))
 
       "CREATE USER foo WITH PASSWORD bar SUPERUSER;"
        (create-user :foo
-              (with-password :bar)
+              (password :bar)
               (superuser true))
 
        "ALTER USER foo WITH PASSWORD bar NOSUPERUSER;"
        (alter-user :foo
-                    (with-password :bar))
+                    (password :bar))
 
        "ALTER USER foo WITH PASSWORD bar SUPERUSER;"
        (alter-user :foo
-                    (with-password :bar)
+                    (password :bar)
                     (superuser true))
 
        "DROP USER foo;"

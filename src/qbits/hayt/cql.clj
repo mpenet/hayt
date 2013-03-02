@@ -300,7 +300,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
    (fn [q resource]
      (str "ON " (cql-identifier resource)))
 
-   :with-password
+   :password
    (fn [q pwd]
      ;; not sure if its a cql-id or cql-val
      (str "WITH PASSWORD " (cql-identifier pwd)))

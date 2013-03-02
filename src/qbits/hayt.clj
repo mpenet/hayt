@@ -202,13 +202,13 @@ Takes a keyspace identifier"
 (defn create-user
   ""
   [user & clauses]
-  (query ["CREATE USER" :user :with-password :superuser]
+  (query ["CREATE USER" :user :password :superuser]
          (into {:user user :superuser false} clauses)))
 
 (defn alter-user
   ""
   [user & clauses]
-  (query ["ALTER USER" :user :with-password :superuser]
+  (query ["ALTER USER" :user :password :superuser]
          (into {:user user :superuser false} clauses)))
 
 (defn drop-user
@@ -332,10 +332,10 @@ clause of a select/update/delete query"
   [value]
   {:superuser value})
 
-(defn with-password
+(defn password
   ""
   [value]
-  {:with-password value})
+  {:password value})
 
 (defn permission
   ""
