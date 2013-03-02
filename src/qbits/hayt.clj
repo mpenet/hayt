@@ -187,29 +187,30 @@ Takes a keyspace identifier"
   (query ["USE" :keyspace]
          {:keyspace keyspace}))
 
-(defn grant
+(defn grant-user
   "Takes clauses:
 * permission
-* user
-* resource"
-  [& clauses]
+* resource
+* user (optionaly using composition)"
+  [user & clauses]
   (query ["GRANT" :permission :resource "TO" :user]
-         (into {} clauses)))
+         (into {:user user} clauses)))
 
-(defn revoke
+(defn revoke-user
   "Takes clauses:
 * permission
-* user
-* resource"
-  [& clauses]
+* resource
+* user (optionaly using composition)"
+
+  [user & clauses]
   (query ["REVOKE" :permission :resource "FROM" :user]
-         (into {} clauses)))
+         (into {:user user} clauses)))
 
 (defn create-user
   "Takes clauses:
 * password
-* user
-* superuser (defaults to false)"
+* superuser (defaults to false)
+* user (optionaly using composition)"
   [user & clauses]
   (query ["CREATE USER" :user :password :superuser]
          (into {:user user :superuser false} clauses)))
@@ -217,8 +218,8 @@ Takes a keyspace identifier"
 (defn alter-user
   "Takes clauses:
 * password
-* user
-* superuser (defaults to false)"
+* superuser (defaults to false)
+* user (optionaly using composition)"
   [user & clauses]
   (query ["ALTER USER" :user :password :superuser]
          (into {:user user :superuser false} clauses)))

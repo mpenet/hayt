@@ -146,14 +146,14 @@
 (deftest test-auth-fns
   (are [expected query] (= expected (->raw query))
        "GRANT FULL_ACCESS ON bar TO baz;"
-       (grant (permission :FULL_ACCESS)
-              (resource :bar)
-              (user :baz))
+       (grant-user :baz
+                   (permission :FULL_ACCESS)
+                   (resource :bar))
 
        "REVOKE FULL_ACCESS ON bar FROM baz;"
-       (revoke (permission :FULL_ACCESS)
-               (resource :bar)
-               (user :baz))
+       (revoke-user :baz
+                    (permission :FULL_ACCESS)
+                    (resource :bar))
 
        "CREATE USER foo WITH PASSWORD bar NOSUPERUSER;"
        (create-user :foo
