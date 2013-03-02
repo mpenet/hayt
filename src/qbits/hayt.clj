@@ -211,6 +211,15 @@ Takes a keyspace identifier"
   (query ["ALTER USER" :user :with-password :superuser]
          (into {:user user :superuser false} clauses)))
 
+(defn drop-user
+  [user]
+  (query ["DROP USER" :user]
+         {:user user}))
+
+(defn list-users
+  []
+  (query ["LIST USERS"] {}))
+
 ;; /**
 ;;  * DROP USER <username>
 ;;  */

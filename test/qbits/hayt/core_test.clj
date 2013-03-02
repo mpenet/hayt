@@ -172,6 +172,13 @@
        (alter-user :foo
                     (with-password :bar)
                     (superuser true))
+
+       "DROP USER foo;"
+       (drop-user :foo)
+
+       "LIST USERS;"
+       (list-users)
+
        ;; "LIST GRANTS FOR foo;"
        ;; (list-grants :foo)
        ))
