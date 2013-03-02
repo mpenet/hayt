@@ -143,6 +143,39 @@
        (create-index :foo :bar
                      (index-name "baz"))))
 
+(deftest test-auth-fns
+  (are [expected query] (= expected (->raw query))
+       "GRANT FULL_ACCESS ON bar TO baz;"
+       (grant :FULL_ACCESS
+              (on-resource :bar)
+              (to-user :baz))
+
+       "REVOKE FULL_ACCESS ON bar FROM baz;"
+       (revoke :FULL_ACCESS
+               (on-resource :bar)
+               (from-user :baz))
+
+       "CREATE USER foo WITH PASSWORD bar NOSUPERUSER;"
+       (create-user :foo
+              (with-password :bar))
+
+      "CREATE USER foo WITH PASSWORD bar SUPERUSER;"
+       (create-user :foo
+              (with-password :bar)
+              (superuser true))
+
+       "ALTER USER foo WITH PASSWORD bar NOSUPERUSER;"
+       (alter-user :foo
+                    (with-password :bar))
+
+       "ALTER USER foo WITH PASSWORD bar SUPERUSER;"
+       (alter-user :foo
+                    (with-password :bar)
+                    (superuser true))
+       ;; "LIST GRANTS FOR foo;"
+       ;; (list-grants :foo)
+       ))
+
 (deftest test-batch
   (is (= "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
          (->raw (batch

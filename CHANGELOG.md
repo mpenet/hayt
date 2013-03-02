@@ -8,3 +8,5 @@
 * Renamed `add` clause to `add-column`
 
 * Added `rename-column`
+
+* Added GRANT/REVOKE/ALTER USER/CREATE USER

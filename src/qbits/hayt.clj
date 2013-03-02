@@ -187,6 +187,37 @@ Takes a keyspace identifier"
   (query ["USE" :keyspace]
          {:keyspace keyspace}))
 
+(defn grant
+  "GRANT <permission> ON <resource> TO <username>"
+  [permission & clauses]
+  (query ["GRANT" :permission :on-resource :to-user]
+         (into {:permission permission} clauses)))
+
+(defn revoke
+  "REVOKE <permission> ON <resource> FROM <username>"
+  [permission & clauses]
+  (query ["REVOKE" :permission :on-resource :from-user]
+         (into {:permission permission} clauses)))
+
+(defn create-user
+  ""
+  [user & clauses]
+  (query ["CREATE USER" :user :with-password :superuser]
+         (into {:user user :superuser false} clauses)))
+
+(defn alter-user
+  ""
+  [user & clauses]
+  (query ["ALTER USER" :user :with-password :superuser]
+         (into {:user user :superuser false} clauses)))
+
+;; /**
+;;  * DROP USER <username>
+;;  */
+;; /**
+;;  * LIST USERS
+;;  */
+
 ;; Clauses
 
 (defn columns
@@ -273,6 +304,32 @@ clause of a select/update/delete query"
 (defn counter
   [value]
   {:counter value})
+
+(defn on-resource
+  ""
+  [value]
+  {:on-resource value})
+
+(defn to-user
+  ""
+  [value]
+  {:to-user value})
+
+(defn from-user
+  ""
+  [value]
+  {:from-user value})
+
+(defn superuser
+  ""
+  [value]
+  {:superuser value})
+
+(defn with-password
+  ""
+  [value]
+  {:with-password value})
+
 
 (defn q->
   "Allows query composition, extending an existing query with new

@@ -296,6 +296,27 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
           join-and
           (str "WITH ")))
 
+   :on-resource
+   (fn [q resource]
+     (str "ON " (cql-identifier resource)))
+
+   :to-user
+   (fn [q user]
+     (str "TO " (cql-identifier user)))
+
+   :from-user
+   (fn [q user]
+     (str "FROM " (cql-identifier user)))
+
+   :with-password
+   (fn [q pwd]
+     ;; not sure if its a cql-id or cql-val
+     (str "WITH PASSWORD " (cql-identifier pwd)))
+
+   :superuser
+   (fn [q superuser?]
+     (if superuser? "SUPERUSER" "NOSUPERUSER"))
+
    :index-column
    (fn [q index-column]
      (wrap-parens (cql-identifier index-column)))
@@ -322,8 +343,9 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
        (map (fn [token]
               (if (string? token)
                 token
-                (when-let [context (token query)]
-                  ((get emit token emit-catch-all) query context)))))
+                (let [context (token query)]
+                  (when-not (nil? context)
+                    ((get emit token emit-catch-all) query context))))))
        (filter identity)
        join-spaced
        terminate))
