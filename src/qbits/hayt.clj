@@ -188,25 +188,37 @@ Takes a keyspace identifier"
          {:keyspace keyspace}))
 
 (defn grant
-  "GRANT <permission> ON <resource> TO <username>"
+  "Takes clauses:
+* permission
+* user
+* resource"
   [permission & clauses]
   (query ["GRANT" :permission :resource "TO" :user]
          (into {:permission permission} clauses)))
 
 (defn revoke
-  "REVOKE <permission> ON <resource> FROM <username>"
+  "Takes clauses:
+* permission
+* user
+* resource"
   [permission & clauses]
   (query ["REVOKE" :permission :resource "FROM" :user]
          (into {:permission permission} clauses)))
 
 (defn create-user
-  ""
+  "Takes clauses:
+* password
+* user
+* superuser (defaults to false)"
   [user & clauses]
   (query ["CREATE USER" :user :password :superuser]
          (into {:user user :superuser false} clauses)))
 
 (defn alter-user
-  ""
+  "Takes clauses:
+* password
+* user
+* superuser (defaults to false)"
   [user & clauses]
   (query ["ALTER USER" :user :password :superuser]
          (into {:user user :superuser false} clauses)))
@@ -310,40 +322,42 @@ clause of a select/update/delete query"
   {:allow-filtering value})
 
 (defn logged
+  "Clause: "
   [value]
   {:logged value})
 
 (defn counter
+  "Clause: "
   [value]
   {:counter value})
 
 (defn resource
-  ""
+  "Clause: "
   [value]
   {:resource value})
 
 (defn user
-  ""
+  "Clause: "
   [value]
   {:user value})
 
 (defn superuser
-  ""
+  "Clause: "
   [value]
   {:superuser value})
 
 (defn password
-  ""
+  "Clause: "
   [value]
   {:password value})
 
 (defn permission
-  ""
+  "Clause: "
   [value]
   {:permission value})
 
 (defn recursive
-  ""
+  "Clause: "
   [value]
   {:recursive value})
 
