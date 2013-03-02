@@ -255,34 +255,34 @@ Ex:
 ```
 
 
-#### grant
+#### Grant user
 
-The `grant` fn takes clauses:
+The `grant-user` fn takes clauses:
 
 * [permission](#permission)
 * [resource](#resource)
-* [user](#user)
+* [user](#user) (optionaly using composition)
 
 Ex:
 ```clojure
-(grant (permission :FULL_ACCESS)
-       (resource :bar)
-       (user :baz))
+(grant-user :foo
+            (permission :FULL_ACCESS)
+            (resource :bar))
 ```
 
-#### revoke
+#### Revoke user
 
-The `revoke` fn takes clauses:
+The `revoke-user` fn takes clauses:
 
 * [permission](#permission)
 * [resource](#resource)
-* [user](#user)
+* [user](#user) (optionaly using composition)
 
 Ex:
 ```clojure
-(revoke (permission :FULL_ACCESS)
-       (resource :bar)
-       (user :baz))
+(revoke-user :baz
+             (permission :FULL_ACCESS)
+             (resource :bar))
 ```
 
 #### create-user
@@ -291,6 +291,7 @@ The `create-user` fn takes clauses:
 
 * [password](#password)
 * [superuser](#superuser)
+* [user](#user) (optionaly using composition)
 
 Ex:
 ```clojure
@@ -305,6 +306,7 @@ The `alter-user` fn takes clauses:
 
 * [password](#password)
 * [superuser](#superuser)
+* [user](#user) (optionaly using composition)
 
 Ex:
 ```clojure
