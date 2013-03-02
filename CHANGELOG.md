@@ -7,7 +7,9 @@
 * Fixed bug in batch clause (begin missing), and add missing arguments
   (UNLOGGED, COUNTER)
 
-* Added `rename-column`
+* Added `rename-column` `grant-user`, `revoke-user`, `alter-user`, `create-user`,
+`drop-user`, `list-users`, `list-permissions`
 
-* Added `grant`, `revoke`, `alter-user`, `create-user`, `drop-user`, `list-users`,
-`list-permissions`
+* Added the following clauses `table`, `keyspace`, `column-family`,
+  `logged`, `counter`, `resource`, `user`, `superuser`, `password`,
+  `permission`, `recursive`.
