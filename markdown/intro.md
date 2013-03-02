@@ -289,7 +289,6 @@ Ex:
 
 The `create-user` fn takes clauses:
 
-* [user](#user)
 * [password](#password)
 * [superuser](#superuser)
 
@@ -304,7 +303,6 @@ Ex:
 
 The `alter-user` fn takes clauses:
 
-* [user](#user)
 * [password](#password)
 * [superuser](#superuser)
 
