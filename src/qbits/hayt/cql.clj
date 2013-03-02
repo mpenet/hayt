@@ -311,7 +311,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
    :recursive
    (fn [q recursive]
-     (when (not recursive) "NORECURSIVE"))
+     (when-not recursive "NORECURSIVE"))
 
    :index-column
    (fn [q index-column]
