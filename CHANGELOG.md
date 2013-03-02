@@ -9,4 +9,4 @@
 
 * Added `rename-column`
 
-* Added GRANT/REVOKE/ALTER USER/CREATE USER
+* Added `grant`, `revoke`, `alter-user`, `create-user`, drop-user`, `list-users`

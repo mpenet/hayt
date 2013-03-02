@@ -220,12 +220,6 @@ Takes a keyspace identifier"
   []
   (query ["LIST USERS"] {}))
 
-;; /**
-;;  * DROP USER <username>
-;;  */
-;; /**
-;;  * LIST USERS
-;;  */
 
 ;; Clauses
 
