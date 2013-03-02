@@ -175,9 +175,9 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 (def emit
   {:columns
    (fn [q columns]
-     (if (empty? columns)
-       "*"
-       (join-comma (map cql-identifier columns))))
+     (if (seq columns)
+       (join-comma (map cql-identifier columns))
+       "*"))
 
    :where
    (fn [q clauses]
