@@ -29,7 +29,8 @@ Takes a table identifier and additional clause arguments:
 * columns (defaults to *)
 * where
 * order-by
-* limit"
+* limit
+* table (optionaly using composition)"
   [table & clauses]
   (query ["SELECT" :columns "FROM" :table :where :order-by :limit
           :allow-filtering]
@@ -39,9 +40,9 @@ Takes a table identifier and additional clause arguments:
   "http://cassandra.apache.org/doc/cql3/CQL.html#insertStmt
 
 Takes a table identifier and additional clause arguments:
-
 * values
-* using"
+* using
+* table (optionaly using composition)"
   [table & clauses]
   (query ["INSERT INTO" :table :values :using]
          (into {:table table}  clauses)))
@@ -52,7 +53,8 @@ Takes a table identifier and additional clause arguments:
 
 * using
 * set-columns
-* where"
+* where
+* table (optionaly using composition)"
   [table & clauses]
   (query ["UPDATE" :table :using :set-columns :where]
          (into {:table table}  clauses)))
@@ -64,7 +66,8 @@ Takes a table identifier and additional clause arguments:
 
 * columns (defaults to *)
 * using
-* where"
+* where
+* table (optionaly using composition)"
   [table & clauses]
   (query ["DELETE" :columns "FROM" :table :using :where]
          (into {:table table :columns []} clauses)))
@@ -107,7 +110,8 @@ Takes an index identifier."
 Takes a table identifier and additional clause arguments:
 
 * index-column
-* index-name"
+* index-name
+* table (optionaly using composition)"
   [table index-column & clauses]
   (query ["CREATE INDEX" :index-name "ON" :table :index-column]
          (into {:table table :index-column index-column} clauses)))
@@ -115,7 +119,9 @@ Takes a table identifier and additional clause arguments:
 (defn create-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#createKeyspaceStmt
 
-Takes a keyspace identifier and a with clause."
+Takes a keyspace identifier and clauses:
+* with
+* keyspace (optionaly using composition)"
   [keyspace & clauses]
   (query ["CREATE KEYSPACE" :keyspace :with]
          (into {:keyspace keyspace} clauses)))
@@ -124,7 +130,8 @@ Takes a keyspace identifier and a with clause."
   "Takes a table identifier and additional clause arguments:
 
 * column-definitions
-* with"
+* with
+* table (optionaly using composition)"
   [table & clauses]
   (query ["CREATE TABLE" :table :column-definitions :with]
          (into {:table table} clauses)))
@@ -138,7 +145,8 @@ Takes a table identifier and additional clause arguments:
 * add
 * with
 * alter
-* rename"
+* rename
+* table (optionaly using composition)"
   [table & clauses]
   (query ["ALTER TABLE" :table
           :alter-column :add-column :rename-column :with]
@@ -153,7 +161,8 @@ Takes a column-familiy identifier and additional clause arguments:
 * add
 * with
 * alter
-* rename"
+* rename
+* column-family (optionaly using composition)"
   [column-family & clauses]
   (query ["ALTER COLUMNFAMILY" :column-family
           :alter-column :add-column :rename-column :with]
@@ -162,7 +171,8 @@ Takes a column-familiy identifier and additional clause arguments:
 (defn alter-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterKeyspaceStmt
 
-Takes a keyspace identifier and a `with` clause."
+Takes a keyspace identifier and a `with` clause.
+* keyspace (optionaly using composition)"
   [keyspace & clauses]
   (query ["ALTER KEYSPACE" :keyspace :with]
          (into {:keyspace keyspace} clauses)))
@@ -200,7 +210,6 @@ Takes a keyspace identifier"
 * permission
 * resource
 * user (optionaly using composition)"
-
   [user & clauses]
   (query ["REVOKE" :permission :resource "FROM" :user]
          (into {:user user} clauses)))
