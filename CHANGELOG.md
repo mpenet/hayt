@@ -9,4 +9,5 @@
 
 * Added `rename-column`
 
-* Added `grant`, `revoke`, `alter-user`, `create-user`, `drop-user`, `list-users`
+* Added `grant`, `revoke`, `alter-user`, `create-user`, `drop-user`, `list-users`,
+`list-permissions`

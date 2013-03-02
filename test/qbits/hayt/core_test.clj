@@ -147,13 +147,13 @@
   (are [expected query] (= expected (->raw query))
        "GRANT FULL_ACCESS ON bar TO baz;"
        (grant :FULL_ACCESS
-              (on-resource :bar)
-              (to-user :baz))
+              (resource :bar)
+              (user :baz))
 
        "REVOKE FULL_ACCESS ON bar FROM baz;"
        (revoke :FULL_ACCESS
-               (on-resource :bar)
-               (from-user :baz))
+               (resource :bar)
+               (user :baz))
 
        "CREATE USER foo WITH PASSWORD bar NOSUPERUSER;"
        (create-user :foo
@@ -179,8 +179,15 @@
        "LIST USERS;"
        (list-users)
 
-       ;; "LIST GRANTS FOR foo;"
-       ;; (list-grants :foo)
+       "LIST ALL ON bar OF baz;"
+       (list-permissions (resource :bar)
+                         (user :baz))
+
+       "LIST ALL ON bar OF baz NORECURSIVE;"
+       (list-permissions (permission :ALTER)
+                         (resource :bar)
+                         (user :baz)
+                         (recursive false))
        ))
 
 (deftest test-batch

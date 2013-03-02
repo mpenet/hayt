@@ -296,17 +296,9 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
           join-and
           (str "WITH ")))
 
-   :on-resource
+   :resource
    (fn [q resource]
      (str "ON " (cql-identifier resource)))
-
-   :to-user
-   (fn [q user]
-     (str "TO " (cql-identifier user)))
-
-   :from-user
-   (fn [q user]
-     (str "FROM " (cql-identifier user)))
 
    :with-password
    (fn [q pwd]
@@ -316,6 +308,10 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
    :superuser
    (fn [q superuser?]
      (if superuser? "SUPERUSER" "NOSUPERUSER"))
+
+   :recursive
+   (fn [q recursive]
+     (when (not recursive) "NORECURSIVE"))
 
    :index-column
    (fn [q index-column]
