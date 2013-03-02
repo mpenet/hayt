@@ -227,8 +227,8 @@ Takes a keyspace identifier"
 * resource
 * recursive (defaults to true)"
   [& clauses]
-  (query ["LIST" :permissions :resource "OF" :user :recursive]
-         (into {:permissions :ALL :recursive true} clauses)))
+  (query ["LIST" :permission :resource "OF" :user :recursive]
+         (into {:permission :ALL :recursive true} clauses)))
 
 ;; Clauses
 

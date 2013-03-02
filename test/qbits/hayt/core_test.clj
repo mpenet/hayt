@@ -183,7 +183,7 @@
        (list-permissions (resource :bar)
                          (user :baz))
 
-       "LIST ALL ON bar OF baz NORECURSIVE;"
+       "LIST ALTER ON bar OF baz NORECURSIVE;"
        (list-permissions (permission :ALTER)
                          (resource :bar)
                          (user :baz)
