@@ -46,8 +46,7 @@ Takes a table identifier and additional clause arguments:
   (query ["INSERT INTO" :table :values :using]
          (into {:table table}  clauses)))
 
-(defn update
-  "http://cassandra.apache.org/doc/cql3/CQL.html#updateStmt
+(defn update  "http://cassandra.apache.org/doc/cql3/CQL.html#updateStmt
 
 Takes a table identifier and additional clause arguments:
 
@@ -244,6 +243,21 @@ Takes a keyspace identifier"
          (into {:permission :ALL :recursive true} clauses)))
 
 ;; Clauses
+
+(defn table
+  "Clause: takes a table identifier"
+  [table]
+  {:table table})
+
+(defn keyspace
+  "Clause: takes a keyspace identifier"
+  [keyspace]
+  {:keyspace keyspace})
+
+(defn column-family
+  "Clause: takes a column family identifier"
+  [keyspace]
+  {:column-family column-family})
 
 (defn columns
   "Clause: takes columns identifiers"
