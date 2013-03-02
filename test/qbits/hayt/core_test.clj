@@ -187,8 +187,7 @@
        (list-permissions (permission :ALTER)
                          (resource :bar)
                          (user :baz)
-                         (recursive false))
-       ))
+                         (recursive false))))
 
 (deftest test-batch
   (is (= "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
