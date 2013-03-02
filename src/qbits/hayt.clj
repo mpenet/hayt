@@ -223,7 +223,7 @@ Takes a keyspace identifier"
 (defn list-permissions
   "Takes clauses:
 * permissions (defaults to ALL if not supplied)
-* of-user
+* user
 * resource
 * recursive (defaults to true)"
   [& clauses]
