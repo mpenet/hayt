@@ -192,18 +192,18 @@ Takes a keyspace identifier"
 * permission
 * user
 * resource"
-  [permission & clauses]
+  [& clauses]
   (query ["GRANT" :permission :resource "TO" :user]
-         (into {:permission permission} clauses)))
+         (into {} clauses)))
 
 (defn revoke
   "Takes clauses:
 * permission
 * user
 * resource"
-  [permission & clauses]
+  [& clauses]
   (query ["REVOKE" :permission :resource "FROM" :user]
-         (into {:permission permission} clauses)))
+         (into {} clauses)))
 
 (defn create-user
   "Takes clauses:
