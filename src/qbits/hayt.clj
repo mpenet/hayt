@@ -137,9 +137,12 @@ Takes a table identifier and additional clause arguments:
 
 * alter-column
 * add
-* with"
+* with
+* alter
+* rename"
   [table & clauses]
-  (query ["ALTER TABLE" :table :alter-column :add :with]
+  (query ["ALTER TABLE" :table
+          :alter-column :add-column :rename-column :with]
          (into {:table table} clauses)))
 
 (defn alter-column-family
@@ -149,9 +152,12 @@ Takes a column-familiy identifier and additional clause arguments:
 
 * alter-column
 * add
-* with"
+* with
+* alter
+* rename"
   [column-family & clauses]
-  (query ["ALTER COLUMNFAMILY" :column-family :alter-column :add :with]
+  (query ["ALTER COLUMNFAMILY" :column-family
+          :alter-column :add-column :rename-column :with]
          (into {:column-family column-family} clauses)))
 
 (defn alter-keyspace
@@ -245,10 +251,15 @@ clause of a select/update/delete query"
   [& args]
   {:alter-column args})
 
-(defn add
+(defn add-column
   "Clause: "
   [& args]
-  {:add args})
+  {:add-column args})
+
+(defn rename-column
+  "Clause: "
+  [& args]
+  {:rename-column args})
 
 (defn allow-filtering
   "Clause: "

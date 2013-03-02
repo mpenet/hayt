@@ -262,7 +262,14 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
              (cql-identifier identifier)
              (cql-identifier type)))
 
-   :add
+
+   :rename-column
+   (fn [q [old-name new-name]]
+     (format "RENAME %s TO %s"
+             (cql-identifier old-name)
+             (cql-identifier new-name)))
+
+   :add-column
    (fn [q [identifier type]]
      (format "ADD %s %s"
              (cql-identifier identifier)

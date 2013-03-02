@@ -209,15 +209,16 @@
        "ALTER TABLE foo ALTER bar TYPE int;"
        (alter-table :foo (alter-column :bar :int))
 
-       "ALTER TABLE foo ALTER bar TYPE int ADD baz text;"
+       "ALTER TABLE foo ALTER bar TYPE int ADD baz text RENAME foo TO bar;"
        (alter-table :foo
                     (alter-column :bar :int)
-                    (add :baz :text))
+                    (add-column :baz :text)
+                    (rename-column :foo :bar))
 
        "ALTER TABLE foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
        (alter-table :foo
                     (alter-column :bar :int)
-                    (add :baz :text)
+                    (add-column :baz :text)
                     (with {:compact-storage true
                            :clustering-order [[:bar :asc]]}))))
 
@@ -226,15 +227,16 @@
        "ALTER COLUMNFAMILY foo ALTER bar TYPE int;"
        (alter-column-family :foo (alter-column :bar :int))
 
-       "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text;"
+       "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text RENAME foo TO bar;"
        (alter-column-family :foo
                             (alter-column :bar :int)
-                            (add :baz :text))
+                            (rename-column :foo :bar)
+                            (add-column :baz :text))
 
        "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
        (alter-column-family :foo
                             (alter-column :bar :int)
-                            (add :baz :text)
+                            (add-column :baz :text)
                             (with {:compact-storage true
                                    :clustering-order [[:bar :asc]]}))))
 
