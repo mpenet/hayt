@@ -2,6 +2,10 @@
   (:require [qbits.hayt.cql :as cql])
   (:import [java.util Date]))
 
+(defprotocol PCompile
+  (->raw [x])
+  (->prepared [x]))
+
 (defn ->raw
   "Compiles a hayt query into its raw/string value"
   [query]
@@ -31,10 +35,13 @@ Takes a table identifier and additional clause arguments:
 * order-by
 * limit
 * table (optionaly using composition)"
-  [table & clauses]
-  (query ["SELECT" :columns "FROM" :table :where :order-by :limit
-          :allow-filtering]
-         (into {:table table :columns []} clauses)))
+  [& columns]
+  {:select columns})
+
+(defn from
+  [table]
+  {:from table})
+
 
 (defn insert
   "http://cassandra.apache.org/doc/cql3/CQL.html#insertStmt
@@ -43,9 +50,8 @@ Takes a table identifier and additional clause arguments:
 * values
 * using
 * table (optionaly using composition)"
-  [table & clauses]
-  (query ["INSERT INTO" :table :values :using]
-         (into {:table table}  clauses)))
+  [table]
+  {:insert table})
 
 (defn update
   "http://cassandra.apache.org/doc/cql3/CQL.html#updateStmt
@@ -56,9 +62,8 @@ Takes a table identifier and additional clause arguments:
 * set-columns
 * where
 * table (optionaly using composition)"
-  [table & clauses]
-  (query ["UPDATE" :table :using :set-columns :where]
-         (into {:table table}  clauses)))
+  [table]
+  {:update table})
 
 (defn delete
   "http://cassandra.apache.org/doc/cql3/CQL.html#deleteStmt
@@ -69,41 +74,36 @@ Takes a table identifier and additional clause arguments:
 * using
 * where
 * table (optionaly using composition)"
-  [table & clauses]
-  (query ["DELETE" :columns "FROM" :table :using :where]
-         (into {:table table :columns []} clauses)))
+  [& columns]
+  {:delete columns})
 
 (defn truncate
   "http://cassandra.apache.org/doc/cql3/CQL.html#truncateStmt
 
 Takes a table identifier."
   [table]
-  (query ["TRUNCATE" :table]
-         {:table table}))
+  {:truncate table})
 
 (defn drop-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropKeyspaceStmt
 
 Takes a keyspace identifier"
   [keyspace]
-  (query ["DROP KEYSPACE" :keyspace]
-         {:keyspace keyspace}))
+  {:drop-keyspace keyspace})
 
 (defn drop-table
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropTableStmt
 
 Takes a table identifier"
   [table]
-  (query ["DROP TABLE" :table]
-         {:table table}))
+  {:drop-table table})
 
 (defn drop-index
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropIndexStmt
 
 Takes an index identifier."
   [index]
-  (query ["DROP INDEX" :index]
-         {:index index}))
+  {:drop-index index})
 
 (defn create-index
   "http://cassandra.apache.org/doc/cql3/CQL.html#createIndexStmt
@@ -113,9 +113,8 @@ Takes a table identifier and additional clause arguments:
 * index-column
 * index-name
 * table (optionaly using composition)"
-  [table index-column & clauses]
-  (query ["CREATE INDEX" :index-name "ON" :table :index-column]
-         (into {:table table :index-column index-column} clauses)))
+  [index-column]
+  {:create-index index-column})
 
 (defn create-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#createKeyspaceStmt
@@ -194,8 +193,7 @@ Takes hayt queries  optional clauses:
 
 Takes a keyspace identifier"
   [keyspace]
-  (query ["USE" :keyspace]
-         {:keyspace keyspace}))
+  {:use-keyspace keyspace})
 
 (defn grant-user
   "Takes clauses:
@@ -321,6 +319,11 @@ clause of a select/update/delete query"
   [values]
   {:with values})
 
+(defn on
+  "Clause: "
+  [x]
+  {:on x})
+
 (defn index-name
   "Clause: "
   [value]
@@ -392,8 +395,7 @@ clause of a select/update/delete query"
   "Allows query composition, extending an existing query with new
   clauses"
   [q & clauses]
-  (-> (into q clauses)
-      (with-meta (meta q))))
+  (into q clauses))
 
 ;; CQL3 functions
 

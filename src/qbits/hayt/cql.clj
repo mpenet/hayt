@@ -8,11 +8,9 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
 TODO: add undocumented auth stuff: create/drop user, grant/revoke"
   (:require [clojure.string :as string]))
 
-(declare emit-query)
+(declare emit-query emit-row)
 (def ^:dynamic *param-stack*)
 (def ^:dynamic *prepared-statement* false)
-
-(defn template [q] (-> q meta :template))
 
 ;; Wraps a CQL function (a template to clj.core/format and its
 ;; argument for later encoding.
@@ -173,7 +171,75 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
          (format-eq identifier))))
 
 (def emit
-  {:columns
+  {;; entry clauses
+   :select
+   (fn [q columns]
+     (str "SELECT "
+          ((emit :columns) q columns)
+          " "
+          (emit-row q [:from :where :order-by :limit :allow-filtering])))
+
+   :insert
+   (fn [q table]
+     (str "INSERT INTO "
+          (cql-identifier table)
+          " "
+          (emit-row q [:values :using])))
+
+   :update
+   (fn [q table]
+     (str "UPDATE "
+          (cql-identifier table)
+          " "
+          (emit-row q [:using :set-columns :where])))
+
+   :delete
+   (fn [q table]
+     (str "DELETE "
+          ((emit :columns) q table)
+          " "
+          (emit-row q [:from :using :where])))
+
+   :drop-index
+   (fn [q index]
+     (str "DROP INDEX " (cql-identifier index)))
+
+   :drop-table
+   (fn [q table]
+     (str "DROP TABLE " (cql-identifier table)))
+
+   :drop-keyspace
+   (fn [q keyspace]
+     (str "DROP KEYSPACE " (cql-identifier keyspace)))
+
+   :use-keyspace
+   (fn [q ks]
+     (str "USE " (cql-identifier ks)))
+
+   :truncate
+   (fn [q ks]
+     (str "TRUNCATE " (cql-identifier ks)))
+
+   :create-index
+   (fn [q column]
+     (str "CREATE INDEX "
+          (emit-row q [:index-name :on])
+          " (" (cql-identifier column) ")"))
+
+   :on
+   (fn [q on]
+     (str "ON " (cql-identifier on)))
+
+   :from
+   (fn [q table]
+     (str "FROM " (cql-identifier table)))
+
+   :into
+   (fn [q table]
+     (str "INTO " (cql-identifier table)))
+
+
+   :columns
    (fn [q columns]
      (if (seq columns)
        (join-comma (map cql-identifier columns))
@@ -334,15 +400,25 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 
+(def entry-clauses #{:select :insert :update :delete :use-keyspace :truncate
+                     :drop-index :drop-table :drop-keyspace :create-index})
+
+(defn some-clause
+  "Finds template to be used for this query map"
+  [qmap]
+  (some entry-clauses (keys qmap)))
+
+(defn emit-row
+  [row template]
+  (->> template
+      (map (fn [token]
+             (let [context (get row token ::empty)]
+               (when-not (= ::empty context)
+                 ((get emit token emit-catch-all) row context)))))
+      (filter identity)
+      join-spaced))
+
 (defn emit-query [query]
-  (->> (template query)
-       (map (fn [token]
-              (if (string? token)
-                token
-                (let [context (token query)]
-                  ;; we need to checks nils explicitely since we can get booleans
-                  (when-not (nil? context)
-                    ((get emit token emit-catch-all) query context))))))
-       (filter identity)
-       join-spaced
-       terminate))
+  (let [entry-point (some-clause query)
+        initial-value (entry-point query)]
+    (terminate ((emit entry-point) query initial-value))))
