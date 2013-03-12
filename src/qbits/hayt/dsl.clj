@@ -1,8 +1,5 @@
 (ns qbits.hayt.dsl)
 
-(defn mv-key [pm from to]
-    (assoc (dissoc pm from) to (get pm from)))
-
 (defn select
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
 
