@@ -2,9 +2,9 @@
   (:require [qbits.hayt.cql :as cql])
   (:import [java.util Date]))
 
-(defprotocol PCompile
-  (->raw [x])
-  (->prepared [x]))
+;; (defprotocol PCompile
+;;   (->raw [x])
+;;   (->prepared [x]))
 
 (defn ->raw
   "Compiles a hayt query into its raw/string value"
@@ -385,7 +385,7 @@ clause of a select/update/delete query"
 
 (defn cql-safe
   [x]
-  (cql/CQLSafe. x))
+  (cql/->CQLSafe x))
 
 ;; CQL3 functions
 
