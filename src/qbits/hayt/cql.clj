@@ -188,7 +188,8 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
    :select
    (fn [q columns]
      (str "SELECT "
-          ((emit :columns) q columns)
+          ;; handle special case for backward compat
+          ((emit :columns) q (or columns (:columns q)))
           " "
           (emit-row q [:from :where :order-by :limit :allow-filtering])))
 
@@ -207,9 +208,9 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
           (emit-row q [:using :set-columns :where])))
 
    :delete
-   (fn [q table]
+   (fn [q columns]
      (str "DELETE "
-          ((emit :columns) q table)
+          ((emit :columns) q (or columns (:columns q)))
           " "
           (emit-row q [:from :using :where])))
 

@@ -14,8 +14,7 @@ Takes a table identifier and additional clause arguments:
 * limit
 * table (optionaly using composition)"
   [table & clauses]
-  (mv-key (into {:from table :columns :*} clauses)
-          :columns :select))
+  (into {:from table :select nil :columns :*} clauses))
 
 (defn from
   [x]
@@ -53,8 +52,7 @@ Takes a table identifier and additional clause arguments:
 * where
 * table (optionaly using composition)"
   [table & clauses]
-  (mv-key (into {:from table :columns :*} clauses)
-          :columns :delete))
+  (into {:from table :columns :* :delete nil} clauses))
 
 (defn truncate
   "http://cassandra.apache.org/doc/cql3/CQL.html#truncateStmt
