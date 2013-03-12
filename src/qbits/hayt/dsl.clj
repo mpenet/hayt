@@ -1,5 +1,7 @@
-(ns qbits.hayt.dsl
-  (require [clojure.set :refer [rename-keys]]))
+(ns qbits.hayt.dsl)
+
+(defn mv-key [pm from to]
+    (assoc (dissoc pm from) to (get pm from)))
 
 (defn select
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
@@ -12,8 +14,8 @@ Takes a table identifier and additional clause arguments:
 * limit
 * table (optionaly using composition)"
   [table & clauses]
-  (rename-keys (into {:select :* :from table} clauses)
-               {:columns :select}))
+  (mv-key (into {:from table :columns :*} clauses)
+          :columns :select))
 
 (defn from
   [x]
@@ -51,8 +53,8 @@ Takes a table identifier and additional clause arguments:
 * where
 * table (optionaly using composition)"
   [table & clauses]
-  (rename-keys (into {:from table :delete :*} clauses)
-               {:columns :delete}))
+  (mv-key (into {:from table :columns :*} clauses)
+          :columns :delete))
 
 (defn truncate
   "http://cassandra.apache.org/doc/cql3/CQL.html#truncateStmt
@@ -319,11 +321,6 @@ clause of a select/update/delete query"
   "Clause: "
   [value]
   {:with-password value})
-
-(defn permission
-  "Clause: "
-  [value]
-  {:permission value})
 
 (defn recursive
   "Clause: "
