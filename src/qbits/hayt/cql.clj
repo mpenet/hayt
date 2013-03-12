@@ -14,7 +14,8 @@ TODO: add undocumented auth stuff: create/drop user, grant/revoke"
 
 ;; Wraps a CQL function (a template to clj.core/format and its
 ;; argument for later encoding.
-(defrecord CQLFn [value template])
+(defrecord CQLFn [name args])
+(defrecord CQLSafe [value])
 
 (defn maybe-parameterize!
   [x f]
@@ -87,14 +88,18 @@ TODO: add undocumented auth stuff: create/drop user, grant/revoke"
 
   ;; CQL Function are always safe, their arguments might not be though
   CQLFn
-  (cql-identifier [{:keys [value template]}]
-    (if template
-      (format template (cql-identifier value))
-      value))
-  (cql-value [{:keys [value template]}]
-    (if template
-      (format template (cql-value value))
-      value))
+  (cql-identifier [{fn-name :name  args :args}]
+    (format "%s(%s)"
+            (name fn-name)
+            (join-comma (map cql-identifier args))))
+  (cql-value [{fn-name :name  args :args}]
+    (format "%s(%s)"
+            (name fn-name)
+            (join-comma (map cql-value args))))
+
+  CQLSafe
+  (cql-identifier [x] x)
+  (cql-value [x] x)
 
   nil
   (cql-value [x]
@@ -220,15 +225,95 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
    (fn [q ks]
      (str "TRUNCATE " (cql-identifier ks)))
 
+   :grant
+   (fn [q permission]
+     (str "GRANT "
+          (cql-identifier permission)
+          " "
+          (emit-row q [:on :to])))
+
+   :revoke
+   (fn [q permission]
+     (str "REVOKE "
+          (cql-identifier permission)
+          " "
+          (emit-row q [:on :from])))
+
    :create-index
    (fn [q column]
      (str "CREATE INDEX "
           (emit-row q [:index-name :on])
           " (" (cql-identifier column) ")"))
 
+   :create-user
+   (fn [q user]
+      (str "CREATE USER "
+           (cql-identifier user)
+           " "
+           (emit-row q [:with-password :superuser])))
+
+   :alter-user
+   (fn [q user]
+      (str "ALTER USER "
+           (cql-identifier user)
+           " "
+           (emit-row q [:with-password :superuser])))
+
+   :drop-user
+   (fn [q user]
+     (str "DROP USER " (cql-identifier user)))
+
+   :list-users
+   (constantly "LIST USERS")
+
+   :list-permission
+   (fn [q perm]
+     (str "LIST "
+          (cql-identifier perm)
+          " "
+          (emit-row q [:on :of :recursive])))
+
+   :create-table
+   (fn [q table]
+     (str "CREATE TABLE " (cql-identifier table)
+          " "
+          (emit-row q [:column-definitions :with])))
+
+   :alter-table
+   (fn [q table]
+     (str "ALTER TABLE " (cql-identifier table)
+          " "
+          (emit-row q [:alter-column :add-column :rename-column :with])))
+
+   :alter-column-family
+   (fn [q cf]
+     (str "ALTER COLUMNFAMILY " (cql-identifier cf)
+          " "
+          (emit-row q [:alter-column :add-column :rename-column :with])))
+
+   :alter-keyspace
+   (fn [q ks]
+     (str "ALTER KEYSPACE " (cql-identifier ks)
+          " "
+          (emit-row q [:with])))
+
+   :create-keyspace
+   (fn [q ks]
+     (str "CREATE KEYSPACE " (cql-identifier ks)
+          " "
+          (emit-row q [:with])))
+
    :on
    (fn [q on]
      (str "ON " (cql-identifier on)))
+
+   :to
+   (fn [q to]
+     (str "TO " (cql-identifier to)))
+
+   :of
+   (fn [q on]
+     (str "OF " (cql-identifier on)))
 
    :from
    (fn [q table]
@@ -241,9 +326,9 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
    :columns
    (fn [q columns]
-     (if (seq columns)
+     (if (sequential? columns)
        (join-comma (map cql-identifier columns))
-       "*"))
+       (cql-identifier columns)))
 
    :where
    (fn [q clauses]
@@ -307,7 +392,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
    :using
    (fn [q args]
-     (->> (partition 2 args)
+     (->> args
           (map (fn [[n value]]
                  (str (-> n name string/upper-case)
                       " " (cql-identifier value))))
@@ -362,11 +447,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
           join-and
           (str "WITH ")))
 
-   :resource
-   (fn [q resource]
-     (str "ON " (cql-identifier resource)))
-
-   :password
+   :with-password
    (fn [q pwd]
      ;; not sure if its a cql-id or cql-val
      (str "WITH PASSWORD " (cql-identifier pwd)))
@@ -383,12 +464,21 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
    (fn [q index-column]
      (wrap-parens (cql-identifier index-column)))
 
-   :begin-batch
-   (fn [{:keys [logged counter]} _]
+   :batch
+   (fn [{:keys [logged counter]
+         :as q} queries]
      (str "BEGIN"
           (when-not logged " UNLOGGED")
           (when counter " COUNTER")
-          " BATCH"))
+          " BATCH "
+          (when-let [using (:using q)]
+            (str ((emit :using) q using) " "))
+          (->> (let [subqs (join-lf (map emit-query queries))]
+                 (if *prepared-statement*
+                   [subqs @*param-stack*])
+                 subqs)
+               (format "\n%s\n"))
+          " APPLY BATCH"))
 
    :queries
    (fn [q queries]
@@ -401,10 +491,13 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 
 (def entry-clauses #{:select :insert :update :delete :use-keyspace :truncate
-                     :drop-index :drop-table :drop-keyspace :create-index})
+                     :drop-index :drop-table :drop-keyspace :create-index :grant
+                     :revoke :create-user :alter-user :drop-user :list-users
+                     :list-permission :batch :create-table :alter-table
+                     :alter-column-family :alter-keyspace :create-keyspace})
 
 (defn some-clause
-  "Finds template to be used for this query map"
+  "Finds entry point key from query map"
   [qmap]
   (some entry-clauses (keys qmap)))
 
@@ -416,9 +509,11 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
                (when-not (= ::empty context)
                  ((get emit token emit-catch-all) row context)))))
       (filter identity)
-      join-spaced))
+      (join-spaced)))
 
 (defn emit-query [query]
+  (println query)
+
   (let [entry-point (some-clause query)
         initial-value (entry-point query)]
     (terminate ((emit entry-point) query initial-value))))

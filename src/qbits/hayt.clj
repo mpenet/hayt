@@ -39,9 +39,8 @@ Takes a table identifier and additional clause arguments:
   {:select columns})
 
 (defn from
-  [table]
-  {:from table})
-
+  [x]
+  {:from x})
 
 (defn insert
   "http://cassandra.apache.org/doc/cql3/CQL.html#insertStmt
@@ -123,8 +122,7 @@ Takes a keyspace identifier and clauses:
 * with
 * keyspace (optionaly using composition)"
   [keyspace & clauses]
-  (query ["CREATE KEYSPACE" :keyspace :with]
-         (into {:keyspace keyspace} clauses)))
+  {:create-keyspace keyspace})
 
 (defn create-table
   "Takes a table identifier and additional clause arguments:
@@ -132,9 +130,8 @@ Takes a keyspace identifier and clauses:
 * column-definitions
 * with
 * table (optionaly using composition)"
-  [table & clauses]
-  (query ["CREATE TABLE" :table :column-definitions :with]
-         (into {:table table} clauses)))
+  [table]
+  {:create-table table})
 
 (defn alter-table
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
@@ -147,10 +144,8 @@ Takes a table identifier and additional clause arguments:
 * alter
 * rename
 * table (optionaly using composition)"
-  [table & clauses]
-  (query ["ALTER TABLE" :table
-          :alter-column :add-column :rename-column :with]
-         (into {:table table} clauses)))
+  [table]
+  {:alter-table table})
 
 (defn alter-column-family
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
@@ -163,19 +158,16 @@ Takes a column-familiy identifier and additional clause arguments:
 * alter
 * rename
 * column-family (optionaly using composition)"
-  [column-family & clauses]
-  (query ["ALTER COLUMNFAMILY" :column-family
-          :alter-column :add-column :rename-column :with]
-         (into {:column-family column-family} clauses)))
+  [column-family]
+  {:alter-column-family column-family})
 
 (defn alter-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterKeyspaceStmt
 
 Takes a keyspace identifier and a `with` clause.
 * keyspace (optionaly using composition)"
-  [keyspace & clauses]
-  (query ["ALTER KEYSPACE" :keyspace :with]
-         (into {:keyspace keyspace} clauses)))
+  [keyspace]
+  {:alter-keyspace keyspace})
 
 (defn batch
   "http://cassandra.apache.org/doc/cql3/CQL.html#batchStmt
@@ -184,9 +176,8 @@ Takes hayt queries  optional clauses:
 * using
 * counter
 * logged "
-  [& clauses]
-  (query [:begin-batch :using :queries "APPLY BATCH"]
-         (into {:begin-batch {} :logged true} clauses)))
+  [& queries]
+  {:batch queries :logged true})
 
 (defn use-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#useStmt
@@ -195,60 +186,55 @@ Takes a keyspace identifier"
   [keyspace]
   {:use-keyspace keyspace})
 
-(defn grant-user
+(defn grant
   "Takes clauses:
 * permission
 * resource
 * user (optionaly using composition)"
-  [user & clauses]
-  (query ["GRANT" :permission :resource "TO" :user]
-         (into {:user user} clauses)))
+  [permission]
+  {:grant permission})
 
-(defn revoke-user
+(defn revoke
   "Takes clauses:
 * permission
 * resource
 * user (optionaly using composition)"
-  [user & clauses]
-  (query ["REVOKE" :permission :resource "FROM" :user]
-         (into {:user user} clauses)))
+  [permission]
+  {:revoke permission})
 
 (defn create-user
   "Takes clauses:
 * password
 * superuser (defaults to false)
 * user (optionaly using composition)"
-  [user & clauses]
-  (query ["CREATE USER" :user :password :superuser]
-         (into {:user user :superuser false} clauses)))
+  [user]
+  {:create-user user
+   :superuser false})
 
 (defn alter-user
   "Takes clauses:
 * password
 * superuser (defaults to false)
 * user (optionaly using composition)"
-  [user & clauses]
-  (query ["ALTER USER" :user :password :superuser]
-         (into {:user user :superuser false} clauses)))
+  [user]
+  {:alter-user user :superuser false})
 
 (defn drop-user
   [user]
-  (query ["DROP USER" :user]
-         {:user user}))
+  {:drop-user user})
 
 (defn list-users
   []
-  (query ["LIST USERS"] {}))
+  {:list-users nil})
 
-(defn list-permissions
+(defn list-permission
   "Takes clauses:
 * permissions (defaults to ALL if not supplied)
 * user
 * resource
 * recursive (defaults to true)"
-  [& clauses]
-  (query ["LIST" :permission :resource "OF" :user :recursive]
-         (into {:permission :ALL :recursive true} clauses)))
+  [perm]
+  {:list-permission perm :recursive true})
 
 ;; Clauses
 
@@ -280,7 +266,7 @@ Takes a keyspace identifier"
 (defn using
   "Clause: takes keyword/value pairs for :timestamp and :ttl"
   [& args]
-  {:using args})
+  {:using (apply hash-map args)})
 
 (defn limit
   "Clause: takes a numeric value"
@@ -324,6 +310,16 @@ clause of a select/update/delete query"
   [x]
   {:on x})
 
+(defn to
+  "Clause: "
+  [x]
+  {:to x})
+
+(defn of
+  "Clause: "
+  [x]
+  {:of x})
+
 (defn index-name
   "Clause: "
   [value]
@@ -359,25 +355,15 @@ clause of a select/update/delete query"
   [value]
   {:counter value})
 
-(defn resource
-  "Clause: "
-  [value]
-  {:resource value})
-
-(defn user
-  "Clause: "
-  [value]
-  {:user value})
-
 (defn superuser
   "Clause: "
   [value]
   {:superuser value})
 
-(defn password
+(defn with-password
   "Clause: "
   [value]
-  {:password value})
+  {:with-password value})
 
 (defn permission
   "Clause: "
@@ -397,16 +383,24 @@ clause of a select/update/delete query"
   [q & clauses]
   (into q clauses))
 
+(defn cql-safe
+  [x]
+  (cql/CQLSafe. x))
+
 ;; CQL3 functions
 
+(defn cql-fn
+  [name & args]
+  (cql/map->CQLFn {:name name :args args}))
+
 (def ^{:doc "Returns a now() CQL function"} now
-  (constantly (cql/map->CQLFn {:value "now()"})))
+  (constantly (cql-fn "now")))
 
 (def ^{:doc "Returns a count(*) CQL function"} count*
-  (constantly (cql/map->CQLFn {:value "COUNT(*)"})))
+  (constantly (cql-fn "COUNT" :*)))
 
 (def ^{:doc "Returns a count(1) CQL function"} count1
-  (constantly (cql/map->CQLFn {:value "COUNT(1)"})))
+  (constantly (cql-fn "COUNT" 1)))
 
 (defn date->epoch
   [d]
@@ -415,71 +409,71 @@ clause of a select/update/delete query"
 (defn max-timeuuid
   "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid"
   [^Date date]
-  (cql/->CQLFn (date->epoch date) "maxTimeuuid(%s)"))
+  (cql-fn "maxTimeuuid" (date->epoch date)))
 
 (defn min-timeuuid
   "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid"
   [^Date date]
-  (cql/->CQLFn (date->epoch date) "minTimeuuid(%s)"))
+  (cql-fn "minTimeuuid" (date->epoch date)))
 
 (defn token
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
 
 Returns a token function with the supplied argument"
   [token]
-  (cql/->CQLFn token "token(%s)"))
+  (cql-fn "token" token))
 
 (defn writetime
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
 
 Returns a WRITETIME function with the supplied argument"
   [x]
-  (cql/->CQLFn x "WRITETIME(%s)"))
+  (cql-fn "WRITETIME" x))
 
 (defn ttl
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
 
 Returns a TTL function with the supplied argument"
   [x]
-  (cql/->CQLFn x "TTL(%s)"))
+  (cql-fn "TTL" x))
 
 (defn unix-timestamp-of
   "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid
 
 Returns a unixTimestampOf function with the supplied argument"
   [x]
-  (cql/->CQLFn x "unixTimestampOf(%s)"))
+  (cql-fn "unixTimestampOf" x))
 
 (defn date-of
   "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid
 
 Returns a dateOf function with the supplied argument"
   [x]
-  (cql/->CQLFn x "dateOf(%s)"))
+  (cql-fn "dateOf" x))
 
 (defn blob->type
   "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 Only available in 3.0.2"
   [x]
-  (cql/->CQLFn x "blobAsType(%s)"))
+  (cql-fn "blobAsType" x))
 
 (defn type->blob
   "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 Only available in 3.0.2"
   [x]
-  (cql/->CQLFn x "typeAsBlob(%s)"))
+  (cql-fn "typeAsBlob" x))
 
 (defn blob->bigint
   "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 Only available in 3.0.2"
   [x]
-  (cql/->CQLFn x "blobAsBigint(%s)"))
+  (cql-fn "blobAsBigint" x))
 
 (defn bigint->blob
   "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 Only available in 3.0.2"
   [x]
-  (cql/->CQLFn x "bigintAsBlob(%s)"))
+  (cql-fn "bigintAsBlob" x))
 
 
 ;; Sugar for collection types

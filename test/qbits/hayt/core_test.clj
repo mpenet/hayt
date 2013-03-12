@@ -9,6 +9,9 @@
        (q-> (select :*)
             (from :foo))
 
+       "SELECT * FROM foo;"
+       {:select :* :from :foo}
+
        "SELECT bar, \"baz\" FROM foo;"
        (q-> (select :bar "baz")
             (from :foo))
@@ -149,262 +152,272 @@
             (on :foo)
             (index-name "baz"))))
 
-;; (deftest test-auth-fns
-;;   (are [expected query] (= expected (->raw query))
-;;        "GRANT FULL_ACCESS ON bar TO baz;"
-;;        (grant-user :baz
-;;                    (permission :FULL_ACCESS)
-;;                    (resource :bar))
+(deftest test-auth-fns
+  (are [expected query] (= expected (->raw query))
+       "GRANT FULL_ACCESS ON bar TO baz;"
+       (q-> (grant :FULL_ACCESS)
+            (to :baz)
+            (on :bar))
 
-;;        "REVOKE FULL_ACCESS ON bar FROM baz;"
-;;        (revoke-user :baz
-;;                     (permission :FULL_ACCESS)
-;;                     (resource :bar))
+       "REVOKE FULL_ACCESS ON bar FROM baz;"
+       (q-> (revoke :FULL_ACCESS)
+            (from :baz)
+            (on :bar))
 
-;;        "CREATE USER foo WITH PASSWORD bar NOSUPERUSER;"
-;;        (create-user :foo
-;;               (password :bar))
+       "CREATE USER foo WITH PASSWORD bar NOSUPERUSER;"
+       (q-> (create-user :foo)
+            (with-password :bar))
 
-;;       "CREATE USER foo WITH PASSWORD bar SUPERUSER;"
-;;        (create-user :foo
-;;               (password :bar)
-;;               (superuser true))
+       "CREATE USER foo WITH PASSWORD bar SUPERUSER;"
+       (q-> (create-user :foo)
+            (with-password :bar)
+            (superuser true))
 
-;;        "ALTER USER foo WITH PASSWORD bar NOSUPERUSER;"
-;;        (alter-user :foo
-;;                     (password :bar))
+       "ALTER USER foo WITH PASSWORD bar NOSUPERUSER;"
+       (q-> (alter-user :foo)
+            (with-password :bar))
 
-;;        "ALTER USER foo WITH PASSWORD bar SUPERUSER;"
-;;        (alter-user :foo
-;;                     (password :bar)
-;;                     (superuser true))
+       "ALTER USER foo WITH PASSWORD bar SUPERUSER;"
+       (q-> (alter-user :foo)
+            (with-password :bar)
+            (superuser true))
 
-;;        "DROP USER foo;"
-;;        (drop-user :foo)
+       "DROP USER foo;"
+       (q-> (drop-user :foo))
 
-;;        "LIST USERS;"
-;;        (list-users)
+       "LIST USERS;"
+       (q-> (list-users))
 
-;;        "LIST ALL ON bar OF baz;"
-;;        (list-permissions (resource :bar)
-;;                          (user :baz))
+       "LIST ALL ON bar OF baz;"
+       (q-> (list-permission :ALL)
+            (on :bar)
+            (of :baz))
 
-;;        "LIST ALTER ON bar OF baz NORECURSIVE;"
-;;        (list-permissions (permission :ALTER)
-;;                          (resource :bar)
-;;                          (user :baz)
-;;                          (recursive false))))
+       "LIST ALTER ON bar OF baz NORECURSIVE;"
+       (q-> (list-permission :ALTER)
+            (on :bar)
+            (of :baz)
+            (recursive false))))
 
-;; (deftest test-batch
-;;   (is (= "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
-;;          (->raw (batch
-;;                  (queries
-;;                   (update :foo
-;;                           (set-columns {:bar 1
-;;                                         :baz [+ 2] }))
-;;                   (insert :foo
-;;                           (values {"a" "b" "c" "d"})
-;;                           (using :timestamp 100000
-;;                                  :ttl 200000)))
-;;                  (using :timestamp 2134)))))
+(deftest test-batch
+  (is (= "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
+         (->raw (q-> (batch
+                      (q-> (update :foo)
+                           (set-columns {:bar 1
+                                         :baz [+ 2] }))
+                      (q-> (insert :foo)
+                           (values {"a" "b" "c" "d"})
+                           (using :timestamp 100000
+                                  :ttl 200000)))
+                     (using :timestamp 2134)))))
 
-;;   (is (= "BEGIN UNLOGGED BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
-;;          (->raw (batch
-;;                  (queries
-;;                   (update :foo
-;;                           (set-columns {:bar 1
-;;                                         :baz [+ 2] }))
-;;                   (insert :foo
-;;                           (values {"a" "b" "c" "d"})
-;;                           (using :timestamp 100000
-;;                                  :ttl 200000)))
-;;                  (logged false)
-;;                  (using :timestamp 2134)))))
+  (is (= "BEGIN UNLOGGED BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
+         (->raw (q-> (batch
+                      (q-> (update :foo)
+                           (set-columns {:bar 1
+                                         :baz [+ 2]}))
+                      (q-> (insert :foo)
+                           (values {"a" "b" "c" "d"})
+                           (using :timestamp 100000
+                                  :ttl 200000)))
+                     (logged false)
+                     (using :timestamp 2134)))))
 
-;;   (is (= ["BEGIN COUNTER BATCH USING TIMESTAMP 1234 \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo (\"a\", \"c\") VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;" [1 2 "b" "d"]]
-;;          (->prepared (batch
-;;                       (queries
-;;                        (update :foo
-;;                                (set-columns {:bar 1
-;;                                              :baz [+ 2] }))
-;;                        (insert :foo
-;;                                (values {"a" "b" "c" "d"})
-;;                                (using :timestamp 100000
-;;                                       :ttl 200000)))
-;;                       (counter true)
-;;                       (using :timestamp 1234))))))
+  (is (= ["BEGIN COUNTER BATCH USING TIMESTAMP 1234 \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo (\"a\", \"c\") VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;" [1 2 "b" "d"]]
+         (->prepared (q-> (batch
+                           (q-> (update :foo)
+                                (set-columns {:bar 1
+                                              :baz [+ 2] }))
+                           (q-> (insert :foo)
+                                (values {"a" "b" "c" "d"})
+                                (using :timestamp 100000
+                                       :ttl 200000)))
+                          (counter true)
+                          (using :timestamp 1234))))))
 
-;; (deftest test-create-table
-;;   (are [expected query] (= expected (->raw query))
-;;        "CREATE TABLE foo (a varchar, b int, PRIMARY KEY (a));"
-;;        (create-table :foo
-;;                      (column-definitions {:a :varchar
-;;                                           :b :int
-;;                                           :primary-key :a}))
+(deftest test-create-table
+  (are [expected query] (= expected (->raw query))
+       "CREATE TABLE foo (a varchar, b int, PRIMARY KEY (a));"
+       (q-> (create-table :foo)
+            (column-definitions {:a :varchar
+                                 :b :int
+                                 :primary-key :a}))
 
-;;        "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar));"
-;;        (create-table :foo
-;;                      (column-definitions {:foo :varchar
-;;                                           :bar :int
-;;                                           :primary-key [:foo :bar]}))
+       "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar));"
+       (q-> (create-table :foo)
+            (column-definitions {:foo :varchar
+                                 :bar :int
+                                 :primary-key [:foo :bar]}))
 
-;;        "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar)) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
-;;        (create-table :foo
-;;                      (column-definitions {:foo :varchar
-;;                                           :bar :int
-;;                                           :primary-key [:foo :bar]})
-;;                      (with {:compact-storage true
-;;                             :clustering-order [[:bar :asc]]}))))
+       "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar)) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
+       (q-> (create-table :foo)
+            (column-definitions {:foo :varchar
+                                 :bar :int
+                                 :primary-key [:foo :bar]})
+            (with {:compact-storage true
+                   :clustering-order [[:bar :asc]]}))))
 
-;; (deftest test-alter-table
-;;   (are [expected query] (= expected (->raw query))
-;;        "ALTER TABLE foo ALTER bar TYPE int;"
-;;        (alter-table :foo (alter-column :bar :int))
+(deftest test-alter-table
+  (are [expected query] (= expected (->raw query))
+       "ALTER TABLE foo ALTER bar TYPE int;"
+       (q-> (alter-table :foo)
+            (alter-column :bar :int))
 
-;;        "ALTER TABLE foo ALTER bar TYPE int ADD baz text RENAME foo TO bar;"
-;;        (alter-table :foo
-;;                     (alter-column :bar :int)
-;;                     (add-column :baz :text)
-;;                     (rename-column :foo :bar))
+       "ALTER TABLE foo ALTER bar TYPE int ADD baz text RENAME foo TO bar;"
+       (q-> (alter-table :foo)
+            (alter-column :bar :int)
+            (add-column :baz :text)
+            (rename-column :foo :bar))
 
-;;        "ALTER TABLE foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
-;;        (alter-table :foo
-;;                     (alter-column :bar :int)
-;;                     (add-column :baz :text)
-;;                     (with {:compact-storage true
-;;                            :clustering-order [[:bar :asc]]}))))
+       "ALTER TABLE foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
+       (q-> (alter-table :foo)
+            (alter-column :bar :int)
+            (add-column :baz :text)
+            (with {:compact-storage true
+                   :clustering-order [[:bar :asc]]}))))
 
-;; (deftest test-alter-column-family
-;;   (are [expected query] (= expected (->raw query))
-;;        "ALTER COLUMNFAMILY foo ALTER bar TYPE int;"
-;;        (alter-column-family :foo (alter-column :bar :int))
+(deftest test-alter-column-family
+  (are [expected query] (= expected (->raw query))
+       "ALTER COLUMNFAMILY foo ALTER bar TYPE int;"
+       (q-> (alter-column-family :foo)
+            (alter-column :bar :int))
 
-;;        "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text RENAME foo TO bar;"
-;;        (alter-column-family :foo
-;;                             (alter-column :bar :int)
-;;                             (rename-column :foo :bar)
-;;                             (add-column :baz :text))
+       "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text RENAME foo TO bar;"
+       (q-> (alter-column-family :foo)
+            (alter-column :bar :int)
+            (rename-column :foo :bar)
+            (add-column :baz :text))
 
-;;        "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
-;;        (alter-column-family :foo
-;;                             (alter-column :bar :int)
-;;                             (add-column :baz :text)
-;;                             (with {:compact-storage true
-;;                                    :clustering-order [[:bar :asc]]}))))
+       "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
+       (q-> (alter-column-family :foo)
+            (alter-column :bar :int)
+            (add-column :baz :text)
+            (with {:compact-storage true
+                   :clustering-order [[:bar :asc]]}))))
 
-;; (deftest test-create-alter-keyspace
-;;   (are [expected query] (= expected (->raw query))
-;;        "CREATE KEYSPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
-;;        (create-keyspace :foo
-;;                         (with {:replication
-;;                                {:class "SimpleStrategy"
-;;                                 :replication_factor 3 }}))
+(deftest test-create-alter-keyspace
+  (are [expected query] (= expected (->raw query))
+       "CREATE KEYSPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
+       (q-> (create-keyspace :foo)
+            (with {:replication
+                   {:class "SimpleStrategy"
+                    :replication_factor 3 }}))
 
-;;        "CREATE KEYSPACE foo WITH durable_writes = true;"
-;;        (create-keyspace :foo
-;;                         (with {:durable_writes true}))
+       "CREATE KEYSPACE foo WITH durable_writes = true;"
+       (q-> (create-keyspace :foo)
+            (with {:durable_writes true}))
 
-;;        "ALTER KEYSPACE foo WITH something-else = 'foo' AND something = 1 AND replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
-;;        (alter-keyspace :foo
-;;                        (with {:replication
-;;                               {:class "SimpleStrategy"
-;;                                :replication_factor 3 }
-;;                               :something 1
-;;                               :something-else "foo"}))))
+       "ALTER KEYSPACE foo WITH something-else = 'foo' AND something = 1 AND replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
+       (q-> (alter-keyspace :foo)
+            (with {:replication
+                   {:class "SimpleStrategy"
+                    :replication_factor 3 }
+                   :something 1
+                   :something-else "foo"}))))
 
-;; (deftest test-q->
-;;   (let [q (select :foo)]
-;;     (is (= "SELECT bar, \"baz\" FROM foo;")
-;;         (->raw (q-> q (columns :bar "baz"))))
+(deftest test-q->
+  (let [q (select :foo)]
+    (is (= "SELECT bar, \"baz\" FROM foo;")
+        (->raw (q-> q (columns :bar "baz"))))
 
-;;     (is (= ["SELECT bar, \"baz\" FROM foo;" []])
-;;         (->prepared (q-> q (columns :bar "baz")))))
+    (is (= ["SELECT bar, \"baz\" FROM foo;" []])
+        (->prepared (q-> q (columns :bar "baz")))))
 
-;;   (let [q (insert :foo)
-;;         q2 (q-> q
-;;                 (values  {:a "b" "c" "d"}))]
-;;     (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b');"
-;;            (->raw q2)))
-;;     (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') USING TIMESTAMP 100000 AND TTL 200000;"
-;;            (->raw (q-> q2
-;;                        (using :timestamp 100000
-;;                               :ttl 200000)))))))
+  (let [q (insert :foo)
+        q2 (q-> q
+                (values  {:a "b" "c" "d"}))]
+    (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b');"
+           (->raw q2)))
+    (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') USING TIMESTAMP 100000 AND TTL 200000;"
+           (->raw (q-> q2
+                       (using :timestamp 100000
+                              :ttl 200000)))))))
 
 
-;; (deftest test-functions
-;;   (are [expected query] (= expected (->raw query))
-;;        "SELECT COUNT(*) FROM foo;"
-;;        (select :foo (columns (count*)))
+(deftest test-functions
+  (are [expected query] (= expected (->raw query))
+       "SELECT COUNT(*) FROM foo;"
+       (q-> (select (count*))
+            (from :foo))
 
-;;        "SELECT * FROM foo WHERE ts = now();"
-;;        (select :foo
-;;                (where {:ts (now)}))
+       "SELECT * FROM foo WHERE ts = now();"
+       (q-> (select :*)
+            (from :foo)
+            (where {:ts (now)}))
 
-;;        "SELECT WRITETIME(bar) FROM foo;"
-;;        (select :foo (columns (writetime :bar)))
+       "SELECT WRITETIME(bar) FROM foo;"
+       (q-> (select (writetime :bar))
+            (from :foo))
 
-;;        "SELECT TTL(\"bar\") FROM foo;"
-;;        (select :foo (columns (ttl "bar")))
+       "SELECT TTL(\"bar\") FROM foo;"
+       (q-> (select (ttl "bar"))
+            (from :foo))
 
-;;        "SELECT unixTimestampOf(\"bar\"), dateOf(bar) FROM foo;"
-;;        (select :foo (columns (unix-timestamp-of "bar")
-;;                              (date-of :bar)))
+       "SELECT unixTimestampOf(\"bar\"), dateOf(bar) FROM foo;"
+       (q-> (select (unix-timestamp-of "bar")
+                    (date-of :bar))
+            (from :foo))
 
-;;        "SELECT * FROM foo WHERE token(user-id) > token('tom');"
-;;        (select :foo
-;;                (where {(token :user-id) [> (token "tom")]})))
+       "SELECT * FROM foo WHERE token(user-id) > token('tom');"
+       (q-> (select :*)
+            (from :foo)
+            (where {(token :user-id) [> (token "tom")]})))
 
-;;   (are [expected query] (= expected (->prepared query))
-;;        ["SELECT * FROM foo WHERE ts = now();" []]
-;;        (select :foo
-;;                (where {:ts (now)}))
+  (are [expected query] (= expected (->prepared query))
+       ["SELECT * FROM foo WHERE ts = now();" []]
+       (q-> (select :*)
+            (from :foo)
+            (where {:ts (now)}))
 
-;;        ["SELECT * FROM foo WHERE token(user-id) > token(?);" ["tom"]]
-;;        (select :foo
-;;                (where {(token :user-id) [> (token "tom")]})))
+       ["SELECT * FROM foo WHERE token(user-id) > token(?);" ["tom"]]
+       (q-> (select :*)
+            (from :foo)
+            (where {(token :user-id) [> (token "tom")]})))
 
-;;   (let [d (java.util.Date. 0)]
-;;     (is (= "SELECT * FROM foo WHERE ts > maxTimeuuid(0) AND ts < minTimeuuid(0);"
-;;            (->raw (select :foo
-;;                           (where [[:ts  [> (max-timeuuid d)]]
-;;                                   [:ts  [< (min-timeuuid d)]]])))))))
+  (let [d (java.util.Date. 0)]
+    (is (= "SELECT * FROM foo WHERE ts > maxTimeuuid(0) AND ts < minTimeuuid(0);"
+           (->raw (q-> (select :*)
+                       (from :foo)
+                       (where [[:ts  [> (max-timeuuid d)]]
+                               [:ts  [< (min-timeuuid d)]]])))))))
 
-;; (deftest test-coll-lookup
-;;   (is (= "DELETE bar[2] FROM foo WHERE baz = 1;"
-;;          (->raw (delete :foo
-;;                         (columns {:bar 2})
-;;                         (where {:baz 1})))))
-;;   (is (= ["DELETE bar[?] FROM foo WHERE baz = ?;" [2 1]]
-;;          (->prepared (delete :foo
-;;                              (columns {:bar 2})
-;;                              (where {:baz 1}))))))
+(deftest test-coll-lookup
+  (is (= "DELETE bar[2] FROM foo WHERE baz = 1;"
+         (->raw (q-> (delete {:bar 2})
+                     (from :foo )
+                     (where {:baz 1})))))
+  (is (= ["DELETE bar[?] FROM foo WHERE baz = ?;" [2 1]]
+         (->prepared (q-> (delete {:bar 2})
+                          (from :foo)
+                          (where {:baz 1}))))))
 
-;; (deftest test-cql-identifier
-;;   (are [expected identifier] (= expected (cql-identifier identifier))
-;;        "\"a\"" "a"
-;;        "a" :a
-;;        "a[2]" {:a 2}
-;;        "a['b']" {:a "b"}
-;;        "blobAsBigint(1)" (blob->bigint 1))
+(deftest test-cql-identifier
+  (are [expected identifier] (= expected (cql-identifier identifier))
+       "\"a\"" "a"
+       "a" :a
+       "a[2]" {:a 2}
+       "a['b']" {:a "b"}
+       "blobAsBigint(1)" (blob->bigint 1))
 
-;;   (are [expected value] (= expected (cql-value value))
-;;        "'a'" "a"
-;;        "'a'" :a
-;;        "{'a' : 'b', 'c' : 'd'}" {:a :b :c :d}
-;;        "['a', 'b', 'c', 'd']" ["a" "b" "c" "d"]
-;;        "['a', 'b', 'c', 'd']" '("a" "b" "c" "d")
-;;        "{'a', 'b', 'c', 'd'}" #{"a" "b" "c" "d"}
-;;        1 1))
+  (are [expected value] (= expected (cql-value value))
+       "'a'" "a"
+       "'a'" :a
+       "{'a' : 'b', 'c' : 'd'}" {:a :b :c :d}
+       "['a', 'b', 'c', 'd']" ["a" "b" "c" "d"]
+       "['a', 'b', 'c', 'd']" '("a" "b" "c" "d")
+       "{'a', 'b', 'c', 'd'}" #{"a" "b" "c" "d"}
+       1 1))
 
-;; (deftest test-col-type-sugar
-;;   (is (= "set<int>" (set-type :int)))
-;;   (is (= "list<int>" (list-type :int)))
-;;   (is (= "map<int, text>" (map-type :int :text))))
+(deftest test-col-type-sugar
+  (is (= "set<int>" (set-type :int)))
+  (is (= "list<int>" (list-type :int)))
+  (is (= "map<int, text>" (map-type :int :text))))
 
-;; (deftest test-prepare-map
-;;   (let [query (->prepared (select :foo
-;;                                   (where {:a :a1
-;;                                           :b :b1
-;;                                           :c :c1})))]
-;;     (is (= ["SELECT * FROM foo WHERE a = ? AND c = ? AND b = ?;" [100 300 200]]
-;;            (apply-map query {:a1 100 :b1 200 :c1 300})))))
+(deftest test-prepare-map
+  (let [query (->prepared (q-> (select :*)
+                               (from :foo)
+                               (where {:a :a1
+                                       :b :b1
+                                       :c :c1})))]
+    (is (= ["SELECT * FROM foo WHERE a = ? AND c = ? AND b = ?;" [100 300 200]]
+           (apply-map query {:a1 100 :b1 200 :c1 300})))))
