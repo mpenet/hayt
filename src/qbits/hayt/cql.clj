@@ -274,7 +274,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
    :list-users
    (constantly "LIST USERS")
 
-   :list-permission
+   :list-permissions
    (fn [q perm]
      (str "LIST "
           (cql-identifier perm)
@@ -501,7 +501,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 (def entry-clauses #{:select :insert :update :delete :use-keyspace :truncate
                      :drop-index :drop-table :drop-keyspace :create-index :grant
                      :revoke :create-user :alter-user :drop-user :list-users
-                     :list-permission :batch :create-table :alter-table
+                     :list-permissions :batch :create-table :alter-table
                      :alter-column-family :alter-keyspace :create-keyspace})
 
 (defn find-entry-clause

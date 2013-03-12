@@ -1,4 +1,5 @@
-(ns qbits.hayt.dsl)
+(ns qbits.hayt.dsl
+  (require [clojure.set :refer [rename-keys]]))
 
 (defn select
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
@@ -10,8 +11,9 @@ Takes a table identifier and additional clause arguments:
 * order-by
 * limit
 * table (optionaly using composition)"
-  [& cols]
-  {:select cols})
+  [table & clauses]
+  (rename-keys (into {:select :* :from table} clauses)
+               {:columns :select}))
 
 (defn from
   [x]
@@ -24,8 +26,8 @@ Takes a table identifier and additional clause arguments:
 * values
 * using
 * table (optionaly using composition)"
-  [table]
-  {:insert table})
+  [table & clauses]
+  (into {:insert table} clauses))
 
 (defn update
   "http://cassandra.apache.org/doc/cql3/CQL.html#updateStmt
@@ -36,8 +38,8 @@ Takes a table identifier and additional clause arguments:
 * set-columns
 * where
 * table (optionaly using composition)"
-  [table]
-  {:update table})
+  [table & clauses]
+  (into {:update table} clauses))
 
 (defn delete
   "http://cassandra.apache.org/doc/cql3/CQL.html#deleteStmt
@@ -48,8 +50,9 @@ Takes a table identifier and additional clause arguments:
 * using
 * where
 * table (optionaly using composition)"
-  [& columns]
-  {:delete columns})
+  [table & clauses]
+  (rename-keys (into {:from table :delete :*} clauses)
+               {:columns :delete}))
 
 (defn truncate
   "http://cassandra.apache.org/doc/cql3/CQL.html#truncateStmt
@@ -87,8 +90,8 @@ Takes a table identifier and additional clause arguments:
 * index-column
 * index-name
 * table (optionaly using composition)"
-  [index-column]
-  {:create-index index-column})
+  [name & clauses]
+  (into {:create-index name} clauses))
 
 (defn create-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#createKeyspaceStmt
@@ -97,16 +100,15 @@ Takes a keyspace identifier and clauses:
 * with
 * keyspace (optionaly using composition)"
   [keyspace & clauses]
-  {:create-keyspace keyspace})
+  (into {:create-keyspace keyspace} clauses))
 
 (defn create-table
   "Takes a table identifier and additional clause arguments:
 
 * column-definitions
-* with
-* table (optionaly using composition)"
-  [table]
-  {:create-table table})
+* with"
+  [table & clauses]
+  (into {:create-table table} clauses))
 
 (defn alter-table
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
@@ -117,10 +119,9 @@ Takes a table identifier and additional clause arguments:
 * add
 * with
 * alter
-* rename
-* table (optionaly using composition)"
-  [table]
-  {:alter-table table})
+* rename"
+  [table & clauses]
+  (into {:alter-table table} clauses))
 
 (defn alter-column-family
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
@@ -133,16 +134,16 @@ Takes a column-familiy identifier and additional clause arguments:
 * alter
 * rename
 * column-family (optionaly using composition)"
-  [column-family]
-  {:alter-column-family column-family})
+  [column-family & clauses]
+  (into {:alter-column-family column-family} clauses))
 
 (defn alter-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterKeyspaceStmt
 
 Takes a keyspace identifier and a `with` clause.
 * keyspace (optionaly using composition)"
-  [keyspace]
-  {:alter-keyspace keyspace})
+  [keyspace & clauses]
+  (into {:alter-keyspace keyspace} clauses))
 
 (defn batch
   "http://cassandra.apache.org/doc/cql3/CQL.html#batchStmt
@@ -151,8 +152,8 @@ Takes hayt queries  optional clauses:
 * using
 * counter
 * logged "
-  [& queries]
-  {:batch queries :logged true})
+  [& clauses]
+  (into {:logged true} clauses))
 
 (defn use-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#useStmt
@@ -161,38 +162,32 @@ Takes a keyspace identifier"
   [keyspace]
   {:use-keyspace keyspace})
 
-(defn grant
-  "Takes clauses:
-* permission
-* resource
-* user (optionaly using composition)"
-  [permission]
-  {:grant permission})
+(defn grant-permission
+  "Takes clauses:"
+  [permission & clauses]
+  (into {:grant permission} clauses))
 
-(defn revoke
+(defn revoke-permission
   "Takes clauses:
 * permission
 * resource
 * user (optionaly using composition)"
-  [permission]
-  {:revoke permission})
+  [permission & clauses]
+  (into {:revoke permission} clauses))
 
 (defn create-user
   "Takes clauses:
 * password
-* superuser (defaults to false)
-* user (optionaly using composition)"
-  [user]
-  {:create-user user
-   :superuser false})
+* superuser (defaults to false)"
+  [user & clauses]
+  (into {:create-user user :superuser false} clauses))
 
 (defn alter-user
   "Takes clauses:
 * password
-* superuser (defaults to false)
-* user (optionaly using composition)"
-  [user]
-  {:alter-user user :superuser false})
+* superuser (defaults to false)"
+  [user & clauses]
+  (into {:alter-user user :superuser false} clauses))
 
 (defn drop-user
   [user]
@@ -202,31 +197,16 @@ Takes a keyspace identifier"
   []
   {:list-users nil})
 
-(defn list-permission
+(defn list-permissions
   "Takes clauses:
-* permissions (defaults to ALL if not supplied)
+* permission (defaults to ALL if not supplied)
 * user
 * resource
 * recursive (defaults to true)"
-  [perm]
-  {:list-permission perm :recursive true})
+  [perm & clauses]
+  (into {:list-permissions perm :recursive true} clauses))
 
 ;; Clauses
-
-(defn table
-  "Clause: takes a table identifier"
-  [table]
-  {:table table})
-
-(defn keyspace
-  "Clause: takes a keyspace identifier"
-  [keyspace]
-  {:keyspace keyspace})
-
-(defn column-family
-  "Clause: takes a column family identifier"
-  [keyspace]
-  {:column-family column-family})
 
 (defn columns
   "Clause: takes columns identifiers"
@@ -257,7 +237,7 @@ Takes a keyspace identifier"
 (defn queries
   "Clause: takes hayt queries to be executed during a batch operation."
   [& queries]
-  {:queries queries})
+  {:batch queries})
 
 (defn where
   "Clause: takes a map or a vector of pairs to compose the where
