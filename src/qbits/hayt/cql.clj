@@ -17,6 +17,14 @@ TODO: add undocumented auth stuff: create/drop user, grant/revoke"
 (defrecord CQLFn [name args])
 (defrecord CQLSafe [value])
 
+(defn cql-safe
+  [x]
+  (->CQLSafe x))
+
+(defn cql-fn
+  [name & args]
+  (map->CQLFn {:name name :args args}))
+
 (defn maybe-parameterize!
   [x f]
   (if *prepared-statement*
@@ -496,7 +504,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
                      :list-permission :batch :create-table :alter-table
                      :alter-column-family :alter-keyspace :create-keyspace})
 
-(defn some-clause
+(defn find-entry-clause
   "Finds entry point key from query map"
   [qmap]
   (some entry-clauses (keys qmap)))
@@ -508,12 +516,25 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
              (let [context (get row token ::empty)]
                (when-not (= ::empty context)
                  ((get emit token emit-catch-all) row context)))))
-      (filter identity)
+      (remove nil?)
       (join-spaced)))
 
 (defn emit-query [query]
-  (println query)
-
-  (let [entry-point (some-clause query)
+  (let [entry-point (find-entry-clause query)
         initial-value (entry-point query)]
     (terminate ((emit entry-point) query initial-value))))
+
+(defn ->raw
+  "Compiles a hayt query into its raw/string value"
+  [query]
+  (binding [*prepared-statement* false]
+    (emit-query query)))
+
+(defn ->prepared
+  "Compiles a hayt query into a vector composed of the prepared string
+  query and a vector of parameters."
+  [query]
+  (binding [*prepared-statement* true
+            *param-stack* (atom [])]
+    [(emit-query query)
+     @*param-stack*]))
