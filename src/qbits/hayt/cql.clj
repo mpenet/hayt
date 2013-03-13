@@ -186,12 +186,12 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 (def emit
   {;; entry clauses
    :select
-   (fn [q columns]
+   (fn [q table]
      (str "SELECT "
-          ;; handle special case for backward compat
-          ((emit :columns) q (or columns (:columns q)))
+          ((emit :columns) q (:columns q))
           " "
-          (emit-row q [:from :where :order-by :limit :allow-filtering])))
+          (emit-row (assoc q :from table)
+                    [:from :where :order-by :limit :allow-filtering])))
 
    :insert
    (fn [q table]
@@ -208,11 +208,12 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
           (emit-row q [:using :set-columns :where])))
 
    :delete
-   (fn [q columns]
+   (fn [q table]
      (str "DELETE "
-          ((emit :columns) q (or columns (:columns q)))
+          ((emit :columns) q (:columns q))
           " "
-          (emit-row q [:from :using :where])))
+          (emit-row (assoc q :from table)
+                    [:from :using :where])))
 
    :drop-index
    (fn [q index]

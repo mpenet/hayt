@@ -11,11 +11,7 @@ Takes a table identifier and additional clause arguments:
 * limit
 * table (optionaly using composition)"
   [table & clauses]
-  (into {:from table :select nil :columns :*} clauses))
-
-(defn from
-  [x]
-  {:from x})
+  (into {:select table :columns :*} clauses))
 
 (defn insert
   "http://cassandra.apache.org/doc/cql3/CQL.html#insertStmt
@@ -49,7 +45,7 @@ Takes a table identifier and additional clause arguments:
 * where
 * table (optionaly using composition)"
   [table & clauses]
-  (into {:from table :columns :* :delete nil} clauses))
+  (into {:delete table :columns :*} clauses))
 
 (defn truncate
   "http://cassandra.apache.org/doc/cql3/CQL.html#truncateStmt
@@ -161,16 +157,15 @@ Takes a keyspace identifier"
 
 (defn grant
   "Takes clauses:
-* permission
-* resource"
+* to
+* on"
   [perm & clauses]
   (into {:grant perm} clauses))
 
 (defn revoke
   "Takes clauses:
-* permission
-* resource
-* user (optionaly using composition)"
+* on
+* from"
   [perm & clauses]
   (into {:revoke perm} clauses))
 
@@ -198,9 +193,9 @@ Takes a keyspace identifier"
 
 (defn list-permissions
   "Takes clauses:
-* permission (defaults to ALL if not supplied)
-* user
-* resource
+* perm (defaults to ALL if not supplied)
+* of
+* on
 * recursive (defaults to true)"
   [& clauses]
   (into {:list-permissions :ALL :recursive true} clauses))
@@ -273,6 +268,10 @@ clause of a select/update/delete query"
   "Clause: "
   [x]
   {:of x})
+
+(defn from
+  [x]
+  {:from x})
 
 (defn index-name
   "Clause: "
