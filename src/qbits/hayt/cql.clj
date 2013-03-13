@@ -260,14 +260,14 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
       (str "CREATE USER "
            (cql-identifier user)
            " "
-           (emit-row q [:with-password :superuser])))
+           (emit-row q [:password :superuser])))
 
    :alter-user
    (fn [q user]
       (str "ALTER USER "
            (cql-identifier user)
            " "
-           (emit-row q [:with-password :superuser])))
+           (emit-row q [:password :superuser])))
 
    :drop-user
    (fn [q user]
@@ -457,7 +457,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
           join-and
           (str "WITH ")))
 
-   :with-password
+   :password
    (fn [q pwd]
      ;; not sure if its a cql-id or cql-val
      (str "WITH PASSWORD " (cql-identifier pwd)))

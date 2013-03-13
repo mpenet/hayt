@@ -313,10 +313,10 @@ clause of a select/update/delete query"
   [value]
   {:superuser value})
 
-(defn with-password
+(defn password
   "Clause: "
   [value]
-  {:with-password value})
+  {:password value})
 
 (defn recursive
   "Clause: "

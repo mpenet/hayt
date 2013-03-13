@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0-beta1
+
+* cleaner AST and document (briefly) it's use in the readme
+* renamed/updated the auth functions/clauses to match their cql
+  counterpart more closely.
+
 ## 0.3.0
 
 * Renamed `add` clause to `add-column` (breaking change)
