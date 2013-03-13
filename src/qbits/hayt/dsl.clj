@@ -157,15 +157,15 @@ Takes a keyspace identifier"
 
 (defn grant
   "Takes clauses:
-* to
-* on"
+* resource
+* user"
   [perm & clauses]
   (into {:grant perm} clauses))
 
 (defn revoke
   "Takes clauses:
-* on
-* from"
+* resource
+* user"
   [perm & clauses]
   (into {:revoke perm} clauses))
 
@@ -194,8 +194,8 @@ Takes a keyspace identifier"
 (defn list-permissions
   "Takes clauses:
 * perm (defaults to ALL if not supplied)
-* of
-* on
+* user
+* resource
 * recursive (defaults to true)"
   [& clauses]
   (into {:list-permissions :ALL :recursive true} clauses))
