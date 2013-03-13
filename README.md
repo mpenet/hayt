@@ -69,6 +69,7 @@ DSL on top of it, or use maps direcly feel free to do so.
 
 ```clojure
 (select :users
+        (columns :a :b)
         (where {:foo :bar
                 :moo [> 3]
                 :meh [:> 4]
