@@ -13,6 +13,7 @@
   :codox {:src-dir-uri "https://github.com/mpenet/hayt/blob/master"
           :src-linenum-anchor-prefix "L"
           :exclude [qbits.hayt.cql
+                    qbits.hayt.dsl
                     qbits.hayt.utils
                     qbits.hayt.fns]}
   :warn-on-reflection true)
