@@ -159,18 +159,20 @@ Takes a keyspace identifier"
   [keyspace]
   {:use-keyspace keyspace})
 
-(defn grant-permission
-  "Takes clauses:"
-  [permission & clauses]
-  (into {:grant permission} clauses))
+(defn grant
+  "Takes clauses:
+* permission
+* resource"
+  [perm & clauses]
+  (into {:grant perm} clauses))
 
-(defn revoke-permission
+(defn revoke
   "Takes clauses:
 * permission
 * resource
 * user (optionaly using composition)"
-  [permission & clauses]
-  (into {:revoke permission} clauses))
+  [perm & clauses]
+  (into {:revoke perm} clauses))
 
 (defn create-user
   "Takes clauses:
@@ -200,8 +202,8 @@ Takes a keyspace identifier"
 * user
 * resource
 * recursive (defaults to true)"
-  [perm & clauses]
-  (into {:list-permissions perm :recursive true} clauses))
+  [& clauses]
+  (into {:list-permissions :ALL :recursive true} clauses))
 
 ;; Clauses
 
@@ -321,3 +323,18 @@ clause of a select/update/delete query"
   "Clause: "
   [value]
   {:recursive value})
+
+(defn resource
+  "Clause: "
+  [value]
+  {:on value})
+
+(defn user
+  "Clause: "
+  [value]
+  {:of value})
+
+(defn perm
+  "Clause: "
+  [value]
+  {:perm value})

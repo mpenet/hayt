@@ -147,22 +147,22 @@
 (deftest test-auth-fns
   (are [expected query] (= expected (->raw query))
        "GRANT FULL_ACCESS ON bar TO baz;"
-       (grant-permission :FULL_ACCESS
-                         (on :bar)
-                         (to :baz))
+       (grant :FULL_ACCESS
+              (on :bar)
+              (to :baz))
 
        "REVOKE FULL_ACCESS ON bar FROM baz;"
-       (revoke-permission :FULL_ACCESS
-                          (on :bar)
-                          (from :baz)))
+       (revoke :FULL_ACCESS
+               (from :baz)
+               (on :bar)))
 
        "CREATE USER foo WITH PASSWORD bar NOSUPERUSER;"
        (create-user :foo (with-password :bar))
 
        "CREATE USER foo WITH PASSWORD bar SUPERUSER;"
        (create-user :foo
-              (with-password :bar)
-              (superuser true))
+                    (with-password :bar)
+                    (superuser true))
 
        "ALTER USER foo WITH PASSWORD bar NOSUPERUSER;"
        (alter-user :foo
@@ -180,12 +180,12 @@
        (list-users)
 
        "LIST ALL ON bar OF baz;"
-       (list-permissions :ALL
+       (list-permissions (perm :ALL)
                          (on :bar)
                          (of :baz))
 
        "LIST ALTER ON bar OF baz NORECURSIVE;"
-       (list-permissions :ALTER
+       (list-permissions (perm :ALTER)
                          (on :bar)
                          (of :baz)
                          (recursive false)))
