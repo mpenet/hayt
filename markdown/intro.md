@@ -259,28 +259,28 @@ Ex:
 
 The `grant` fn takes a permission identifier and clauses:
 
-* [on](#on)
-* [to](#to)
+* [resource](#resource)
+* [user](#user)
 
 Ex:
 ```clojure
 (grant :ALL
-       (on :bar)
-       (to :user-foo))
+       (resource :bar)
+       (user :user-foo))
 ```
 
 #### Revoke
 
 The `revoke` fn takes a permission identifier and clauses:
 
-* [on](#on)
-* [from](#from)
+* [resource](#resource)
+* [user](#user)
 
 Ex:
 ```clojure
 (revoke :ALL
-       (on :bar)
-       (from :user-foo))
+       (resource :bar)
+       (user :user-foo))
 ```
 
 #### create-user
@@ -337,14 +337,14 @@ Ex:
 
 The `list-permissions` fn takes clauses:
 
-* [permission](#permission)
+* [perm](#perm)
 * [resource](#resource)
 * [user](#user)
 * [recursive](#recursive) (defaults to true)
 
 Ex:
 ```clojure
-(list-permissions (permission :ALTER)
+(list-permissions (perm :ALTER)
                   (resource :bar)
                   (user :baz)
                   (recursive false))
@@ -467,7 +467,7 @@ be sent with the parent `batch`
 
 #### password
 
-#### permission
+#### perm
 
 #### recursive
 
