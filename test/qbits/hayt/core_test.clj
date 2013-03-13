@@ -137,24 +137,23 @@
 (deftest test-create-index
   (are [expected query] (= expected (->raw query))
        "CREATE INDEX ON foo (bar);"
-       (create-index :bar (on :foo))
+       (create-index :foo :bar)
 
        "CREATE INDEX \"baz\" ON foo (bar);"
-       (create-index :bar
-                     (on :foo)
+       (create-index :foo :bar
                      (index-name "baz"))))
 
 (deftest test-auth-fns
   (are [expected query] (= expected (->raw query))
        "GRANT FULL_ACCESS ON bar TO baz;"
        (grant :FULL_ACCESS
-              (on :bar)
-              (to :baz))
+              (resource :bar)
+              (user :baz))
 
        "REVOKE FULL_ACCESS ON bar FROM baz;"
        (revoke :FULL_ACCESS
-               (from :baz)
-               (on :bar)))
+               (user :baz)
+               (resource :bar))
 
        "CREATE USER foo WITH PASSWORD bar NOSUPERUSER;"
        (create-user :foo (password :bar))
@@ -181,14 +180,15 @@
 
        "LIST ALL ON bar OF baz;"
        (list-permissions (perm :ALL)
-                         (on :bar)
-                         (of :baz))
+                         (resource :bar)
+                         (user :baz))
 
        "LIST ALTER ON bar OF baz NORECURSIVE;"
        (list-permissions (perm :ALTER)
-                         (on :bar)
-                         (of :baz)
-                         (recursive false)))
+                         (resource :bar)
+                         (user :baz)
+                         (recursive false))))
+
 
 (deftest test-batch
   (is (= "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"

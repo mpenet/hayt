@@ -240,14 +240,14 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
      (str "GRANT "
           (cql-identifier permission)
           " "
-          (emit-row q [:on :to])))
+          (emit-row q [:resource :user])))
 
    :revoke
    (fn [q permission]
      (str "REVOKE "
           (cql-identifier permission)
           " "
-          (emit-row q [:on :from])))
+          (emit-row q [:resource :user])))
 
    :create-index
    (fn [q column]
@@ -281,7 +281,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
      (str "LIST "
           (cql-identifier perm)
           " "
-          (emit-row q [:on :of :recursive])))
+          (emit-row q [:resource :user :recursive])))
 
    :create-table
    (fn [q table]
@@ -312,6 +312,22 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
      (str "CREATE KEYSPACE " (cql-identifier ks)
           " "
           (emit-row q [:with])))
+
+   :resource
+   (fn [q resource]
+     ((emit :on) q resource))
+
+   :user
+   (fn [q user]
+     (cond
+      (contains? q :list-permissions)
+      ((emit :of) q user)
+
+      (contains? q :revoke)
+      ((emit :from) q user)
+
+      (contains? q :grant)
+      ((emit :to) q user)))
 
    :on
    (fn [q on]
