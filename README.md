@@ -64,6 +64,26 @@ Queries are composable using `q->`
 
 ```
 
+All these functions do is generate maps, if you want to build your own
+DSL on top of it, or use maps direcly feel free to do so.
+
+```clojure
+(select :users
+        (where {:foo :bar
+                :moo [> 3]
+                :meh [:> 4]
+                :baz [:in [5 6 7]]}))
+
+;; generates the following
+
+>> {:select :users
+    :columns [:a :b]
+    :where {:foo :bar
+            :moo [> 3]
+            :meh [:> 4]
+            :baz [:in [5 6 7]]}}
+```
+
 To compile the queries just use `->raw` or `->prepared`
 
 ```clojure
@@ -72,6 +92,10 @@ To compile the queries just use `->raw` or `->prepared`
 
 (->prepared (select :foo (where {:bar 1})))
 > ["SELECT * FROM foo WHERE bar=?;" [1]]
+
+
+(->raw {:select :foo :columns [:a :b]})
+> "SELECT a, b FROM foo;"
 
 ```
 
