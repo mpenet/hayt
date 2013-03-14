@@ -3,9 +3,7 @@
 https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 
 This one is really up to date:
-https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g#L384
-
-TODO: add undocumented auth stuff: create/drop user, grant/revoke"
+https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g"
   (:require [clojure.string :as string]))
 
 (declare emit-query emit-row)
@@ -538,9 +536,8 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
       (join-spaced)))
 
 (defn emit-query [query]
-  (let [entry-point (find-entry-clause query)
-        initial-value (entry-point query)]
-    (terminate ((emit entry-point) query initial-value))))
+  (let [entry-point (find-entry-clause query)]
+    (terminate ((emit entry-point) query (entry-point query)))))
 
 (defn ->raw
   "Compiles a hayt query into its raw/string value"
