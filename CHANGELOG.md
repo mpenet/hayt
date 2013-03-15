@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0-beta2
+
+* Fix all permission queries, grant, revoke, list-permission (missing
+  PERMISSION or PERMISSIONS)
+
+* Renamed list-permission to list-perm
+
 ## 0.4.0-beta1
 
 * cleaner AST and document (briefly) it's use in the readme
