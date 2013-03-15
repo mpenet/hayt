@@ -235,15 +235,16 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
    :grant
    (fn [q permission]
+
      (str "GRANT "
-          (cql-identifier permission)
+          ((emit :perm) q permission)
           " "
           (emit-row q [:resource :user])))
 
    :revoke
    (fn [q permission]
      (str "REVOKE "
-          (cql-identifier permission)
+          ((emit :perm) q permission)
           " "
           (emit-row q [:resource :user])))
 
@@ -274,10 +275,16 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
    :list-users
    (constantly "LIST USERS")
 
-   :list-permissions
+   :perm
+   (fn [q perm]
+     (if (= :ALL perm)
+       "PERMISSIONS ALL"
+       (str "PERMISSION " (cql-identifier perm))))
+
+   :list-perm
    (fn [q perm]
      (str "LIST "
-          (cql-identifier perm)
+          ((emit :perm) q perm)
           " "
           (emit-row q [:resource :user :recursive])))
 
@@ -318,7 +325,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
    :user
    (fn [q user]
      (cond
-      (contains? q :list-permissions)
+      (contains? q :list-perm)
       ((emit :of) q user)
 
       (contains? q :revoke)
@@ -517,7 +524,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 (def entry-clauses #{:select :insert :update :delete :use-keyspace :truncate
                      :drop-index :drop-table :drop-keyspace :create-index :grant
                      :revoke :create-user :alter-user :drop-user :list-users
-                     :list-permissions :batch :create-table :alter-table
+                     :list-perm :batch :create-table :alter-table
                      :alter-column-family :alter-keyspace :create-keyspace})
 
 (defn find-entry-clause
@@ -528,12 +535,12 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 (defn emit-row
   [row template]
   (->> template
-      (map (fn [token]
-             (let [context (get row token ::empty)]
-               (when-not (= ::empty context)
-                 ((get emit token emit-catch-all) row context)))))
-      (remove nil?)
-      (join-spaced)))
+       (map (fn [token]
+              (let [context (get row token ::empty)]
+                (when-not (= ::empty context)
+                  ((get emit token emit-catch-all) row context)))))
+       (remove nil?)
+       (join-spaced)))
 
 (defn emit-query [query]
   (let [entry-point (find-entry-clause query)]

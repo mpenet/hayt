@@ -191,14 +191,14 @@ Takes a keyspace identifier"
   []
   {:list-users nil})
 
-(defn list-permissions
+(defn list-perm
   "Takes clauses:
 * perm (defaults to ALL if not supplied)
 * user
 * resource
 * recursive (defaults to true)"
   [& clauses]
-  (into {:list-permissions :ALL :recursive true} clauses))
+  (into {:list-perm :ALL :recursive true} clauses))
 
 ;; Clauses
 
@@ -317,4 +317,4 @@ clause of a select/update/delete query"
 (defn perm
   "Clause: "
   [value]
-  {:list-permissions value})
+  {:list-perm value})
