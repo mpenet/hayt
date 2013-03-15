@@ -333,9 +333,9 @@ Ex:
 (list-users)
 ```
 
-#### list-permissions
+#### list-perm
 
-The `list-permissions` fn takes clauses:
+The `list-perm` fn takes clauses:
 
 * [perm](#perm)
 * [resource](#resource)
@@ -344,10 +344,10 @@ The `list-permissions` fn takes clauses:
 
 Ex:
 ```clojure
-(list-permissions (perm :ALTER)
-                  (resource :bar)
-                  (user :baz)
-                  (recursive false))
+(list-perm (perm :ALTER)
+           (resource :bar)
+           (user :baz)
+           (recursive false))
 ```
 
 
