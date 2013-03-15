@@ -12,22 +12,19 @@ The possible collection types are :map, :list and :set."
           (name t)
           (cql/join-comma (map name spec))))
 
-(def
-  ^{:doc "Generates a map type definition, takes 2 arguments, for
-  key and value types"}
-  map-type
+(def map-type
+  "Generates a map type definition, takes 2 arguments, for key and
+  value types"
   (partial coll-type :map))
 
-(def
-  ^{:doc "Generates a list type definition, takes a single argument
-  indicating the list elements type"}
-  list-type
+(def list-type
+  "Generates a list type definition, takes a single argument
+  indicating the list elements type"
   (partial coll-type :list))
 
-(def
-  ^{:doc "Generates a set type definition, takes a single argument
-  indicating the set elements type"}
-  set-type
+(def set-type
+  "Generates a set type definition, takes a single argument indicating
+  the set elements type"
   (partial coll-type :set))
 
 ;; Utilities

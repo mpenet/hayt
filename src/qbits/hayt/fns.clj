@@ -2,13 +2,16 @@
   (:require [qbits.hayt.cql :as cql])
   (:import [java.util Date]))
 
-(def ^{:doc "Returns a now() CQL function"} now
+(def now
+  "Returns a now() CQL function"
   (constantly (cql/cql-fn "now")))
 
-(def ^{:doc "Returns a count(*) CQL function"} count*
+(def count*
+  "Returns a count(*) CQL function"
   (constantly (cql/cql-fn "COUNT" :*)))
 
-(def ^{:doc "Returns a count(1) CQL function"} count1
+(def count1
+  "Returns a count(1) CQL function"
   (constantly (cql/cql-fn "COUNT" 1)))
 
 (defn date->epoch
