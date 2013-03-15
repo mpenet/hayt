@@ -228,7 +228,6 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
    :grant
    (fn [q permission]
-
      (str "GRANT "
           ((emit :perm) q permission)
           " "
