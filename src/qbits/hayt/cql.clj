@@ -145,13 +145,6 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
        join-comma
        wrap-brackets))
 
-
-(defn format-column-definition
-  [[k v]]
-  (join-spaced
-   [(cql-identifier k)
-    (cql-identifier v)]))
-
 (defn where-sequential-entry [column [op value]]
   (let [col-name (cql-identifier column)]
     (cond
@@ -392,7 +385,9 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
    :column-definitions
    (fn [q {:keys [primary-key] :as column-definitions}]
-     (-> (mapv format-column-definition
+     (-> (mapv (fn [[k v]]
+                 (join-spaced [(cql-identifier k)
+                               (cql-identifier v)]))
                (dissoc column-definitions :primary-key))
          (conj ((:primary-key emit) q primary-key))
          join-comma
