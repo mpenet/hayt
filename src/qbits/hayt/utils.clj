@@ -38,7 +38,7 @@ The possible collection types are :map, :list and :set."
 
 ;; ;; Utilities
 
-(t/ann apply-map ['[String (Vector* Any)] (APersistentMap Any Any) -> String])
+(t/ann apply-map ['[String '[Any]] (APersistentMap Any Any) -> String])
 (defn apply-map
   "Takes a generated prepared query with its arg vector containing
   keywords for placeholders and maps the supplied map to it"

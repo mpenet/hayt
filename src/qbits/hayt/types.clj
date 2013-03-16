@@ -66,11 +66,16 @@
 (t/def-alias UserClause '{:user CQLIdentifier})
 (t/def-alias PermClause '{:perm '[CQLPermission]})
 
+(t/def-alias AnyOperatorFn [Number * -> (U Boolean Number)]) ;; hairy
+(t/def-alias Operator (U ':= ':> ':< ':<= ':=> ':+ ':- AnyOperatorFn
+                         ;; '= '> '< '<= '=> '+ '-
+                         ))
 
-;; (t/ann b [(I '{:a '1} '{:b '2}) -> (Value 1)])
+
+;; (t/ann b [(U '{:a '1} '{:b '2} AnyOperatorFn) -> (Value 1)])
 ;; (defn b [x] 1)
 
-;; (t/cf (b {:a 1 :b 2}))
+;; 0(t/cf (b +))
 
 ;; (def x {:a 1 :b 2})
 ;; (t/ann x (I Number Integer))

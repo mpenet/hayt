@@ -7,8 +7,9 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
   (:require
    [clojure.string :as string]
    [clojure.core.typed :as t]
-   [qbits.hayt.types :refer [HaytQuery HaytClause MaybeSequential]])
-  (:import [clojure.lang Keyword]))
+   [qbits.hayt.types :refer :all])
+  ;; (:import [clojure.lang ])
+  )
 
 (declare emit-query emit-row)
 
@@ -63,6 +64,7 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
 (t/ann wrap-brackets TemplateFn)
 (t/ann wrap-sqbrackets TemplateFn)
 (t/ann terminate TemplateFn)
+(t/ann kw->c*const TemplateFn)
 (def quote-string #(str "'" (string/replace % "'" "''") "'"))
 (def dquote-string #(str "\"" (string/replace % "\" " "\"\"") "\""))
 (def wrap-parens #(str "(" % ")"))
@@ -147,8 +149,6 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
   (cql-identifier [x] x)
   (cql-value [x] (maybe-parameterize! x identity)))
 
-
-
 ;; TODO; not sure it works, check it
 (t/ann operators (HMap {=  (Value "=")
                         >  (Value ">")
@@ -165,15 +165,13 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
                 + "+"
                 - "-"})
 
-(t/def-alias Operator (U ':= ':> ':< ':<= ':=> ':+ ':-
-                         '= '> '< '<= '=> '+ '-))
-
 (t/ann operator? [Any -> Boolean])
 (defn operator?
   [op]
   (or (keyword? op)
       (get operators op)))
 
+(t/ann option-value [Any -> Boolean])
 (defn option-value
   [x]
   (if (or (number? x)
@@ -210,6 +208,9 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
            (cql-value value)))))
 
 ;; x and y can be an operator or a value
+(t/ann counter [CQLIdentifier (U '[Operator CQLValue]
+                                 '[CQLValue Operator])
+                -> String])
 (defn counter [column [x y]]
   (let [identifier (cql-identifier column)]
     (->> (if (operator? x)
