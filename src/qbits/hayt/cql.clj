@@ -7,10 +7,14 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
   (:require
    [clojure.string :as string]
    [clojure.core.typed :as t]
-   [qbits.hayt.types :refer [HaytQuery HaytClause]]))
+   [qbits.hayt.types :refer [HaytQuery HaytClause MaybeSeq]]))
 
 (declare emit-query emit-row)
+
+(t/ann *param-stack* '[Any])
 (def ^:dynamic *param-stack*)
+
+(t/ann *prepared-statement* Boolean)
 (def ^:dynamic *prepared-statement* false)
 
 ;; Wraps a CQL function (a template to clj.core/format and its
@@ -18,10 +22,12 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
 (defrecord CQLFn [name args])
 (defrecord CQLSafe [value])
 
+(t/ann cql-safe [Any * -> CQLSafe])
 (defn cql-safe
   [x]
   (->CQLSafe x))
 
+(t/ann cql-fn [String Any * -> CQLFn])
 (defn cql-fn
   [name & args]
   (map->CQLFn {:name name :args args}))
@@ -32,12 +38,30 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
      (do (swap! *param-stack* conj x) "?")
      (f x)))
 
+(t/def-alias JoinFn [MaybeSeq -> String])
+(t/ann join-and JoinFn)
+(t/ann join-spaced JoinFn)
+(t/ann join-comma JoinFn)
+(t/ann join-lf JoinFn)
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join " " %))
 (def join-comma #(string/join ", " %))
 (def join-lf #(string/join "\n" %))
+
+;;FIXME Any is a bit wide, but will do for now
+(t/def-alias FormatFn [Any Any -> String])
+(t/ann format-eq FormatFn)
+(t/ann format-kv FormatFn)
 (def format-eq #(str %1 " = " %2))
 (def format-kv #(str %1 " : "  %2))
+
+(t/def-alias TemplateFn [Any -> String])
+(t/ann quote-string TemplateFn)
+(t/ann dquote-string TemplateFn)
+(t/ann wrap-parens TemplateFn)
+(t/ann wrap-brackets TemplateFn)
+(t/ann wrap-sqbrackets TemplateFn)
+(t/ann terminate TemplateFn)
 (def quote-string #(str "'" (string/replace % "'" "''") "'"))
 (def dquote-string #(str "\"" (string/replace % "\" " "\"\"") "\""))
 (def wrap-parens #(str "(" % ")"))

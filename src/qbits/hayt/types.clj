@@ -2,7 +2,9 @@
   (:require
    [clojure.core.typed :as t])
   (:import
-   [clojure.lang APersistentMap]))
+   [clojure.lang APersistentMap Sequential]))
+
+(t/def-alias MaybeSeq (Option Sequential))
 
 (t/def-alias HaytQuery (APersistentMap Any Any))
 (t/def-alias HaytClause (APersistentMap Any Any))
@@ -26,3 +28,7 @@
                        ':uuid
                        ':varchar
                        ':varint))
+
+
+;; could make sense to define a type for possible parameterized values
+;; allowing to type check qbits.hayt.cql/maybe-parameterize! for instance
