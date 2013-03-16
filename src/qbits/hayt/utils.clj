@@ -2,7 +2,8 @@
   (:require
    [qbits.hayt.cql :as cql]
    [qbits.hayt.types :refer [C*Type C*CollType]]
-   [clojure.core.typed :as t]))
+   [clojure.core.typed :as t])
+  (:import [clojure.lang APersistentMap]))
 
 
 ;; Sugar for collection types
