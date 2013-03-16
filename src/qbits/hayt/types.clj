@@ -4,7 +4,7 @@
   (:import
    [clojure.lang APersistentMap Sequential]))
 
-(t/def-alias MaybeSeq (Option Sequential))
+(t/def-alias MaybeSequential (Option Sequential))
 
 (t/def-alias HaytQuery (APersistentMap Any Any))
 (t/def-alias HaytClause (APersistentMap Any Any))
