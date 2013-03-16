@@ -313,9 +313,10 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
    :perm
    (fn [q perm]
-     (if (= :all perm)
-       "PERMISSIONS ALL"
-       (str "PERMISSION " (-> perm kw->c*const cql-identifier))))
+     (let [raw-perm (kw->c*const perm)]
+       (if (= "ALL" raw-perm)
+         "PERMISSIONS ALL"
+         (str "PERMISSION " raw-perm))))
 
    :list-perm
    (fn [q perm]
