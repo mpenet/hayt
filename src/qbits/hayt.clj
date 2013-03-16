@@ -2,11 +2,8 @@
   (:require
    [clojure.core.typed :as t]
    [useful.ns :as uns]
-   [qbits.hayt.cql :as cql])
-  (:import [clojure.lang APersistentMap]))
-
-(t/def-alias HaytQuery (APersistentMap Any Any))
-(t/def-alias HaytClause (APersistentMap Any Any))
+   [qbits.hayt.cql :as cql]
+   [qbits.hayt.types :refer [HaytQuery HaytClause]]))
 
 (t/ann ->raw [HaytQuery -> String])
 (def ->raw cql/->raw)

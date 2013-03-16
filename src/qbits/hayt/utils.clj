@@ -1,36 +1,13 @@
 (ns qbits.hayt.utils
   (:require
    [qbits.hayt.cql :as cql]
-   [clojure.core.typed :as t])
-  (:import
-   [clojure.lang
-    Keyword
-    APersistentMap]))
+   [qbits.hayt.types :refer [C*Type C*CollType]]
+   [clojure.core.typed :as t]))
 
-(t/def-alias C*CollKeyword (U (Value :list)
-                              (Value :map)
-                              (Value :set)))
-
-(t/def-alias C*Types (U (Value :ascii)
-                        (Value :bigint)
-                        (Value :blob)
-                        (Value :boolean)
-                        (Value :counter)
-                        (Value :decimal)
-                        (Value :double)
-                        (Value :float)
-                        (Value :inet)
-                        (Value :int)
-                        (Value :text)
-                        (Value :timestamp)
-                        (Value :timeuuid)
-                        (Value :uuid)
-                        (Value :varchar)
-                        (Value :varint)))
 
 ;; Sugar for collection types
-(t/ann coll-type (Fn [C*CollKeyword C*Types -> String]
-                     [C*CollKeyword C*Types C*Types -> String]))
+(t/ann coll-type (Fn [C*CollType C*Type -> String]
+                     [C*CollType C*Type C*Type -> String]))
 (defn coll-type
   "Helps with the generation of Collection types definitions.
 Takes a CQL type as keyword and it's arguments: ex (coll-type :map :int :uuid).
@@ -40,19 +17,19 @@ The possible collection types are :map, :list and :set."
           (name t)
           (cql/join-comma (map name spec))))
 
-(t/ann map-type [C*Types C*Types -> String])
+(t/ann map-type [C*Type C*Type -> String])
 (def map-type
   "Generates a map type definition, takes 2 arguments, for key and
   value types"
   (partial coll-type :map))
 
-(t/ann map-type [C*Types -> String])
+(t/ann map-type [C*Type -> String])
 (def list-type
   "Generates a list type definition, takes a single argument
   indicating the list elements type"
   (partial coll-type :list))
 
-(t/ann set-type [C*Types -> String])
+(t/ann set-type [C*Type -> String])
 (def set-type
   "Generates a set type definition, takes a single argument indicating
   the set elements type"
