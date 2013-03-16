@@ -13,7 +13,7 @@
 (t/def-alias XMap (APersistentMap Any Any))
 
 (t/def-alias HaytQuery XMap)
-(t/def-alias HaytClause XMap)
+(t/def-alias HaytClause XMap) ;; to be replaced by an union of *Clause
 (t/def-alias CompiledQuery String)
 
 (t/def-alias C*CollType (U ':list ':map ':set))
@@ -42,7 +42,7 @@
 (t/def-alias CQLValue Any)
 
 ;; clauses
-(t/def-alias ColumnClause '{:columns '[CQLIdentifier]})
+(t/def-alias ColumnsClause '{:columns '[CQLIdentifier]})
 (t/def-alias ColumnDefinitionsClause '{:column-definitions '{CQLIdentifier (U C*Type '[CQLIdentifier])}})
 (t/def-alias UsingClause '{:using '[(U CQLIdentifier Number)]})
 (t/def-alias LimitClause '{:limit Number})

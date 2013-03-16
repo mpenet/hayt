@@ -1,8 +1,7 @@
 (ns qbits.hayt.dsl
   (:require
    [clojure.core.typed :as t]
-   [qbits.hayt.types
-    :refer [HaytQuery HaytClause CQLIdentifier CQLPermission]])
+   [qbits.hayt.types :refer :all])
   (:import [clojure.lang APersistentMap Sequential]))
 
 (t/ann select [CQLIdentifier HaytClause * -> HaytQuery])
@@ -230,7 +229,7 @@ Takes a keyspace identifier"
 
 ;; Clauses
 
-(t/ann columns [CQLIdentifier * -> ColumnClause])
+(t/ann columns [CQLIdentifier * -> ColumnsClause])
 (defn columns
   "Clause: takes columns identifiers"
   [& columns]
@@ -283,7 +282,7 @@ clause of a select/update/delete query"
   [values]
   {:values values})
 
-(t/ann values [{CQLIdentifier Any} -> HaytClause])
+(t/ann values ['{CQLIdentifier Any} -> HaytClause])
 (defn set-columns
   "Clause: "
   [values]
