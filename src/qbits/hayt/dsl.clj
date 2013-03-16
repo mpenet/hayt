@@ -267,8 +267,8 @@ Takes a keyspace identifier"
   [& queries]
   {:batch queries})
 
-(t/ann where [(U '{CQLIdentifier Any}
-                 '['[CQLIdentifier Any]])
+(t/ann where [(U '{CQLIdentifier CQLValue}
+                 '['[CQLIdentifier CQLValue]])
               -> WhereClause])
 (defn where
   "Clause: takes a map or a vector of pairs to compose the where
@@ -276,13 +276,13 @@ clause of a select/update/delete query"
   [args]
   {:where args})
 
-(t/ann values ['{CQLIdentifier Any} -> ValuesClause])
+(t/ann values ['{CQLIdentifier CQLValue} -> ValuesClause])
 (defn values
   "Clause: "
   [values]
   {:values values})
 
-(t/ann values ['{CQLIdentifier Any} -> HaytClause])
+(t/ann values ['{CQLIdentifier CQLValue} -> HaytClause])
 (defn set-columns
   "Clause: "
   [values]
