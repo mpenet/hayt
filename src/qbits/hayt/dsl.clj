@@ -2,7 +2,8 @@
   (:require
    [clojure.core.typed :as t]
    [qbits.hayt.types
-    :refer [HaytQuery HaytClause CQLIdentifier]]))
+    :refer [HaytQuery HaytClause CQLIdentifier CQLPermission]])
+  (:import [clojure.lang APersistentMap]))
 
 (t/ann select [CQLIdentifier HaytClause * -> HaytQuery])
 (defn select
@@ -229,58 +230,75 @@ Takes a keyspace identifier"
 
 ;; Clauses
 
+(t/ann columns [CQLIdentifier * -> HaytClause])
 (defn columns
   "Clause: takes columns identifiers"
   [& columns]
   {:columns columns})
 
+;; TODO: create an alias for possible values
+(t/ann column-definitions [Any -> HaytClause])
 (defn column-definitions
   "Clause: "
   [column-definitions]
   {:column-definitions column-definitions})
 
+;; TODO: create an alias for possible values
+(t/ann using [Any * -> HaytClause])
 (defn using
   "Clause: takes keyword/value pairs for :timestamp and :ttl"
   [& args]
   {:using (apply hash-map args)})
 
+(t/ann limit [Number -> HaytClause])
 (defn limit
   "Clause: takes a numeric value"
   [n]
   {:limit n})
 
+(t/ann order-by ['[CQLIdentifier (U ':asc ':desc)] * -> HaytClause])
 (defn order-by
   "Clause: takes vectors of 2 elements, where the first is the column
   identifier and the second is the ordering as keyword.
   ex: :asc, :desc"
   [& columns] {:order-by columns})
 
+(t/ann queries [HaytQuery * -> HaytClause])
 (defn queries
   "Clause: takes hayt queries to be executed during a batch operation."
   [& queries]
   {:batch queries})
 
+;; TODO: create an alias for possible values
+(t/ann column-definitions [(APersistentMap Any Any) -> HaytClause])
 (defn where
   "Clause: takes a map or a vector of pairs to compose the where
 clause of a select/update/delete query"
   [args]
   {:where args})
 
+;; TODO: create an alias for possible values
+(t/ann values [(APersistentMap Any Any) -> HaytClause])
 (defn values
   "Clause: "
   [values]
   {:values values})
 
+;; TODO: create an alias for possible values
+(t/ann values [(APersistentMap Any Any) -> HaytClause])
 (defn set-columns
   "Clause: "
   [values]
   {:set-columns values})
 
+;; TODO: create an alias for possible values
+(t/ann with [(APersistentMap Any Any) -> HaytClause])
 (defn with
   "Clause: "
   [values]
   {:with values})
 
+(t/ann index-name [CQLIdentifier -> HaytClause])
 (defn index-name
   "Clause: "
   [value]
@@ -306,41 +324,49 @@ clause of a select/update/delete query"
   [value]
   {:allow-filtering value})
 
+(t/ann logged [Boolean -> HaytClause])
 (defn logged
   "Clause: "
   [value]
   {:logged value})
 
+(t/ann counter [Boolean -> HaytClause])
 (defn counter
   "Clause: "
   [value]
   {:counter value})
 
+(t/ann superuser [Boolean -> HaytClause])
 (defn superuser
   "Clause: "
   [value]
   {:superuser value})
 
+(t/ann password [CQLIdentifier -> HaytClause])
 (defn password
   "Clause: "
   [value]
   {:password value})
 
+(t/ann recursive [Boolean -> HaytClause])
 (defn recursive
   "Clause: "
   [value]
   {:recursive value})
 
+(t/ann resource [CQLIdentifier -> HaytClause])
 (defn resource
   "Clause: "
   [value]
   {:resource value})
 
+(t/ann user [CQLIdentifier -> HaytClause])
 (defn user
   "Clause: "
   [value]
   {:user value})
 
+(t/ann perm [CQLPermission -> HaytClause])
 (defn perm
   "Clause: "
   [value]
