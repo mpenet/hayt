@@ -32,6 +32,9 @@
                        ':varchar
                        ':varint))
 
+(t/def-alias CQLPermission (U ':all ':alter ':authorize ':create ':drop ':modify
+                              ':select))
+
 (t/def-alias CQLIdentifier (U Keyword String))
 
 
