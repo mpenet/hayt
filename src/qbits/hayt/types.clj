@@ -13,7 +13,6 @@
 (t/def-alias XMap (APersistentMap Any Any))
 
 (t/def-alias HaytQuery XMap)
-(t/def-alias HaytClause XMap) ;; to be replaced by an union of *Clause
 (t/def-alias CompiledQuery String)
 
 (t/def-alias C*CollType (U ':list ':map ':set))
@@ -71,7 +70,29 @@
                          ;; '= '> '< '<= '=> '+ '-
                          ))
 
-
+;; (t/def-alias HaytClause XMap) ;; to be replaced by an union of *Clause
+(t/def-alias HaytClause (U ColumnsClause
+                           ColumnDefinitionsClause
+                           UsingClause
+                           LimitClause
+                           OrderByClause
+                           QueriesClause
+                           WhereClause
+                           ValuesClause
+                           SetColumnsClause
+                           WithClause
+                           IndexNameClause
+                           AlterColumnClause
+                           RenameColumnClause
+                           AddColumnClause
+                           AllowFilteringClause
+                           LoggedClause
+                           CounterClause
+                           SuperUserClause
+                           PasswordClause
+                           RecursiveClause
+                           UserClause
+                           PermClause))
 ;; (t/ann b [(U '{:a '1} '{:b '2} AnyOperatorFn) -> (Value 1)])
 ;; (defn b [x] 1)
 

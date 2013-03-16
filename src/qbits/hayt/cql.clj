@@ -570,6 +570,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
   [qmap]
   (some entry-clauses (keys qmap)))
 
+
 (defn emit-row
   [row template]
   (->> template
@@ -580,18 +581,19 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
        (remove nil?)
        (join-spaced)))
 
+;; (t/ann )
 (defn emit-query [query]
   (let [entry-point (find-entry-clause query)]
     (terminate ((emit entry-point) query (entry-point query)))))
 
-(t/ann ->raw [HaytQuery -> String])
+(t/ann ->raw [HaytQuery -> CompiledQuery])
 (defn ->raw
   "Compiles a hayt query into its raw/string value"
   [query]
   (binding [*prepared-statement* false]
     (emit-query query)))
 
-(t/ann ->prepared [HaytQuery -> '[String '[Any]]])
+(t/ann ->prepared [HaytQuery -> '[CompiledQuery '[Any]]])
 (defn ->prepared
   "Compiles a hayt query into a vector composed of the prepared string
   query and a vector of parameters."
