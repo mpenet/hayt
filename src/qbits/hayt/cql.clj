@@ -7,7 +7,8 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
   (:require
    [clojure.string :as string]
    [clojure.core.typed :as t]
-   [qbits.hayt.types :refer [HaytQuery HaytClause MaybeSequential]]))
+   [qbits.hayt.types :refer [HaytQuery HaytClause MaybeSequential]])
+  (:import [clojure.lang Keyword]))
 
 (declare emit-query emit-row)
 
@@ -145,6 +146,16 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
   (cql-identifier [x] x)
   (cql-value [x] (maybe-parameterize! x identity)))
 
+
+
+;; TODO; not sure it works, check it
+(t/ann operators (HMap {=  (Value "=")
+                        >  (Value ">")
+                        <  (Value "<")
+                        <= (Value "<=")
+                        >= (Value ">=")
+                        +  (Value "+")
+                        -  (Value "-")}))
 (def operators {= "="
                 > ">"
                 < "<"
@@ -152,6 +163,11 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
                 >= ">="
                 + "+"
                 - "-"})
+
+(t/def-alias Operator (U ':= ':> ':< ':<= ':=> ':+ ':-
+                         '= '> '< '<= '=> '+ '-))
+
+(t/ann operator? [Any -> Boolean])
 (defn operator?
   [op]
   (or (keyword? op)
