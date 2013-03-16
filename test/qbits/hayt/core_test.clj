@@ -146,12 +146,12 @@
 (deftest test-auth-fns
   (are [expected query] (= expected (->raw query))
        "GRANT PERMISSION FULL_ACCESS ON bar TO baz;"
-       (grant :FULL_ACCESS
+       (grant :full-access
               (resource :bar)
               (user :baz))
 
        "REVOKE PERMISSION FULL_ACCESS ON bar FROM baz;"
-       (revoke :FULL_ACCESS
+       (revoke :full-access
                (user :baz)
                (resource :bar))
 
@@ -179,7 +179,7 @@
        (list-users)
 
        "LIST PERMISSIONS ALL ON bar OF baz;"
-       (list-perm (perm :ALL)
+       (list-perm (perm :all)
                   (resource :bar)
                   (user :baz))
 
@@ -188,7 +188,7 @@
                   (user :baz))
 
        "LIST PERMISSION ALTER ON bar OF baz NORECURSIVE;"
-       (list-perm (perm :ALTER)
+       (list-perm (perm :alter)
                   (resource :bar)
                   (user :baz)
                   (recursive false))))
