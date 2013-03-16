@@ -3,7 +3,7 @@
    [clojure.core.typed :as t]
    [qbits.hayt.types
     :refer [HaytQuery HaytClause CQLIdentifier CQLPermission]])
-  (:import [clojure.lang APersistentMap]))
+  (:import [clojure.lang APersistentMap Sequential]))
 
 (t/ann select [CQLIdentifier HaytClause * -> HaytQuery])
 (defn select
@@ -230,143 +230,144 @@ Takes a keyspace identifier"
 
 ;; Clauses
 
-(t/ann columns [CQLIdentifier * -> HaytClause])
+(t/ann columns [CQLIdentifier * -> ColumnClause])
 (defn columns
   "Clause: takes columns identifiers"
   [& columns]
   {:columns columns})
 
-;; TODO: create an alias for possible values
-(t/ann column-definitions [Any -> HaytClause])
+(t/ann column-definitions ['{CQLIdentifier (U C*Type '[CQLIdentifier])}
+                           -> ColumnDefinitionsClause])
 (defn column-definitions
   "Clause: "
   [column-definitions]
   {:column-definitions column-definitions})
 
-;; TODO: create an alias for possible values
-(t/ann using [Any * -> HaytClause])
+(t/ann using [(U CQLIdentifier (U CQLIdentifier Number)) * -> UsingClause])
 (defn using
   "Clause: takes keyword/value pairs for :timestamp and :ttl"
   [& args]
   {:using (apply hash-map args)})
 
-(t/ann limit [Number -> HaytClause])
+(t/ann limit [Number -> LimitClause])
 (defn limit
   "Clause: takes a numeric value"
   [n]
   {:limit n})
 
-(t/ann order-by ['[CQLIdentifier (U ':asc ':desc)] * -> HaytClause])
+(t/ann order-by ['[CQLIdentifier (U ':asc ':desc)] * -> OrderByClause])
 (defn order-by
   "Clause: takes vectors of 2 elements, where the first is the column
   identifier and the second is the ordering as keyword.
   ex: :asc, :desc"
   [& columns] {:order-by columns})
 
-(t/ann queries [HaytQuery * -> HaytClause])
+(t/ann queries [HaytQuery * -> QueriesClause])
 (defn queries
   "Clause: takes hayt queries to be executed during a batch operation."
   [& queries]
   {:batch queries})
 
-;; TODO: create an alias for possible values
-(t/ann column-definitions [(APersistentMap Any Any) -> HaytClause])
+(t/ann where [(U '{CQLIdentifier Any}
+                 '['[CQLIdentifier Any]])
+              -> WhereClause])
 (defn where
   "Clause: takes a map or a vector of pairs to compose the where
 clause of a select/update/delete query"
   [args]
   {:where args})
 
-;; TODO: create an alias for possible values
-(t/ann values [(APersistentMap Any Any) -> HaytClause])
+(t/ann values ['{CQLIdentifier Any} -> ValuesClause])
 (defn values
   "Clause: "
   [values]
   {:values values})
 
-;; TODO: create an alias for possible values
-(t/ann values [(APersistentMap Any Any) -> HaytClause])
+(t/ann values [{CQLIdentifier Any} -> HaytClause])
 (defn set-columns
   "Clause: "
   [values]
   {:set-columns values})
 
-;; TODO: create an alias for possible values
-(t/ann with [(APersistentMap Any Any) -> HaytClause])
+(t/ann with [XMap -> WithClause])
 (defn with
   "Clause: "
   [values]
   {:with values})
 
-(t/ann index-name [CQLIdentifier -> HaytClause])
+(t/ann index-name [CQLIdentifier -> IndexNameClause])
 (defn index-name
   "Clause: "
   [value]
   {:index-name value})
 
+(t/ann alter-column [CQLIdentifier C*Type -> AddColumnClause])
 (defn alter-column
   "Clause: "
   [& args]
   {:alter-column args})
 
+(t/ann add-column [CQLIdentifier C*Type -> AddColumnClause])
 (defn add-column
   "Clause: "
   [& args]
   {:add-column args})
 
+(t/ann rename-column [CQLIdentifier CQLIdentifier -> RenameColumnClause])
 (defn rename-column
   "Clause: "
   [& args]
   {:rename-column args})
 
+(t/ann allow-filtering [Boolean -> AllowFilteringClause])
 (defn allow-filtering
   "Clause: "
   [value]
   {:allow-filtering value})
 
-(t/ann logged [Boolean -> HaytClause])
+(t/ann logged [Boolean -> LoggedClause])
 (defn logged
   "Clause: "
   [value]
   {:logged value})
 
-(t/ann counter [Boolean -> HaytClause])
+(t/ann counter [Boolean -> CounterClause])
 (defn counter
   "Clause: "
   [value]
   {:counter value})
 
-(t/ann superuser [Boolean -> HaytClause])
+(t/ann superuser [Boolean -> SuperUserClause])
 (defn superuser
   "Clause: "
   [value]
   {:superuser value})
 
-(t/ann password [CQLIdentifier -> HaytClause])
+(t/ann password [CQLIdentifier -> PasswordClause])
 (defn password
   "Clause: "
   [value]
   {:password value})
 
-(t/ann recursive [Boolean -> HaytClause])
+(t/ann recursive [Boolean -> RecursiveClause])
 (defn recursive
   "Clause: "
   [value]
   {:recursive value})
 
-(t/ann resource [CQLIdentifier -> HaytClause])
+(t/ann resource [CQLIdentifier -> ResourceClause])
 (defn resource
   "Clause: "
   [value]
   {:resource value})
 
-(t/ann user [CQLIdentifier -> HaytClause])
+(t/ann user [CQLIdentifier -> UserClause])
 (defn user
   "Clause: "
   [value]
   {:user value})
 
-(t/ann perm [CQLPermission -> HaytClause])
+(t/ann perm [CQLPermission -> PermClause])
 (defn perm
   "Clause: "
   [value]
