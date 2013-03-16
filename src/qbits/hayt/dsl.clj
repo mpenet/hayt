@@ -1,5 +1,10 @@
-(ns qbits.hayt.dsl)
+(ns qbits.hayt.dsl
+  (:require
+   [clojure.core.typed :as t]
+   [qbits.hayt.types
+    :refer [HaytQuery HaytClause CQLIdentifier]]))
 
+(t/ann select [CQLIdentifier HaytClause * -> HaytQuery])
 (defn select
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
 
@@ -13,6 +18,7 @@ Takes a table identifier and additional clause arguments:
   [table & clauses]
   (into {:select table :columns :*} clauses))
 
+(t/ann insert [CQLIdentifier HaytClause * -> HaytQuery])
 (defn insert
   "http://cassandra.apache.org/doc/cql3/CQL.html#insertStmt
 
@@ -23,6 +29,7 @@ Takes a table identifier and additional clause arguments:
   [table & clauses]
   (into {:insert table} clauses))
 
+(t/ann update [CQLIdentifier HaytClause * -> HaytQuery])
 (defn update
   "http://cassandra.apache.org/doc/cql3/CQL.html#updateStmt
 
@@ -35,6 +42,7 @@ Takes a table identifier and additional clause arguments:
   [table & clauses]
   (into {:update table} clauses))
 
+(t/ann delete [CQLIdentifier HaytClause * -> HaytQuery])
 (defn delete
   "http://cassandra.apache.org/doc/cql3/CQL.html#deleteStmt
 
@@ -47,6 +55,7 @@ Takes a table identifier and additional clause arguments:
   [table & clauses]
   (into {:delete table :columns :*} clauses))
 
+(t/ann truncate [CQLIdentifier -> HaytQuery])
 (defn truncate
   "http://cassandra.apache.org/doc/cql3/CQL.html#truncateStmt
 
@@ -54,6 +63,7 @@ Takes a table identifier."
   [table]
   {:truncate table})
 
+(t/ann drop-keyspace [CQLIdentifier -> HaytQuery])
 (defn drop-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropKeyspaceStmt
 
@@ -61,6 +71,7 @@ Takes a keyspace identifier"
   [keyspace]
   {:drop-keyspace keyspace})
 
+(t/ann drop-table [CQLIdentifier -> HaytQuery])
 (defn drop-table
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropTableStmt
 
@@ -68,6 +79,7 @@ Takes a table identifier"
   [table]
   {:drop-table table})
 
+(t/ann drop-index [CQLIdentifier -> HaytQuery])
 (defn drop-index
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropIndexStmt
 
@@ -75,6 +87,7 @@ Takes an index identifier."
   [index]
   {:drop-index index})
 
+(t/ann create-index [CQLIdentifier CQLIdentifier HaytClause * -> HaytQuery])
 (defn create-index
   "http://cassandra.apache.org/doc/cql3/CQL.html#createIndexStmt
 
@@ -86,6 +99,7 @@ Takes a table identifier and additional clause arguments:
   [table name & clauses]
   (into {:create-index name :on table} clauses))
 
+(t/ann create-keyspace [CQLIdentifier HaytClause * -> HaytQuery])
 (defn create-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#createKeyspaceStmt
 
@@ -95,6 +109,7 @@ Takes a keyspace identifier and clauses:
   [keyspace & clauses]
   (into {:create-keyspace keyspace} clauses))
 
+(t/ann create-table [CQLIdentifier HaytClause * -> HaytQuery])
 (defn create-table
   "Takes a table identifier and additional clause arguments:
 
@@ -103,6 +118,7 @@ Takes a keyspace identifier and clauses:
   [table & clauses]
   (into {:create-table table} clauses))
 
+(t/ann alter-table [CQLIdentifier HaytClause * -> HaytQuery])
 (defn alter-table
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
 
@@ -116,6 +132,7 @@ Takes a table identifier and additional clause arguments:
   [table & clauses]
   (into {:alter-table table} clauses))
 
+(t/ann alter-column-family [CQLIdentifier HaytClause * -> HaytQuery])
 (defn alter-column-family
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
 
@@ -130,6 +147,7 @@ Takes a column-familiy identifier and additional clause arguments:
   [column-family & clauses]
   (into {:alter-column-family column-family} clauses))
 
+(t/ann truncate [CQLIdentifier HaytClause * -> HaytQuery])
 (defn alter-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterKeyspaceStmt
 
@@ -138,6 +156,7 @@ Takes a keyspace identifier and a `with` clause.
   [keyspace & clauses]
   (into {:alter-keyspace keyspace} clauses))
 
+(t/ann batch [HaytClause * -> HaytQuery])
 (defn batch
   "http://cassandra.apache.org/doc/cql3/CQL.html#batchStmt
 
@@ -148,6 +167,7 @@ Takes hayt queries  optional clauses:
   [& clauses]
   (into {:logged true} clauses))
 
+(t/ann use-keyspace [CQLIdentifier -> HaytQuery])
 (defn use-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#useStmt
 
@@ -155,6 +175,7 @@ Takes a keyspace identifier"
   [keyspace]
   {:use-keyspace keyspace})
 
+(t/ann grant [CQLIdentifier HaytClause * -> HaytQuery])
 (defn grant
   "Takes clauses:
 * resource
@@ -162,6 +183,7 @@ Takes a keyspace identifier"
   [perm & clauses]
   (into {:grant perm} clauses))
 
+(t/ann revoke [CQLIdentifier HaytClause * -> HaytQuery])
 (defn revoke
   "Takes clauses:
 * resource
@@ -169,6 +191,7 @@ Takes a keyspace identifier"
   [perm & clauses]
   (into {:revoke perm} clauses))
 
+(t/ann create-user [CQLIdentifier HaytClause * -> HaytQuery])
 (defn create-user
   "Takes clauses:
 * password
@@ -176,6 +199,7 @@ Takes a keyspace identifier"
   [user & clauses]
   (into {:create-user user :superuser false} clauses))
 
+(t/ann alter-user [CQLIdentifier HaytClause * -> HaytQuery])
 (defn alter-user
   "Takes clauses:
 * password
@@ -183,14 +207,17 @@ Takes a keyspace identifier"
   [user & clauses]
   (into {:alter-user user :superuser false} clauses))
 
+(t/ann drop-user [CQLIdentifier -> HaytQuery])
 (defn drop-user
   [user]
   {:drop-user user})
 
+(t/ann list-users [-> HaytQuery])
 (defn list-users
   []
   {:list-users nil})
 
+(t/ann list-perm [HaytClause * -> HaytQuery])
 (defn list-perm
   "Takes clauses:
 * perm (defaults to ALL if not supplied)

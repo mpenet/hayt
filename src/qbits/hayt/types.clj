@@ -2,7 +2,10 @@
   (:require
    [clojure.core.typed :as t])
   (:import
-   [clojure.lang APersistentMap Sequential]))
+   [clojure.lang
+    Keyword
+    APersistentMap
+    Sequential]))
 
 (t/def-alias MaybeSequential (t/Option Sequential))
 
@@ -28,6 +31,8 @@
                        ':uuid
                        ':varchar
                        ':varint))
+
+(t/def-alias CQLIdentifier (U Keyword String))
 
 
 ;; could make sense to define a type for possible parameterized values
