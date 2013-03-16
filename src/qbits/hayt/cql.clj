@@ -4,7 +4,10 @@ https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 
 This one is really up to date:
 https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g"
-  (:require [clojure.string :as string]))
+  (:require
+   [clojure.string :as string]
+   [clojure.core.typed :as t]
+   [qbits.hayt.types :refer [HaytQuery HaytClause]]))
 
 (declare emit-query emit-row)
 (def ^:dynamic *param-stack*)
@@ -540,12 +543,14 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
   (let [entry-point (find-entry-clause query)]
     (terminate ((emit entry-point) query (entry-point query)))))
 
+(t/ann ->raw [HaytQuery -> String])
 (defn ->raw
   "Compiles a hayt query into its raw/string value"
   [query]
   (binding [*prepared-statement* false]
     (emit-query query)))
 
+(t/ann ->prepared [HaytQuery -> '[String '[Any]]])
 (defn ->prepared
   "Compiles a hayt query into a vector composed of the prepared string
   query and a vector of parameters."
