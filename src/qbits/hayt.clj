@@ -5,15 +5,10 @@
    [qbits.hayt.cql :as cql]
    [qbits.hayt.types :refer [HaytQuery HaytClause]]))
 
-(t/ann ->raw [HaytQuery -> String])
 (def ->raw cql/->raw)
-
-(t/ann ->prepared [HaytQuery -> '[String '[Any]]])
 (def ->prepared cql/->prepared)
 
-;; (prn (t/cf (->raw {:select :users :columns :*})))
-
-(t/ann q-> [HaytQuery HaytClause * -> String])
+(t/ann q-> [HaytQuery HaytClause * -> HaytQuery])
 (defn q->
   "Allows query composition, extending an existing query with new
   clauses"
