@@ -2,7 +2,7 @@
   (:require
    [clojure.core.typed :as t]
    [qbits.hayt.types :refer :all])
-  (:import [clojure.lang APersistentMap Sequential]))
+  (:import [clojure.lang APersistentMap Seqable]))
 
 (t/ann select [CQLIdentifier HaytClause * -> HaytQuery])
 (defn select
@@ -235,7 +235,8 @@ Takes a keyspace identifier"
   [& columns]
   {:columns columns})
 
-(t/ann column-definitions ['{CQLIdentifier (U C*Type '[CQLIdentifier])}
+(t/ann column-definitions [(APersistentMap CQLIdentifier
+                                           (U C*Type (Seqable CQLIdentifier)))
                            -> ColumnDefinitionsClause])
 (defn column-definitions
   "Clause: "
@@ -267,8 +268,8 @@ Takes a keyspace identifier"
   [& queries]
   {:batch queries})
 
-(t/ann where [(U '{CQLIdentifier CQLValue}
-                 '['[CQLIdentifier CQLValue]])
+(t/ann where [(U (APersistentMap CQLIdentifier CQLValue)
+                 '[CQLIdentifier CQLValue])
               -> WhereClause])
 (defn where
   "Clause: takes a map or a vector of pairs to compose the where
@@ -276,13 +277,13 @@ clause of a select/update/delete query"
   [args]
   {:where args})
 
-(t/ann values ['{CQLIdentifier CQLValue} -> ValuesClause])
+(t/ann values [(APersistentMap CQLIdentifier CQLValue) -> ValuesClause])
 (defn values
   "Clause: "
   [values]
   {:values values})
 
-(t/ann values ['{CQLIdentifier CQLValue} -> HaytClause])
+(t/ann values [(APersistentMap CQLIdentifier CQLValue) -> HaytClause])
 (defn set-columns
   "Clause: "
   [values]

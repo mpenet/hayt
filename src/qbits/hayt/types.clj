@@ -5,7 +5,7 @@
    [clojure.lang
     Named
     APersistentMap
-    Sequential]))
+    Seqable]))
 
 (t/def-alias MaybeSequential (t/Option Sequential))
 
@@ -41,20 +41,22 @@
 (t/def-alias CQLValue Any)
 
 ;; clauses
-(t/def-alias ColumnsClause '{:columns '[CQLIdentifier]})
-(t/def-alias ColumnDefinitionsClause '{:column-definitions '{CQLIdentifier (U C*Type '[CQLIdentifier])}})
-(t/def-alias UsingClause '{:using '[(U CQLIdentifier Number)]})
+(t/def-alias ColumnsClause '{:columns (Seqable CQLIdentifier)})
+(t/def-alias ColumnDefinitionsClause '{:column-definitions
+                                       (APersistentMap CQLIdentifier
+                                                       (U C*Type '[CQLIdentifier]))})
+(t/def-alias UsingClause '{:using (Seqable (U CQLIdentifier Number))})
 (t/def-alias LimitClause '{:limit Number})
-(t/def-alias OrderByClause '{:order-by '[CQLIdentifier (U ':asc ':desc)]})
-(t/def-alias QueriesClause '{:queries '[HaytClause]})
-(t/def-alias WhereClause '{:where '{CQLIdentifier CQLValue}})
-(t/def-alias ValuesClause '{:values '{CQLIdentifier CQLValue}})
-(t/def-alias SetColumnsClause '{:set-columns '{CQLIdentifier CQLValue}})
+(t/def-alias OrderByClause '{:order-by (Seqable '[CQLIdentifier (U ':asc ':desc)])})
+(t/def-alias QueriesClause '{:queries (Seqable HaytQuery)})
+(t/def-alias WhereClause '{:where (APersistentMap CQLIdentifier CQLValue)})
+(t/def-alias ValuesClause '{:values (APersistentMap CQLIdentifier CQLValue)})
+(t/def-alias SetColumnsClause '{:set-columns (APersistentMap CQLIdentifier CQLValue)})
 (t/def-alias WithClause '{:with XMap})
 (t/def-alias IndexNameClause '{:index-name CQLIdentifier})
-(t/def-alias AlterColumnClause '{:alter-column '['CQLIdentifier 'C*Type]})
-(t/def-alias RenameColumnClause '{:rename-column '['CQLIdentifier 'CQLIdentifier]})
-(t/def-alias AddColumnClause '{:add-column '['CQLIdentifier 'C*Type]})
+(t/def-alias AlterColumnClause '{:alter-column '[CQLIdentifier C*Type]})
+(t/def-alias RenameColumnClause '{:rename-column '[CQLIdentifier CQLIdentifier]})
+(t/def-alias AddColumnClause '{:add-column '[CQLIdentifier C*Type]})
 (t/def-alias AllowFilteringClause '{:allow-filtering Boolean})
 (t/def-alias LoggedClause '{:logged Boolean})
 (t/def-alias CounterClause '{:counter Boolean})
@@ -63,7 +65,7 @@
 (t/def-alias RecursiveClause '{:recursive Boolean})
 (t/def-alias ResourceClause '{:resource CQLIdentifier})
 (t/def-alias UserClause '{:user CQLIdentifier})
-(t/def-alias PermClause '{:perm '[CQLPermission]})
+(t/def-alias PermClause '{:perm (Seqable CQLPermission)})
 
 (t/def-alias AnyOperatorFn [Number * -> (U Boolean Number)]) ;; hairy
 (t/def-alias Operator (U ':= ':> ':< ':<= ':=> ':+ ':- AnyOperatorFn
