@@ -255,22 +255,12 @@ Takes a keyspace identifier"
   [n]
   {:limit n})
 
-(t/def-alias SeqPair2 (TFn [[x :variance :covariant]
-                           [y :variance :covariant]]
-                          (I (U (Vector* x y)
-                                (List* x y)
-                                (Seq* x y)
-                                (Seqable (U x y)))
-                             (CountRange 2))))
-
-
 (t/ann order-by [(SeqPair  CQLIdentifier (U ':asc ':desc)) * -> OrderByClause])
 (defn order-by
   "Clause: takes vectors of 2 elements, where the first is the column
   identifier and the second is the ordering as keyword.
   ex: :asc, :desc"
   [& columns] {:order-by columns})
-
 
 (t/ann queries [HaytQuery * -> QueriesClause])
 (defn queries
