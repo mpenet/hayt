@@ -262,8 +262,6 @@ Takes a keyspace identifier"
   ex: :asc, :desc"
   [& columns] {:order-by columns})
 
-(t/cf (order-by (:a :desc) [:a :desc] [:a :desc]))
-
 (t/ann queries [HaytQuery * -> QueriesClause])
 (defn queries
   "Clause: takes hayt queries to be executed during a batch operation."

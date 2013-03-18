@@ -7,11 +7,13 @@
     APersistentMap
     Seqable]))
 
+;; in case we now type per position, it will enforce it
 (t/def-alias SeqPair (TFn [[x :variance :covariant]
                            [y :variance :covariant]]
-                        (U (Seqable (U x y))
-                           (Vector* x y)
-                           (List* x y))))
+                        (U (Vector* x y)
+                           (List* x y)
+                           (Seq* x y)
+                           (Seqable (U x y)))))
 
 ;; will be used as a placeholder until replaced
 (t/def-alias XMap (APersistentMap Any Any))
