@@ -7,8 +7,6 @@
     APersistentMap
     Seqable]))
 
-(t/def-alias MaybeSequential (t/Option Sequential))
-
 ;; will be used as a placeholder until replaced
 (t/def-alias XMap (APersistentMap Any Any))
 

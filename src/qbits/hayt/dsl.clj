@@ -269,7 +269,7 @@ Takes a keyspace identifier"
   {:batch queries})
 
 (t/ann where [(U (APersistentMap CQLIdentifier CQLValue)
-                 '[CQLIdentifier CQLValue])
+                 (Seqable '[CQLIdentifier CQLValue]))
               -> WhereClause])
 (defn where
   "Clause: takes a map or a vector of pairs to compose the where

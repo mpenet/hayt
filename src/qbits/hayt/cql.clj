@@ -8,8 +8,8 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
    [clojure.string :as string]
    [clojure.core.typed :as t]
    [qbits.hayt.types :refer :all])
-  ;; (:import [clojure.lang ])
-  )
+  (:import [clojure.lang
+            Seqable]))
 
 (declare emit-query emit-row)
 
@@ -40,7 +40,7 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
      (do (swap! *param-stack* conj x) "?")
      (f x)))
 
-(t/def-alias JoinFn [MaybeSequential -> String])
+(t/def-alias JoinFn [(t/Option (Seqable (t/Option String))) -> String])
 (t/ann join-and JoinFn)
 (t/ann join-spaced JoinFn)
 (t/ann join-comma JoinFn)
