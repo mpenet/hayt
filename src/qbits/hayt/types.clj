@@ -7,6 +7,12 @@
     APersistentMap
     Seqable]))
 
+(t/def-alias SeqPair (TFn [[x :variance :covariant]
+                           [y :variance :covariant]]
+                        (U (Seqable (U x y))
+                           (Vector* x y)
+                           (List* x y))))
+
 ;; will be used as a placeholder until replaced
 (t/def-alias XMap (APersistentMap Any Any))
 

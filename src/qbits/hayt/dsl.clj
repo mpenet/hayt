@@ -255,12 +255,14 @@ Takes a keyspace identifier"
   [n]
   {:limit n})
 
-(t/ann order-by [(Seqable (U CQLIdentifier (U ':asc ':desc))) * -> OrderByClause])
+(t/ann order-by [(SeqPair CQLIdentifier (U ':asc ':desc)) * -> OrderByClause])
 (defn order-by
   "Clause: takes vectors of 2 elements, where the first is the column
   identifier and the second is the ordering as keyword.
   ex: :asc, :desc"
   [& columns] {:order-by columns})
+
+(t/cf (order-by (:a :desc) [:a :desc] [:a :desc]))
 
 (t/ann queries [HaytQuery * -> QueriesClause])
 (defn queries
@@ -270,7 +272,7 @@ Takes a keyspace identifier"
 
 (t/ann where [(U (APersistentMap CQLIdentifier CQLValue)
                  ;; in most cases it's a 2d vector, but the user could pass any seqable
-                 (Seqable (Seqable (U CQLIdentifier CQLValue))))
+                 (Seqable (SeqPair CQLIdentifier CQLValue)))
               -> WhereClause])
 (defn where
   "Clause: takes a map or a vector of pairs to compose the where
