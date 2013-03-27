@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0-beta3
+
+* Allow to use lowercased/dashed kw for permission, ex: `:full-access`
+  or `:FULL_ACCESS`
+
+* Fix `:primary-key` to allow composites
+
 ## 0.4.0-beta2
 
 * Fix all permission queries, grant, revoke, list-permission (missing
