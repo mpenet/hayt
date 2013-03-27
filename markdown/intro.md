@@ -509,20 +509,20 @@ be sent with the parent `batch`
 ## Query generation
 
 Hayt won't generate the query until you ask for it explicitly.
-This has a few advantages, you can compose your queries using the
-`q->` function at will until you generate them.
+This has a few advantages, you can compose your queries/clauses easily since
+they are just maps.
 
 ```clojure
 (def base (select :foo (where {:foo 1})))
 
-(def qa (q-> base
-             (columns :bar :baz)
-             (where {:bar 2})))
+(def qa (merge base
+               (columns :bar :baz)
+               (where {:bar 2})))
 
-(def qb (q-> base
-             (order-by [:bar :asc])
-             (using :ttl 10000)
-             (columns :bar :baz :bal)))
+(def qb (merge base
+               (order-by [:bar :asc])
+               (using :ttl 10000)
+               (columns :bar :baz :bal)))
 ```
 
 ### Raw
