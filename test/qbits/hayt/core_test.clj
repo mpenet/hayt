@@ -146,7 +146,7 @@
 (deftest test-auth-fns
   (are [expected query] (= expected (->raw query))
        "GRANT PERMISSION FULL_ACCESS ON bar TO baz;"
-       (grant :FULL_ACCESS
+       (grant :full-access
               (resource :bar)
               (user :baz))
 

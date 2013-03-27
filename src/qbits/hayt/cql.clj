@@ -40,6 +40,7 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
 (def wrap-parens #(str "(" % ")"))
 (def wrap-brackets #(str "{" % "}"))
 (def wrap-sqbrackets #(str "[" % "]"))
+(def kw->c*const #(-> % name string/upper-case (.replaceAll "-" "_")))
 (def terminate #(str % ";"))
 
 (defprotocol CQLEntities
@@ -269,9 +270,8 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
 
    :perm
    (fn [q perm]
-     (if (= :ALL perm)
-       "PERMISSIONS ALL"
-       (str "PERMISSION " (cql-identifier perm))))
+     (let [raw-perm (kw->c*const perm)]
+       (str "PERMISSION" (when (= "ALL" raw-perm) "S") " " raw-perm)))
 
    :list-perm
    (fn [q perm]
