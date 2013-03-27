@@ -253,6 +253,15 @@
                                           :bar :int
                                           :primary-key [:foo :bar]})
                      (with {:compact-storage true
+                            :clustering-order [[:bar :asc]]}))
+
+       "CREATE TABLE foo (foo varchar, bar int, baz text, PRIMARY KEY ((foo, baz), bar)) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
+       (create-table :foo
+                     (column-definitions {:foo :varchar
+                                          :bar :int
+                                          :baz :text
+                                          :primary-key [[:foo :baz] :bar]})
+                     (with {:compact-storage true
                             :clustering-order [[:bar :asc]]}))))
 
 (deftest test-alter-table

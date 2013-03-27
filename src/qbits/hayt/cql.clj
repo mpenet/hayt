@@ -376,7 +376,13 @@ https://issues.apache.org/jira/browse/CASSANDRA-3783")))
    :primary-key
    (fn [q primary-key]
      (->> (if (sequential? primary-key)
-            (map cql-identifier primary-key)
+            (map (fn [pk]
+                   (if (sequential? pk)
+                     (->  (map cql-identifier pk)
+                          join-comma
+                          wrap-parens)
+                     (cql-identifier pk)))
+                 primary-key)
             (cql-identifier primary-key))
           join-comma
           wrap-parens
