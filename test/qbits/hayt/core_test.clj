@@ -320,23 +320,23 @@
                               :something 1
                               :something-else "foo"}))))
 
-(deftest test-q->
+(deftest test-comp
   (let [q (select :foo)]
     (is (= "SELECT bar, \"baz\" FROM foo;")
-        (->raw (q-> q (columns :bar "baz"))))
+        (->raw (merge q (columns :bar "baz"))))
 
     (is (= ["SELECT bar, \"baz\" FROM foo;" []])
-        (->prepared (q-> q (columns :bar "baz")))))
+        (->prepared (merge q (columns :bar "baz")))))
 
   (let [q (insert :foo)
-        q2 (q-> q
-                (values  {:a "b" "c" "d"}))]
+        q2 (merge q
+                  (values  {:a "b" "c" "d"}))]
     (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b');"
            (->raw q2)))
     (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') USING TIMESTAMP 100000 AND TTL 200000;"
-           (->raw (q-> q2
-                       (using :timestamp 100000
-                              :ttl 200000)))))))
+           (->raw (merge q2
+                         (using :timestamp 100000
+                                :ttl 200000)))))))
 
 
 (deftest test-functions

@@ -51,16 +51,17 @@ Some examples:
          (order-by [:foo :asc]))
 ```
 
-Queries are composable using `q->`
+Since Queries are just maps they are composable using the usual `merge`
+`into` `assoc` etc.
 
 ```clojure
 (def base (select :foo (where {:foo 1})))
 
-(q-> base
-     (columns :bar :baz)
-     (where {:bar 2})
-     (order-by [:bar :asc])
-     (using :ttl 10000))
+(merge base
+       (columns :bar :baz)
+       (where {:bar 2})
+       (order-by [:bar :asc])
+       (using :ttl 10000))
 
 ```
 

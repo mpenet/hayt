@@ -2,6 +2,9 @@
 
 ## 0.4.0-beta3
 
+* Deprecate `q->`, since clauses/queries are just maps, use the usual
+  `merge`/`assoc`/`into` etc
+
 * Allow to use lowercased/dashed kw for permission, ex: `:full-access`
   or `:FULL_ACCESS`
 

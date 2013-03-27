@@ -6,8 +6,9 @@
 (def ->raw cql/->raw)
 (def ->prepared cql/->prepared)
 
-(defn q->
-  "Allows query composition, extending an existing query with new
+(defn ^:deprecated q->
+  "Deprecated, just use `merge` or `into`, since it's just maps now.
+Allows query composition, extending an existing query with new
   clauses"
   [q & clauses]
   (into q clauses))
