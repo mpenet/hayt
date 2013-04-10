@@ -32,7 +32,11 @@
        "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
        (select :foo
                (where [[:foo  [> 1]]
-                       [:foo  [< 10]]])))
+                       [:foo  [< 10]]]))
+
+       "SELECT * FROM foo WHERE uuid = 1f84b56b-5481-4ee4-8236-8a3831ee5892;"
+       (select :foo
+               (where {:uuid  #uuid "1f84b56b-5481-4ee4-8236-8a3831ee5892"})))
 
   ;;
   (is (= ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
