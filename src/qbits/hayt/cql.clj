@@ -24,10 +24,12 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
   (map->CQLFn {:name name :args args}))
 
 (defn maybe-parameterize!
-  [x f]
-  (if *prepared-statement*
-     (do (swap! *param-stack* conj x) "?")
-     (f x)))
+  ([x f]
+     (if *prepared-statement*
+       (do (swap! *param-stack* conj x) "?")
+       (f x)))
+  ([x]
+     (maybe-parameterize! x identity)))
 
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join " " %))
@@ -109,15 +111,11 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
   (cql-value [x] x)
 
   nil
-  (cql-value [x]
-    (throw (UnsupportedOperationException.
-            "'null' parameters are not allowed since CQL3 does
-not (yet) supports them. See
-https://issues.apache.org/jira/browse/CASSANDRA-3783")))
+  (cql-value [x] (maybe-parameterize! x))
 
   Object
   (cql-identifier [x] x)
-  (cql-value [x] (maybe-parameterize! x identity)))
+  (cql-value [x] (maybe-parameterize! x)))
 
 (def operators {= "="
                 > ">"

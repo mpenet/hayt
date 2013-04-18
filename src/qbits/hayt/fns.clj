@@ -1,6 +1,6 @@
 (ns qbits.hayt.fns
   (:require [qbits.hayt.cql :as cql])
-  (:import [java.util Date]))
+  (:import (java.util Date)))
 
 (def now
   "Returns a now() CQL function"
