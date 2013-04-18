@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0-beta4
+
+* Lift restriction on nil values (supported in C* 1.2.4+)
+
 ## 0.4.0-beta3
 
 * Deprecate `q->`, since clauses/queries are just maps, use the usual
