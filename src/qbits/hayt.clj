@@ -1,6 +1,6 @@
 (ns qbits.hayt
   (:require
-   [useful.ns :as uns]
+   [flatland.useful.ns :as uns]
    [qbits.hayt.cql :as cql]))
 
 (def ->raw cql/->raw)
