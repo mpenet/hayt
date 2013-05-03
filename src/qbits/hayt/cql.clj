@@ -46,7 +46,7 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
 (def wrap-sqbrackets #(str "[" % "]"))
 (def kw->c*const #(-> (name %)
                       StringUtils/upperCase
-                      (string/replace \- \_)))
+                      (StringUtils/replaceChars \- \_)))
 (def terminate #(str % ";"))
 
 (defprotocol CQLEntities
