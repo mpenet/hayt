@@ -145,7 +145,12 @@
 
        "CREATE INDEX \"baz\" ON foo (bar);"
        (create-index :foo :bar
-                     (index-name "baz"))))
+                     (index-name "baz"))
+
+       "CREATE CUSTOM INDEX ON users (email) WITH options = {'class' : 'path.to.the.IndexClass'};"
+       (create-index :users :email
+                     (custom true)
+                     (with {:options {:class "path.to.the.IndexClass"}}))))
 
 (deftest test-auth-fns
   (are [expected query] (= expected (->raw query))

@@ -84,7 +84,7 @@ Takes a table identifier and additional clause arguments:
 * index-name
 * table (optionaly using composition)"
   [table name & clauses]
-  (into {:create-index name :on table} clauses))
+  (into {:create-index name :custom false :on table} clauses))
 
 (defn create-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#createKeyspaceStmt
@@ -318,3 +318,7 @@ clause of a select/update/delete query"
   "Clause: "
   [value]
   {:list-perm value})
+
+(defn custom
+  [x]
+  {:custom x})
