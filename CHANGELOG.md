@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.0
+
+* CQL 3.0.3 support (create secondary index aka "CREATE CUSTOM INDEX")
+
 ## 0.4.0-beta4
 
 * Lift restriction on nil values (supported in C* 1.2.4+)
