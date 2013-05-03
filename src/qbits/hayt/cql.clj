@@ -99,10 +99,14 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
   CQLFn
   (cql-identifier [{fn-name :name  args :args}]
     (str (name fn-name)
-         (wrap-parens (join-comma (map cql-identifier args)))))
+         (-> (map cql-identifier args)
+             join-comma
+             wrap-parens)))
   (cql-value [{fn-name :name  args :args}]
     (str (name fn-name)
-         (wrap-parens (join-comma (map cql-value args)))))
+         (-> (map cql-value args)
+             join-comma
+             wrap-parens)))
 
   CQLSafe
   (cql-identifier [x] x)
