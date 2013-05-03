@@ -4,7 +4,8 @@ https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 
 This one is really up to date:
 https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g"
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string])
+  (:import (org.apache.commons.lang3 StringUtils)))
 
 (declare emit-query emit-row)
 (def ^:dynamic *param-stack*)
@@ -31,18 +32,21 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
   ([x]
      (maybe-parameterize! x identity)))
 
+;; TODO: StringUtils/join is also way faster, see if it's usable
 (def join-and #(string/join " AND " %))
-(def join-spaced #(string/join " " %))
+(def join-spaced #(string/join \space %))
 (def join-comma #(string/join ", " %))
 (def join-lf #(string/join "\n" %))
 (def format-eq #(str %1 " = " %2))
 (def format-kv #(str %1 " : "  %2))
-(def quote-string #(str "'" (string/replace % "'" "''") "'"))
-(def dquote-string #(str "\"" (string/replace % "\" " "\"\"") "\""))
+(def quote-string #(str "'" (StringUtils/replace % "'" "''") "'"))
+(def dquote-string #(str "\"" (StringUtils/replace % "\" " "\"\"") "\""))
 (def wrap-parens #(str "(" % ")"))
 (def wrap-brackets #(str "{" % "}"))
 (def wrap-sqbrackets #(str "[" % "]"))
-(def kw->c*const #(-> % name string/upper-case (string/replace "-" "_")))
+(def kw->c*const #(-> (name %)
+                      StringUtils/upperCase
+                      (string/replace \- \_)))
 (def terminate #(str % ";"))
 
 (defprotocol CQLEntities
