@@ -240,15 +240,16 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
           (emit-row q [:resource :user])))
 
    :create-index
-   (fn [q column]
-     (let [custom (:custom q)]
-       (str "CREATE "
-            (when custom "CUSTOM ")
-            "INDEX "
-            (emit-row q [:index-name :on])
-            " (" (cql-identifier column) ")"
-            (when (and custom (:with q))
-              (str " " ((emit :with) q (:with q)))))))
+   (fn [{:keys [custom with]
+         :as q}
+        column]
+     (str "CREATE "
+          (when custom "CUSTOM ")
+          "INDEX "
+          (emit-row q [:index-name :on])
+          " (" (cql-identifier column) ")"
+          (when (and custom with)
+            (str " " ((emit :with) q with)))))
 
    :create-user
    (fn [q user]
