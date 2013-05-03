@@ -98,13 +98,11 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
   ;; CQL Function are always safe, their arguments might not be though
   CQLFn
   (cql-identifier [{fn-name :name  args :args}]
-    (format "%s(%s)"
-            (name fn-name)
-            (join-comma (map cql-identifier args))))
+    (str (name fn-name)
+         (wrap-parens (join-comma (map cql-identifier args)))))
   (cql-value [{fn-name :name  args :args}]
-    (format "%s(%s)"
-            (name fn-name)
-            (join-comma (map cql-value args))))
+    (str (name fn-name)
+         (wrap-parens (join-comma (map cql-value args)))))
 
   CQLSafe
   (cql-identifier [x] x)
@@ -247,7 +245,7 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
           (when custom "CUSTOM ")
           "INDEX "
           (emit-row q [:index-name :on])
-          " (" (cql-identifier column) ")"
+          " " (wrap-parens (cql-identifier column))
           (when (and custom with)
             (str " " ((emit :with) q with)))))
 
