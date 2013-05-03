@@ -42,7 +42,7 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
 (def wrap-parens #(str "(" % ")"))
 (def wrap-brackets #(str "{" % "}"))
 (def wrap-sqbrackets #(str "[" % "]"))
-(def kw->c*const #(-> % name string/upper-case (.replaceAll "-" "_")))
+(def kw->c*const #(-> % name string/upper-case (string/replace "-" "_")))
 (def terminate #(str % ";"))
 
 (defprotocol CQLEntities
@@ -92,8 +92,8 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
   (cql-value [x]
     (maybe-parameterize! x
      #(->> (map cql-value %)
-          join-comma
-          wrap-sqbrackets)))
+           join-comma
+           wrap-sqbrackets)))
 
   ;; CQL Function are always safe, their arguments might not be though
   CQLFn
