@@ -32,7 +32,6 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
   ([x]
      (maybe-parameterize! x identity)))
 
-;; TODO: StringUtils/join is also way faster, see if it's usable
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join \space %))
 (def join-comma #(string/join ", " %))
