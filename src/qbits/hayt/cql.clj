@@ -33,7 +33,7 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
      (maybe-parameterize! x identity)))
 
 (def join-and #(string/join " AND " %))
-(def join-spaced #(string/join \space %))
+(def join-spaced #(string/join " " %))
 (def join-comma #(string/join ", " %))
 (def join-lf #(string/join "\n" %))
 (def format-eq #(str %1 " = " %2))
