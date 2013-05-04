@@ -246,7 +246,7 @@ clause of a update/delete query"
   {:if args})
 
 (defn if-not-exists
-  "Takes a book to make an update query apply only if the row exists"
+  "Apply only if the row does not exist"
   []
   {:if-not-exists true})
 
