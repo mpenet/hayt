@@ -221,7 +221,7 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
           ((emit :columns) q (:columns q))
           " "
           (emit-row (assoc q :from table)
-                    [:from :using :where :if :if-not-exists])))
+                    [:from :using :where :if])))
 
    :drop-index
    (fn [q index]
