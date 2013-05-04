@@ -245,10 +245,10 @@ clause of a update/delete query"
   [args]
   {:if args})
 
-(defn upsert
+(defn if-not-exists
   "Takes a book to make an update query apply only if the row exists"
-  [b]
-  {:if-not-exists (not b)})
+  []
+  {:if-not-exists true})
 
 (defn values
   "Clause: "

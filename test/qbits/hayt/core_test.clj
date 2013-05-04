@@ -89,7 +89,7 @@
 
        "UPDATE foo SET bar = 1, baz = baz + 2 IF NOT EXISTS;"
        (update :foo
-               (upsert false)
+               (if-not-exists)
                (set-columns {:bar 1
                              :baz [+ 2] }))
 
