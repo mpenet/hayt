@@ -132,7 +132,17 @@
                              (where {:foo :bar
                                      :moo [> 3]
                                      :meh [:> 4]
-                                     :baz [:in [5 6 7]]}))))))
+                                     :baz [:in [5 6 7]]})))))
+
+  (is (= ["DELETE * FROM foo USING TIMESTAMP 100000 AND TTL 200000 IF foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
+          [:bar 3 4 5 6 7]]
+         (->prepared (delete :foo
+                             (using :timestamp 100000
+                                    :ttl 200000)
+                             (only-if {:foo :bar
+                                       :moo [> 3]
+                                       :meh [:> 4]
+                                       :baz [:in [5 6 7]]}))))))
 
 (deftest test-use-keyspace
   (is (= "USE foo;"
