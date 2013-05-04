@@ -78,6 +78,21 @@
                        :meh [:> 4]
                        :baz [:in [5 6 7]]}))
 
+       "UPDATE foo SET bar = 1, baz = baz + 2 IF foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
+       (update :foo
+               (set-columns {:bar 1
+                             :baz [+ 2] })
+               (only-if {:foo :bar
+                         :moo [> 3]
+                         :meh [:> 4]
+                         :baz [:in [5 6 7]]}))
+
+       "UPDATE foo SET bar = 1, baz = baz + 2 IF NOT EXISTS;"
+       (update :foo
+               (upsert false)
+               (set-columns {:bar 1
+                             :baz [+ 2] }))
+
        "UPDATE foo SET bar = 1, baz = baz + {'key' : 'value'} WHERE foo = 'bar';"
        (update :foo
                (set-columns {:bar 1

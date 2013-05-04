@@ -149,7 +149,9 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
        join-comma
        wrap-brackets))
 
-(defn where-sequential-entry [column [op value]]
+
+;; secondary index clauses helpers
+(defn query-cond-sequential-entry [column [op value]]
   (let [col-name (cql-identifier column)]
     (cond
       (= :in op)
@@ -168,6 +170,17 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
       (str col-name
            " " (name op) " "
            (cql-value value)))))
+
+(defn query-cond
+  [clauses]
+  (->> clauses
+       (map (fn [[k v]]
+              (if (sequential? v)
+                ;; Sequence, we do the complex thing first
+                (query-cond-sequential-entry k v)
+                ;; else we just append if its a simple map val
+                (format-eq (cql-identifier k) (cql-value v)))))
+       join-and))
 
 ;; x and y can be an operator or a value
 (defn counter [column [x y]]
@@ -200,7 +213,7 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
      (str "UPDATE "
           (cql-identifier table)
           " "
-          (emit-row q [:using :set-columns :where])))
+          (emit-row q [:using :set-columns :where :if :if-not-exists])))
 
    :delete
    (fn [q table]
@@ -208,7 +221,7 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
           ((emit :columns) q (:columns q))
           " "
           (emit-row (assoc q :from table)
-                    [:from :using :where])))
+                    [:from :using :where :if :if-not-exists])))
 
    :drop-index
    (fn [q index]
@@ -364,15 +377,15 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
 
    :where
    (fn [q clauses]
-     (->> clauses
-          (map (fn [[k v]]
-                 (if (sequential? v)
-                   ;; Sequence, we do the complex thing first
-                   (where-sequential-entry k v)
-                   ;; else we just append if its a simple map val
-                   (format-eq (cql-identifier k) (cql-value v)))))
-          join-and
-          (str "WHERE ")))
+     (str "WHERE " (query-cond clauses)))
+
+   :if
+   (fn [q clauses]
+     (str "IF " (query-cond clauses)))
+
+   :if-not-exists
+   (fn [q ifne]
+     (when ifne "IF NOT EXISTS"))
 
    :order-by
    (fn [q columns]

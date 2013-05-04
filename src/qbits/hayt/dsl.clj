@@ -239,6 +239,17 @@ clause of a select/update/delete query"
   [args]
   {:where args})
 
+(defn only-if
+  "Clause: takes a map or a vector of pairs to compose the if
+clause of a update/delete query"
+  [args]
+  {:if args})
+
+(defn upsert
+  "Takes a book to make an update query apply only if the row exists"
+  [b]
+  {:if-not-exists (not b)})
+
 (defn values
   "Clause: "
   [values]
