@@ -6,7 +6,12 @@ This one is really up to date:
 https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g
 And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/cql_tests.py"
   (:require [clojure.string :as string])
-  (:import (org.apache.commons.lang3 StringUtils)))
+  (:import
+   (org.apache.commons.lang3 StringUtils)
+   (java.nio ByteBuffer)
+   (java.util Date)
+   (java.net InetAddress)
+   (org.apache.cassandra.utils ByteBufferUtil)))
 
 (declare emit-query emit-row)
 (def ^:dynamic *param-stack*)
@@ -67,6 +72,18 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   (cql-identifier [x] (name x))
   (cql-value [x]
     (maybe-parameterize! x #(cql-value (name %))))
+
+  ByteBuffer
+  (cql-value [x]
+    (maybe-parameterize! x #(str "0x" (ByteBufferUtil/bytesToHex %))))
+
+  Date
+  (cql-value [x]
+    (maybe-parameterize! x #(.getTime ^Date %)))
+
+  InetAddress
+  (cql-value [x]
+    (maybe-parameterize! x #(.getHostAddress ^InetAddress %)))
 
   ;; Collections are just for cassandra collection types, not to
   ;; generate query parts

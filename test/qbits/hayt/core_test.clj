@@ -1,7 +1,8 @@
 (ns qbits.hayt.core-test
   (:use clojure.test
         qbits.hayt
-        [qbits.hayt.cql :only [cql-value cql-identifier]]))
+        [qbits.hayt.cql :only [cql-value cql-identifier]])
+  (:import (java.nio ByteBuffer)))
 
 (deftest test-select
   (are [expected query] (= expected (->raw query))
@@ -456,3 +457,17 @@
                                           :c :c1})))]
     (is (= ["SELECT * FROM foo WHERE a = ? AND c = ? AND b = ?;" [100 300 200]]
            (apply-map query {:a1 100 :b1 200 :c1 300})))))
+
+
+(deftest test-types
+  (is (= "SELECT * FROM foo WHERE bar = 0x;"
+         (->raw (select :foo (where {:bar (ByteBuffer/allocate 0)})))))
+
+  (is (= "SELECT * FROM foo WHERE bar = 0x62617a;"
+         (->raw (select :foo (where {:bar (ByteBuffer/wrap (.getBytes "baz"))})))))
+
+  (is (= "SELECT * FROM foo WHERE bar = 0;"
+         (->raw (select :foo (where {:bar (java.util.Date. 0)})))))
+
+  (is (= "SELECT * FROM foo WHERE bar = 127.0.0.1;"
+         (->raw (select :foo (where {:bar (java.net.InetAddress/getLocalHost)}))))))

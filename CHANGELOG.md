@@ -10,6 +10,7 @@
 * Performance/ressource use improvements
 
 * Add support for null values
+* Add support for Date, blob (ByteBuffer instances), InetAddress literals
 
 ## 0.4.0-beta4
 
