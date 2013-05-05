@@ -61,7 +61,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   String
   (cql-identifier [x] (dquote-string x))
   (cql-value [x]
-    (maybe-parameterize! x #(quote-string %)))
+    (maybe-parameterize! x quote-string))
 
   clojure.lang.Keyword
   (cql-identifier [x] (name x))
