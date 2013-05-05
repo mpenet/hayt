@@ -33,11 +33,7 @@
        "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
        (select :foo
                (where [[:foo  [> 1]]
-                       [:foo  [< 10]]]))
-
-       "SELECT * FROM foo WHERE uuid = 1f84b56b-5481-4ee4-8236-8a3831ee5892;"
-       (select :foo
-               (where {:uuid  #uuid "1f84b56b-5481-4ee4-8236-8a3831ee5892"})))
+                       [:foo  [< 10]]])))
 
   ;;
   (is (= ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
@@ -142,14 +138,6 @@
                                        :moo [> 3]
                                        :meh [:> 4]
                                        :baz [:in [5 6 7]]}))))))
-
-(deftest test-null
-  (is (= "INSERT INTO test (v1, c, k) VALUES (null, 1, 0);"
-         (->raw (insert :test (values {:k 0 :c 1 :v1 nil})))))
-
-  (is (= ["INSERT INTO test (v1, c, k) VALUES (?, ?, ?);" [nil 1 0]]
-         (->prepared (insert :test (values {:k 0 :c 1 :v1 nil}))))))
-
 
 (deftest test-use-keyspace
   (is (= "USE foo;"
@@ -469,5 +457,16 @@
   (is (= "SELECT * FROM foo WHERE bar = 0;"
          (->raw (select :foo (where {:bar (java.util.Date. 0)})))))
 
-  (is (= "SELECT * FROM foo WHERE bar = 127.0.0.1;"
-         (->raw (select :foo (where {:bar (java.net.InetAddress/getLocalHost)}))))))
+  (let [addr (java.net.InetAddress/getLocalHost)]
+    (is (= (str "SELECT * FROM foo WHERE bar = " (.getHostAddress addr) ";")
+           (->raw (select :foo (where {:bar addr}))))))
+
+  "SELECT * FROM foo WHERE uuid = 1f84b56b-5481-4ee4-8236-8a3831ee5892;"
+  (select :foo
+          (where {:uuid  #uuid "1f84b56b-5481-4ee4-8236-8a3831ee5892"}))
+
+  (is (= "INSERT INTO test (v1, c, k) VALUES (null, 1, 0);"
+         (->raw (insert :test (values {:k 0 :c 1 :v1 nil})))))
+
+  (is (= ["INSERT INTO test (v1, c, k) VALUES (?, ?, ?);" [nil 1 0]]
+         (->prepared (insert :test (values {:k 0 :c 1 :v1 nil}))))))
