@@ -121,8 +121,6 @@
                        :meh [:> 4]
                        :baz [:in [5 6 7]]}))))
 
-
-
 (deftest test-delete
   (is (= ["DELETE * FROM foo USING TIMESTAMP 100000 AND TTL 200000 WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
           [:bar 3 4 5 6 7]]
@@ -143,6 +141,14 @@
                                        :moo [> 3]
                                        :meh [:> 4]
                                        :baz [:in [5 6 7]]}))))))
+
+(deftest test-null
+  (is (= "INSERT INTO test (v1, c, k) VALUES (null, 1, 0);"
+         (->raw (insert :test (values {:k 0 :c 1 :v1 nil})))))
+
+  (is (= ["INSERT INTO test (v1, c, k) VALUES (?, ?, ?);" [nil 1 0]]
+         (->prepared (insert :test (values {:k 0 :c 1 :v1 nil}))))))
+
 
 (deftest test-use-keyspace
   (is (= "USE foo;"

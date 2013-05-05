@@ -3,7 +3,8 @@
 https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 
 This one is really up to date:
-https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g"
+https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g
+And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/cql_tests.py"
   (:require [clojure.string :as string])
   (:import (org.apache.commons.lang3 StringUtils)))
 
@@ -116,7 +117,8 @@ https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassa
   (cql-value [x] x)
 
   nil
-  (cql-value [x] (maybe-parameterize! x))
+  (cql-value [x]
+    (maybe-parameterize! x (constantly "null")))
 
   Object
   (cql-identifier [x] x)
