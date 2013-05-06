@@ -118,6 +118,6 @@ Long (and complex) story short, he eventually becomes the husband of
 
 ## License
 
-Copyright © 2013 mpenet
+Copyright © 2013 [Max Penet](https://twitter.com/mpenet)
 
 Distributed under the Eclipse Public License, the same as Clojure.
