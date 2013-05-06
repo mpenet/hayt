@@ -2,7 +2,8 @@
   (:use clojure.test
         qbits.hayt
         [qbits.hayt.cql :only [cql-value cql-identifier]])
-  (:import (java.nio ByteBuffer)))
+  (:import (java.nio ByteBuffer)
+           (org.joda.time DateTime)))
 
 (deftest test-select
   (are [expected query] (= expected (->raw query))
@@ -456,6 +457,9 @@
 
   (is (= "SELECT * FROM foo WHERE bar = 0;"
          (->raw (select :foo (where {:bar (java.util.Date. 0)})))))
+
+  (is (= "SELECT * FROM foo WHERE bar = 0;"
+         (->raw (select :foo (where {:bar (DateTime. 0)})))))
 
   (let [addr (java.net.InetAddress/getLocalHost)]
     (is (= (str "SELECT * FROM foo WHERE bar = " (.getHostAddress addr) ";")
