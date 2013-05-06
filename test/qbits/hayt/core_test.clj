@@ -418,6 +418,17 @@
                              (columns {:bar 2})
                              (where {:baz 1}))))))
 
+(deftest test-alias
+  (is (= "SELECT name AS user_name, occupation AS user_occupation FROM users;"
+         (->raw (select :users
+                        (columns (as :name :user_name)
+                                 (as :occupation :user_occupation))))))
+  (is (= "SELECT COUNT(*) AS user_count FROM users;"
+         (->raw (select :users
+                        (columns (as (count*)
+                                     :user_count)))))))
+
+
 (deftest test-cql-identifier
   (are [expected identifier] (= expected (cql-identifier identifier))
        "\"a\"" "a"
@@ -447,7 +458,6 @@
                                           :c :c1})))]
     (is (= ["SELECT * FROM foo WHERE a = ? AND c = ? AND b = ?;" [100 300 200]]
            (apply-map query {:a1 100 :b1 200 :c1 300})))))
-
 
 (deftest test-types
   (is (= "SELECT * FROM foo WHERE bar = 0x;"

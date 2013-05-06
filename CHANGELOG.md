@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.2
+
+* Added alias support
+
 ## 0.5.1
 
 * Joda time support

@@ -21,14 +21,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 ;; argument for later encoding.
 (defrecord CQLFn [name args])
 (defrecord CQLSafe [value])
-
-(defn cql-safe
-  [x]
-  (->CQLSafe x))
-
-(defn cql-fn
-  [name & args]
-  (map->CQLFn {:name name :args args}))
+(defrecord CQLAlias [selector id])
 
 (defn maybe-parameterize!
   ([x f]
@@ -128,6 +121,11 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
          (-> (map cql-value args)
              join-comma
              wrap-parens)))
+
+  CQLAlias
+  (cql-identifier [{:keys [selector id]}]
+    (str (cql-identifier selector) " AS "
+         (cql-identifier id)))
 
   CQLSafe
   (cql-identifier [x] x)

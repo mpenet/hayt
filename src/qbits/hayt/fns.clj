@@ -5,17 +5,31 @@
    [qbits.hayt.utils :as u])
   (:import (java.util Date)))
 
+(defn cql-safe
+  "Allows to pass raw (assumed safe) content, no escaping will be applied"
+  [x]
+  (cql/->CQLSafe x))
+
+(defn cql-fn
+  [name & args]
+  (cql/map->CQLFn {:name name :args args}))
+
+(defn as
+  "Aliases"
+  [selector id]
+  (cql/->CQLAlias selector id))
+
 (def now
   "Returns a now() CQL function"
-  (constantly (cql/cql-fn "now")))
+  (constantly (cql-fn "now")))
 
 (def count*
   "Returns a count(*) CQL function"
-  (constantly (cql/cql-fn "COUNT" :*)))
+  (constantly (cql-fn "COUNT" :*)))
 
 (def count1
   "Returns a count(1) CQL function"
-  (constantly (cql/cql-fn "COUNT" 1)))
+  (constantly (cql-fn "COUNT" 1)))
 
 (defn date->epoch
   [d]
@@ -24,47 +38,47 @@
 (defn max-timeuuid
   "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid"
   [^Date date]
-  (cql/cql-fn "maxTimeuuid" (date->epoch date)))
+  (cql-fn "maxTimeuuid" (date->epoch date)))
 
 (defn min-timeuuid
   "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid"
   [^Date date]
-  (cql/cql-fn "minTimeuuid" (date->epoch date)))
+  (cql-fn "minTimeuuid" (date->epoch date)))
 
 (defn token
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
 
 Returns a token function with the supplied argument"
   [token]
-  (cql/cql-fn "token" token))
+  (cql-fn "token" token))
 
 (defn writetime
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
 
 Returns a WRITETIME function with the supplied argument"
   [x]
-  (cql/cql-fn "WRITETIME" x))
+  (cql-fn "WRITETIME" x))
 
 (defn ttl
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
 
 Returns a TTL function with the supplied argument"
   [x]
-  (cql/cql-fn "TTL" x))
+  (cql-fn "TTL" x))
 
 (defn unix-timestamp-of
   "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid
 
 Returns a unixTimestampOf function with the supplied argument"
   [x]
-  (cql/cql-fn "unixTimestampOf" x))
+  (cql-fn "unixTimestampOf" x))
 
 (defn date-of
   "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid
 
 Returns a dateOf function with the supplied argument"
   [x]
-  (cql/cql-fn "dateOf" x))
+  (cql-fn "dateOf" x))
 
 ;; blob convertion fns
 ;;
@@ -81,12 +95,12 @@ Returns a dateOf function with the supplied argument"
 See https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions"
                       t)
              [x#]
-             (cql/cql-fn ~(str "blobAs" (string/capitalize t)) x#))
+             (cql-fn ~(str "blobAs" (string/capitalize t)) x#))
            (defn ~(symbol (str t "->blob"))
              ~(format "Converts %s to blob.
 See https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions"
                       t)
              [x#]
-             (cql/cql-fn ~(str t "AsBlob") x#))))))
+             (cql-fn ~(str t "AsBlob") x#))))))
 
 (gen-blob-fns)
