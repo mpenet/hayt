@@ -11,7 +11,7 @@ Hayt is an attempt to allow the existing and future clients to share
 this, provide a simple but extensible base to build upon.
 
 Our goals from the start were to be feature complete (up to CQL
-v3.0.2), idiomatic, well tested, and performant.
+v3.0.3), idiomatic, well tested, and performant.
 
 There are already 3 libraries that use Hayt:
 
