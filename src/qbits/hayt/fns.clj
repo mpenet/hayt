@@ -1,5 +1,8 @@
 (ns qbits.hayt.fns
-  (:require [qbits.hayt.cql :as cql])
+  (:require
+   [clojure.string :as string]
+   [qbits.hayt.cql :as cql]
+   [qbits.hayt.utils :as u])
   (:import (java.util Date)))
 
 (def now
@@ -63,26 +66,27 @@ Returns a dateOf function with the supplied argument"
   [x]
   (cql/cql-fn "dateOf" x))
 
-(defn blob->type
-  "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
-Only available in 3.0.2"
-  [x]
-  (cql/cql-fn "blobAsType" x))
+;; blob convertion fns
+;;
 
-(defn type->blob
-  "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
-Only available in 3.0.2"
-  [x]
-  (cql/cql-fn "typeAsBlob" x))
+(defmacro gen-blob-fns
+  "Generator for blobAs[Type] and [Type]asBlob functions"
+  []
+  `(do
+    ~@(for [t u/native-types
+            :let [t (name t)]]
+        `(do
+           (defn ~(symbol (str "blob->" t))
+             ~(format "Converts blob to %s.
+See https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions"
+                      t)
+             [x#]
+             (cql/cql-fn ~(str "blobAs" (string/capitalize t)) x#))
+           (defn ~(symbol (str t "->blob"))
+             ~(format "Converts %s to blob.
+See https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions"
+                      t)
+             [x#]
+             (cql/cql-fn ~(str t "AsBlob") x#))))))
 
-(defn blob->bigint
-  "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
-Only available in 3.0.2"
-  [x]
-  (cql/cql-fn "blobAsBigint" x))
-
-(defn bigint->blob
-  "https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
-Only available in 3.0.2"
-  [x]
-  (cql/cql-fn "bigintAsBlob" x))
+(gen-blob-fns)

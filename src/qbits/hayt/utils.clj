@@ -1,6 +1,23 @@
 (ns qbits.hayt.utils
   (:require [qbits.hayt.cql :as cql]))
 
+(def native-types [:ascii
+                   :bigint
+                   :blob
+                   :boolean
+                   :counter
+                   :decimal
+                   :double
+                   :float
+                   :inet
+                   :int
+                   :text
+                   :timestamp
+                   :timeuuid
+                   :uuid
+                   :varchar
+                   :varint])
+
 ;; Sugar for collection types
 
 (defn coll-type
