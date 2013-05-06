@@ -47,8 +47,7 @@ Some examples:
          (where {:foo :bar
                  :moo [> 3]
                  :meh [:> 4]
-                 :baz [:in [5 6 7]]})
-         (order-by [:foo :asc]))
+                 :baz [:in [5 6 7]]}))
 ```
 
 Since Queries are just maps they are composable using the usual `merge`
