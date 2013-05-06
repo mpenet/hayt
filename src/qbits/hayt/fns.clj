@@ -73,7 +73,7 @@ Returns a dateOf function with the supplied argument"
   "Generator for blobAs[Type] and [Type]asBlob functions"
   []
   `(do
-    ~@(for [t u/native-types
+    ~@(for [t (remove #{:blob} u/native-types)
             :let [t (name t)]]
         `(do
            (defn ~(symbol (str "blob->" t))
