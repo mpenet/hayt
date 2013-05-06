@@ -1,6 +1,7 @@
 (ns qbits.hayt.core-test
   (:use clojure.test
         qbits.hayt
+        qbits.hayt.codec.joda-time
         [qbits.hayt.cql :only [cql-value cql-identifier]])
   (:import (java.nio ByteBuffer)
            (org.joda.time DateTime)))
