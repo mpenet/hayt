@@ -5,13 +5,14 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.flatland/useful "0.10.0"]
-                 [org.apache.commons/commons-lang3 "3.1"]
-                 [org.apache.cassandra/cassandra-all "1.2.3"]] ;; match datastax/java-driver version
+                 [org.apache.commons/commons-lang3 "3.1"]] ;; match datastax/java-driver version
   :profiles {:1.4  {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.5  {:dependencies [[org.clojure/clojure "1.5.1"]]}
              :1.6  {:dependencies [[org.clojure/clojure "1.6.0-master-SNAPSHOT"]]}
-             :dev  {:dependencies [[clj-time "0.5.0"]]}
-             :test {:dependencies [[clj-time "0.5.0"]]}}
+             :dev  {:dependencies [[org.apache.cassandra/cassandra-all "1.2.3"]
+                                   [clj-time "0.5.0"]]}
+             :test {:dependencies [[org.apache.cassandra/cassandra-all "1.2.3"]
+                                   [clj-time "0.5.0"]]}}
   :codox {:src-dir-uri "https://github.com/mpenet/hayt/blob/master"
           :src-linenum-anchor-prefix "L"
           :exclude [qbits.hayt.cql
