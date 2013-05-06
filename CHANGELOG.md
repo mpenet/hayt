@@ -4,13 +4,18 @@
 
 * CQL 3.0.3 support (create secondary index aka "CREATE CUSTOM INDEX")
 
-* Add CAS support: `if-not-exists` `only-if` clauses
+* Added CAS support: `if-not-exists` `only-if` clauses
   https://issues.apache.org/jira/browse/CASSANDRA-5443
 
 * Performance/ressource use improvements
 
-* Add support for null values
-* Add support for Date, blob (ByteBuffer instances), InetAddress literals
+* Added support for null values
+
+* Added support for Date, blob (ByteBuffer instances), InetAddress literals
+
+* Added noarg versions of bool clauses
+
+* Completed/fixed coverage of blobAsX and XAsBlob functions
 
 ## 0.4.0-beta4
 
