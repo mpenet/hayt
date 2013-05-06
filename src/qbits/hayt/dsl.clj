@@ -247,8 +247,10 @@ clause of a update/delete query"
 
 (defn if-not-exists
   "Apply only if the row does not exist"
-  []
-  {:if-not-exists true})
+  ([b]
+     {:if-not-exists b})
+  ([]
+     (if-not-exists true)))
 
 (defn values
   "Clause: "
@@ -287,8 +289,10 @@ clause of a update/delete query"
 
 (defn allow-filtering
   "Clause: "
-  [value]
-  {:allow-filtering value})
+  ([value]
+     {:allow-filtering value})
+  ([]
+     (allow-filtering true)))
 
 (defn logged
   "Clause: "
@@ -297,13 +301,17 @@ clause of a update/delete query"
 
 (defn counter
   "Clause: "
-  [value]
-  {:counter value})
+  ([value]
+     {:counter value})
+  ([]
+     (counter true)))
 
 (defn superuser
   "Clause: "
-  [value]
-  {:superuser value})
+  ([value]
+     {:superuser value})
+  ([]
+     (superuser true)))
 
 (defn password
   "Clause: "
@@ -312,8 +320,10 @@ clause of a update/delete query"
 
 (defn recursive
   "Clause: "
-  [value]
-  {:recursive value})
+  ([value]
+     {:recursive value})
+  ([]
+     (recursive true)))
 
 (defn resource
   "Clause: "
@@ -331,5 +341,7 @@ clause of a update/delete query"
   {:list-perm value})
 
 (defn custom
-  [x]
-  {:custom x})
+  ([x]
+     {:custom x})
+  ([]
+     (custom true)))
