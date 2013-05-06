@@ -24,7 +24,7 @@ Hayt development is the result of collaboration, thanks to our [contributors](ht
 ## Installation
 
 ```clojure
-[cc.qbits/hayt "0.5.0"]
+[cc.qbits/hayt "0.5.1"]
 ```
 
 ## Usage

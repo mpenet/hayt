@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1
+
+* Joda time support
+
+* Moved cassandra-all in dev/test profiles
+
 ## 0.5.0
 
 * CQL 3.0.3 support (create secondary index aka "CREATE CUSTOM INDEX")
