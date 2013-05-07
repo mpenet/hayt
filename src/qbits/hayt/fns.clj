@@ -5,10 +5,10 @@
    [qbits.hayt.utils :as u])
   (:import (java.util Date)))
 
-(defn cql-safe
+(defn cql-raw
   "Allows to pass raw (assumed safe) content, no escaping will be applied"
   [x]
-  (cql/->CQLSafe x))
+  (cql/->CQLRaw x))
 
 (defn cql-fn
   [name & args]

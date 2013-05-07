@@ -20,7 +20,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 ;; Wraps a CQL function (a template to clj.core/format and its
 ;; argument for later encoding.
 (defrecord CQLFn [name args])
-(defrecord CQLSafe [value])
+(defrecord CQLRaw [value])
 (defrecord CQLAlias [selector id])
 
 (defn maybe-parameterize!
@@ -127,7 +127,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
     (str (cql-identifier selector) " AS "
          (cql-identifier id)))
 
-  CQLSafe
+  CQLRaw
   (cql-identifier [x] x)
   (cql-value [x] x)
 
