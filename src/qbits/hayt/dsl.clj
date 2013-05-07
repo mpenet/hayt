@@ -287,6 +287,11 @@ clause of a update/delete query"
   [& args]
   {:rename-column args})
 
+(defn drop-column
+  "Clause: "
+  [id]
+  {:drop-column id})
+
 (defn allow-filtering
   "Clause: "
   ([value]

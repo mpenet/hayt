@@ -329,13 +329,13 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [q table]
      (str "ALTER TABLE " (cql-identifier table)
           " "
-          (emit-row q [:alter-column :add-column :rename-column :with])))
+          (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
 
    :alter-column-family
    (fn [q cf]
      (str "ALTER COLUMNFAMILY " (cql-identifier cf)
           " "
-          (emit-row q [:alter-column :add-column :rename-column :with])))
+          (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
 
    :alter-keyspace
    (fn [q ks]
@@ -495,6 +495,10 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
      (format "ADD %s %s"
              (cql-identifier identifier)
              (cql-identifier type)))
+
+   :drop-column
+   (fn [q identifier]
+     (str "DROP " (cql-identifier identifier)))
 
    :clustering-order
    (fn [q columns]

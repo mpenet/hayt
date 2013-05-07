@@ -1,8 +1,10 @@
 # Changelog
 
-## 0.5.2
+## X.X.X
 
 * Added alias support
+
+* Added ALTER DROP clause support
 
 ## 0.5.1
 

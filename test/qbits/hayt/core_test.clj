@@ -300,11 +300,12 @@
        "ALTER TABLE foo ALTER bar TYPE int;"
        (alter-table :foo (alter-column :bar :int))
 
-       "ALTER TABLE foo ALTER bar TYPE int ADD baz text RENAME foo TO bar;"
+       "ALTER TABLE foo ALTER bar TYPE int ADD baz text RENAME foo TO bar DROP baz;"
        (alter-table :foo
                     (alter-column :bar :int)
                     (add-column :baz :text)
-                    (rename-column :foo :bar))
+                    (rename-column :foo :bar)
+                    (drop-column :baz))
 
        "ALTER TABLE foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
        (alter-table :foo
