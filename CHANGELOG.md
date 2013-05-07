@@ -2,6 +2,11 @@
 
 ## X.X.X
 
+* Exposed `cql-raw` and `cql-fn`, the former allows to pass arbitrary raw
+  content as value, and the later allows to create function wrappers.
+  These two could be usefull when/if we don't support a feature and/or
+  you need lower level access to value/fn encoding.
+
 * Added alias support
 
 * Added ALTER DROP clause support
