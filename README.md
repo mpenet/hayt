@@ -107,12 +107,12 @@ To compile the queries just use `->raw` or `->prepared`
 
 When compiling prepared queries, the values are untouched in the
 returned vector.
-<!-- When compiling with `->raw` we take care of the encoding/escaping -->
-<!-- required by CQL. This process is also open via the -->
-<!-- `qbits.hayt.CQLEntities` protocol for both values and identifiers. We -->
-<!-- also supply a joda-time codec for you to use if you require to in -->
-<!-- `qbits.hayt.codec.joda-time`. This codec is a good example of how to -->
-<!-- handle custom type encoding. -->
+When compiling with `->raw` we take care of the encoding/escaping
+required by CQL. This process is also open via the
+`qbits.hayt.CQLEntities` protocol for both values and identifiers. We
+also supply a joda-time codec for you to use if you require to in
+`qbits.hayt.codec.joda-time`. This codec is a good example of how to
+handle custom type encoding.
 
 If you are curious about what else it can do head to the
 [codox documentation](http://mpenet.github.com/hayt/codox/qbits.hayt.html)
