@@ -10,7 +10,7 @@ none provides a CQL3 DSL yet.
 Hayt is an attempt to allow the existing and future clients to share
 this, provide a simple but extensible base to build upon.
 
-Our goals from the start were to be feature complete (up to CQL
+The goals from the start were to be feature complete (up to CQL
 v3.0.3), idiomatic, well tested, and performant.
 
 There are already 3 libraries that use Hayt:
@@ -21,6 +21,11 @@ There are already 3 libraries that use Hayt:
 
 Hayt development is the result of collaboration, thanks to our [contributors](https://github.com/mpenet/hayt/contributors).
 
+The different layers of the library are decoupled, that means you
+could only use the query compiler (`qbits.hayt.cql`) and create your
+own dsl on top of it if the one on `qbits.hayt.dsl` is not of your
+liking.
+
 ## Installation
 
 ```clojure
@@ -30,7 +35,7 @@ Hayt development is the result of collaboration, thanks to our [contributors](ht
 ## Usage
 
 This should be familiar if you know Korma or ClojureQL.
-One of the major difference is that Hayt doesn't use macros.
+One of the major difference is that Hayt doesn't exposes macros.
 
 Some examples:
 
@@ -48,20 +53,6 @@ Some examples:
                  :moo [> 3]
                  :meh [:> 4]
                  :baz [:in [5 6 7]]}))
-```
-
-Since Queries are just maps they are composable using the usual `merge`
-`into` `assoc` etc.
-
-```clojure
-(def base (select :foo (where {:foo 1})))
-
-(merge base
-       (columns :bar :baz)
-       (where {:bar 2})
-       (order-by [:bar :asc])
-       (using :ttl 10000))
-
 ```
 
 All these functions do is generate maps, if you want to build your own
@@ -83,6 +74,20 @@ DSL on top of it, or use maps direcly feel free to do so.
             :moo [> 3]
             :meh [:> 4]
             :baz [:in [5 6 7]]}}
+```
+
+Since Queries are just maps they are composable using the usual `merge`
+`into` `assoc` etc.
+
+```clojure
+(def base (select :foo (where {:foo 1})))
+
+(merge base
+       (columns :bar :baz)
+       (where {:bar 2})
+       (order-by [:bar :asc])
+       (using :ttl 10000))
+
 ```
 
 To compile the queries just use `->raw` or `->prepared`
