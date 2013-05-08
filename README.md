@@ -6,10 +6,8 @@ CQL3 DSL for Clojure.
 
 There are a number of clients available for Cassandra for clojure and
 none provides a CQL3 DSL yet.
-
 Hayt is an attempt to allow the existing and future clients to share
 this, provide a simple but extensible base to build upon.
-
 The goals from the start were to be feature complete (up to CQL
 v3.0.3), idiomatic, well tested, and performant.
 
