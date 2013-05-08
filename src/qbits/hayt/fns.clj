@@ -11,11 +11,12 @@
   (cql/->CQLRaw x))
 
 (defn cql-fn
+  "Calls supplied function by name, with the supplied args"
   [name & args]
   (cql/map->CQLFn {:name name :args args}))
 
 (defn as
-  "Aliases"
+  "Aliases a column (selector) to another identifier (id)"
   [selector id]
   (cql/->CQLAlias selector id))
 

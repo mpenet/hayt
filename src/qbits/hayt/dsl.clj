@@ -9,7 +9,7 @@ Takes a table identifier and additional clause arguments:
 * where
 * order-by
 * limit
-* table (optionaly using composition)"
+* only-if"
   [table & clauses]
   (into {:select table :columns :*} clauses))
 
@@ -18,8 +18,7 @@ Takes a table identifier and additional clause arguments:
 
 Takes a table identifier and additional clause arguments:
 * values
-* using
-* table (optionaly using composition)"
+* using"
   [table & clauses]
   (into {:insert table} clauses))
 
@@ -31,7 +30,8 @@ Takes a table identifier and additional clause arguments:
 * using
 * set-columns
 * where
-* table (optionaly using composition)"
+* only-if
+* if-not-exists"
   [table & clauses]
   (into {:update table} clauses))
 
@@ -43,7 +43,7 @@ Takes a table identifier and additional clause arguments:
 * columns (defaults to *)
 * using
 * where
-* table (optionaly using composition)"
+* only-if"
   [table & clauses]
   (into {:delete table :columns :*} clauses))
 
@@ -82,7 +82,8 @@ Takes a table identifier and additional clause arguments:
 
 * index-column
 * index-name
-* table (optionaly using composition)"
+* custom
+* on (overwrites table id)"
   [table name & clauses]
   (into {:create-index name :custom false :on table} clauses))
 
@@ -90,8 +91,7 @@ Takes a table identifier and additional clause arguments:
   "http://cassandra.apache.org/doc/cql3/CQL.html#createKeyspaceStmt
 
 Takes a keyspace identifier and clauses:
-* with
-* keyspace (optionaly using composition)"
+* with"
   [keyspace & clauses]
   (into {:create-keyspace keyspace} clauses))
 
@@ -109,10 +109,11 @@ Takes a keyspace identifier and clauses:
 Takes a table identifier and additional clause arguments:
 
 * alter-column
-* add
-* with
-* alter
-* rename"
+* add-column
+* alter-column
+* rename-column
+* drop-column
+* with"
   [table & clauses]
   (into {:alter-table table} clauses))
 
@@ -122,19 +123,18 @@ Takes a table identifier and additional clause arguments:
 Takes a column-familiy identifier and additional clause arguments:
 
 * alter-column
-* add
-* with
-* alter
-* rename
-* column-family (optionaly using composition)"
+* add-column
+* alter-column
+* rename-column
+* drop-column
+* with"
   [column-family & clauses]
   (into {:alter-column-family column-family} clauses))
 
 (defn alter-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterKeyspaceStmt
 
-Takes a keyspace identifier and a `with` clause.
-* keyspace (optionaly using composition)"
+Takes a keyspace identifier and a `with` clause."
   [keyspace & clauses]
   (into {:alter-keyspace keyspace} clauses))
 
@@ -208,12 +208,13 @@ Takes a keyspace identifier"
   {:columns columns})
 
 (defn column-definitions
-  "Clause: "
+  "Clause: Takes a map of columns definitions (keys are identifiers ,
+   values, types), to be used with create-table."
   [column-definitions]
   {:column-definitions column-definitions})
 
 (defn using
-  "Clause: takes keyword/value pairs for :timestamp and :ttl"
+  "Clause: Sets USING, takes keyword/value pairs for :timestamp and :ttl"
   [& args]
   {:using (apply hash-map args)})
 
@@ -246,106 +247,110 @@ clause of a update/delete query"
   {:if args})
 
 (defn if-not-exists
-  "Apply only if the row does not exist"
+  "Clause: Apply only if the row does not exist"
   ([b]
      {:if-not-exists b})
   ([]
      (if-not-exists true)))
 
 (defn values
-  "Clause: "
+  "Clause: Takes a map of columns to be inserted"
   [values]
   {:values values})
 
 (defn set-columns
-  "Clause: "
+  "Clause: Takes a map of columns to be updated"
   [values]
   {:set-columns values})
 
 (defn with
-  "Clause: "
+  "Clause: compiles to a CQL with clause (possibly nested maps)"
   [values]
   {:with values})
 
 (defn index-name
-  "Clause: "
+  "Clause: Takes an index identifier"
   [value]
   {:index-name value})
 
 (defn alter-column
-  "Clause: "
-  [& args]
-  {:alter-column args})
+  "Clause: takes a table identifier and a column type"
+  [identifier type]
+  {:alter-column [identifier type]})
 
 (defn add-column
-  "Clause: "
-  [& args]
-  {:add-column args})
+  "Clause: takes a table identifier and a column type"
+  [identifier type]
+  {:add-column [identifier type]})
 
 (defn rename-column
-  "Clause: "
-  [& args]
-  {:rename-column args})
+  "Clause: rename from old-name to new-name"
+  [old-name new-name]
+  {:rename-column [old-name new-name]})
 
 (defn drop-column
-  "Clause: "
+  "Clause: Takes a column Identifier"
   [id]
   {:drop-column id})
 
 (defn allow-filtering
-  "Clause: "
+  "Clause: sets ALLOW FILTERING on select queries, defaults to true is
+   used without a value"
   ([value]
      {:allow-filtering value})
   ([]
      (allow-filtering true)))
 
 (defn logged
-  "Clause: "
-  [value]
-  {:logged value})
+  "Clause: Sets LOGGED/UNLOGGED attribute on BATCH queries"
+  ([value]
+     {:logged value})
+  ([]
+     (logged true)))
 
 (defn counter
-  "Clause: "
+  "Clause: Sets COUNTER attribute on BATCH queries"
   ([value]
      {:counter value})
   ([]
      (counter true)))
 
 (defn superuser
-  "Clause: "
+  "Clause: To be used with alter-user and create-user, sets superuser status"
   ([value]
      {:superuser value})
   ([]
      (superuser true)))
 
 (defn password
-  "Clause: "
+  "Clause: To be used with alter-user and create-user, sets password"
   [value]
   {:password value})
 
 (defn recursive
-  "Clause: "
+  "Clause: Sets recusivity on list-perm (LIST PERMISSION) queries"
   ([value]
      {:recursive value})
   ([]
      (recursive true)))
 
 (defn resource
-  "Clause: "
+  "Clause: Sets resource to be modified/used with grant or list-perm"
   [value]
   {:resource value})
 
 (defn user
-  "Clause: "
+  "Clause: Sets user to be modified/used with grant or list-perm"
   [value]
   {:user value})
 
 (defn perm
-  "Clause: "
+  "Clause: Sets permission to be listed with list-perm"
   [value]
   {:list-perm value})
 
 (defn custom
+  "Clause: Sets CUSTOM status on create-index query"
   ([x]
      {:custom x})
   ([]
