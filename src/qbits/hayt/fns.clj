@@ -84,7 +84,7 @@ Returns a dateOf function with the supplied argument"
 ;; blob convertion fns
 ;;
 
-(defmacro gen-blob-fns
+(defmacro ^:no-doc gen-blob-fns
   "Generator for blobAs[Type] and [Type]asBlob functions"
   []
   `(do

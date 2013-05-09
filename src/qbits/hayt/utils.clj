@@ -1,26 +1,27 @@
 (ns qbits.hayt.utils
   (:require [qbits.hayt.cql :as cql]))
 
-(def native-types [:ascii
-                   :bigint
-                   :blob
-                   :boolean
-                   :counter
-                   :decimal
-                   :double
-                   :float
-                   :inet
-                   :int
-                   :text
-                   :timestamp
-                   :timeuuid
-                   :uuid
-                   :varchar
-                   :varint])
+(def ^:no-doc native-types
+  [:ascii
+   :bigint
+   :blob
+   :boolean
+   :counter
+   :decimal
+   :double
+   :float
+   :inet
+   :int
+   :text
+   :timestamp
+   :timeuuid
+   :uuid
+   :varchar
+   :varint])
 
 ;; Sugar for collection types
 
-(defn coll-type
+(defn ^:no-doc coll-type
   "Helps with the generation of Collection types definitions.
 Takes a CQL type as keyword and it's arguments: ex (coll-type :map :int :uuid).
 The possible collection types are :map, :list and :set."
