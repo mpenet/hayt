@@ -6,8 +6,17 @@
   (:import (java.nio ByteBuffer)
            (org.joda.time DateTime)))
 
+
+(defmacro are-raw [& body]
+  `(are [expected query] (= expected (->raw query))
+        ~@body))
+
+(defmacro are-prepared [& body]
+  `(are [expected query] (= expected (->prepared query))
+        ~@body))
+
 (deftest test-select
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "SELECT * FROM foo;"
        (select :foo)
 
@@ -62,7 +71,7 @@
                                :ttl 200000))))))
 
 (deftest test-update
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "UPDATE foo SET bar = 1, baz = baz + 2;"
        (update :foo
                (set-columns {:bar 1
@@ -104,7 +113,7 @@
                (where {:foo :bar})))
 
 
-  (are [expected query] (= expected (->prepared query))
+  (are-prepared
        ["UPDATE foo SET bar = ?, baz = baz + ?;" [1 2]]
        (update :foo
                (set-columns {:bar 1
@@ -121,7 +130,7 @@
                        :baz [:in [5 6 7]]}))))
 
 (deftest test-delete
-  (are [expected query] (= expected (->prepared query))
+  (are-prepared
        ["DELETE * FROM foo USING TIMESTAMP 100000 AND TTL 200000 WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
         [:bar 3 4 5 6 7]]
        (delete :foo
@@ -143,7 +152,7 @@
                          :baz [:in [5 6 7]]}))))
 
 (deftest test-ddl
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "USE foo;"
        (use-keyspace :foo)
 
@@ -160,7 +169,7 @@
        (drop-table :foo)))
 
 (deftest test-create-index
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "CREATE INDEX ON foo (bar);"
        (create-index :foo :bar)
 
@@ -174,7 +183,7 @@
                      (with {:options {:class "path.to.the.IndexClass"}}))))
 
 (deftest test-auth-fns
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "GRANT PERMISSION FULL_ACCESS ON bar TO baz;"
        (grant :full-access
               (resource :bar)
@@ -225,7 +234,7 @@
 
 
 (deftest test-batch
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
        (batch
         (queries
@@ -265,7 +274,7 @@
                       (using :timestamp 1234))))))
 
 (deftest test-create-table
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "CREATE TABLE foo (a varchar, b int, PRIMARY KEY (a));"
        (create-table :foo
                      (column-definitions {:a :varchar
@@ -296,7 +305,7 @@
                             :clustering-order [[:bar :asc]]}))))
 
 (deftest test-alter-table
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "ALTER TABLE foo ALTER bar TYPE int;"
        (alter-table :foo (alter-column :bar :int))
 
@@ -315,7 +324,7 @@
                            :clustering-order [[:bar :asc]]}))))
 
 (deftest test-alter-column-family
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "ALTER COLUMNFAMILY foo ALTER bar TYPE int;"
        (alter-column-family :foo (alter-column :bar :int))
 
@@ -333,7 +342,7 @@
                                    :clustering-order [[:bar :asc]]}))))
 
 (deftest test-create-alter-keyspace
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "CREATE KEYSPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
        (create-keyspace :foo
                         (with {:replication
@@ -370,7 +379,7 @@
 
 
 (deftest test-functions
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "SELECT COUNT(*) FROM foo;"
        (select :foo (columns (count*)))
 
@@ -392,7 +401,7 @@
        (select :foo
                (where {(token :user-id) [> (token "tom")]})))
 
-  (are [expected query] (= expected (->prepared query))
+  (are-prepared
        ["SELECT * FROM foo WHERE ts = now();" []]
        (select :foo
                (where {:ts (now)}))
@@ -418,7 +427,7 @@
                              (where {:baz 1}))))))
 
 (deftest test-alias
-  (are [expected query] (= expected (->raw query))
+  (are-raw
        "SELECT name AS user_name, occupation AS user_occupation FROM users;"
        (select :users
                (columns (as :name :user_name)
@@ -462,7 +471,7 @@
 
 (deftest test-types
   (let [addr (java.net.InetAddress/getLocalHost)]
-    (are [expected query] (= expected (->raw query))
+    (are-raw
          "SELECT * FROM foo WHERE bar = 0x;"
          (select :foo (where {:bar (ByteBuffer/allocate 0)}))
 
