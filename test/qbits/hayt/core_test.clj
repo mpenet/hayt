@@ -377,11 +377,11 @@
 
   (let [q (insert :foo)
         q2 (merge q (values  {:a "b" "c" "d"}))]
-    (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b');"
-           (->raw q2)))
-    (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') USING TIMESTAMP 100000 AND TTL 200000;"
-           (->raw (merge q2 (using :timestamp 100000
-                                   :ttl 200000)))))))
+    (are-raw "INSERT INTO foo (\"c\", a) VALUES ('d', 'b');" q2)
+    (are-raw
+     "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') USING TIMESTAMP 100000 AND TTL 200000;"
+     (merge q2 (using :timestamp 100000
+                      :ttl 200000)))))
 
 
 (deftest test-functions
