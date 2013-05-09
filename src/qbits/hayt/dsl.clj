@@ -142,6 +142,7 @@ Takes a keyspace identifier and a `with` clause."
   "http://cassandra.apache.org/doc/cql3/CQL.html#batchStmt
 
 Takes hayt queries  optional clauses:
+* queries
 * using
 * counter
 * logged "
@@ -184,10 +185,12 @@ Takes a keyspace identifier"
   (into {:alter-user user :superuser false} clauses))
 
 (defn drop-user
+  "Takes a user identifier"
   [user]
   {:drop-user user})
 
 (defn list-users
+  ""
   []
   {:list-users nil})
 
@@ -203,7 +206,8 @@ Takes a keyspace identifier"
 ;; Clauses
 
 (defn columns
-  "Clause: takes columns identifiers"
+  "Clause: takes columns identifiers
+ex: (columns :foo \"bar\" :baz) "
   [& columns]
   {:columns columns})
 
@@ -219,14 +223,14 @@ Takes a keyspace identifier"
   {:using (apply hash-map args)})
 
 (defn limit
-  "Clause: takes a numeric value"
+  "Clause: Sets LIMIT, takes a numeric value"
   [n]
   {:limit n})
 
 (defn order-by
   "Clause: takes vectors of 2 elements, where the first is the column
   identifier and the second is the ordering as keyword.
-  ex: :asc, :desc"
+  ex: (order-by [:asc :desc])"
   [& columns] {:order-by columns})
 
 (defn queries
@@ -241,7 +245,7 @@ clause of a select/update/delete query"
   {:where args})
 
 (defn only-if
-  "Clause: takes a map or a vector of pairs to compose the if
+  "Clause: takes a map or a vector of pairs (same as `where`) to compose the if
 clause of a update/delete query"
   [args]
   {:if args})
