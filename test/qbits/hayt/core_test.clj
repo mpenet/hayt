@@ -121,36 +121,33 @@
                        :baz [:in [5 6 7]]}))))
 
 (deftest test-delete
-  (is (= ["DELETE * FROM foo USING TIMESTAMP 100000 AND TTL 200000 WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-          [:bar 3 4 5 6 7]]
-         (->prepared (delete :foo
-                             (using :timestamp 100000
-                                    :ttl 200000)
-                             (where {:foo :bar
-                                     :moo [> 3]
-                                     :meh [:> 4]
-                                     :baz [:in [5 6 7]]})))))
+  (are [expected query] (= expected (->prepared query))
+       ["DELETE * FROM foo USING TIMESTAMP 100000 AND TTL 200000 WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
+        [:bar 3 4 5 6 7]]
+       (delete :foo
+               (using :timestamp 100000
+                      :ttl 200000)
+               (where {:foo :bar
+                       :moo [> 3]
+                       :meh [:> 4]
+                       :baz [:in [5 6 7]]}))
 
-  (is (= ["DELETE * FROM foo USING TIMESTAMP 100000 AND TTL 200000 IF foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-          [:bar 3 4 5 6 7]]
-         (->prepared (delete :foo
-                             (using :timestamp 100000
-                                    :ttl 200000)
-                             (only-if {:foo :bar
-                                       :moo [> 3]
-                                       :meh [:> 4]
-                                       :baz [:in [5 6 7]]}))))))
+       ["DELETE * FROM foo USING TIMESTAMP 100000 AND TTL 200000 IF foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
+        [:bar 3 4 5 6 7]]
+       (delete :foo
+               (using :timestamp 100000
+                      :ttl 200000)
+               (only-if {:foo :bar
+                         :moo [> 3]
+                         :meh [:> 4]
+                         :baz [:in [5 6 7]]}))))
 
-(deftest test-use-keyspace
-  (is (= "USE foo;"
-         (->raw (use-keyspace :foo)))))
-
-(deftest test-truncate
-  (is (= "TRUNCATE foo;"
-         (->raw (truncate :foo)))))
-
-(deftest test-drop
+(deftest test-ddl
   (are [expected query] (= expected (->raw query))
+       "USE foo;"
+       (use-keyspace :foo)
+       "TRUNCATE foo;"
+       (truncate :foo)
        "DROP INDEX foo;"
        (drop-index :foo)
 
@@ -196,12 +193,12 @@
 
        "ALTER USER foo WITH PASSWORD bar NOSUPERUSER;"
        (alter-user :foo
-                    (password :bar))
+                   (password :bar))
 
        "ALTER USER foo WITH PASSWORD bar SUPERUSER;"
        (alter-user :foo
-                    (password :bar)
-                    (superuser true))
+                   (password :bar)
+                   (superuser true))
 
        "DROP USER foo;"
        (drop-user :foo)
@@ -226,30 +223,31 @@
 
 
 (deftest test-batch
-  (is (= "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
-         (->raw (batch
-                 (queries
-                  (update :foo
-                          (set-columns {:bar 1
-                                        :baz [+ 2] }))
-                  (insert :foo
-                          (values {"a" "b" "c" "d"})
-                          (using :timestamp 100000
-                                 :ttl 200000)))
-                 (using :timestamp 2134)))))
+  (are [expected query] (= expected (->raw query))
+       "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
+       (batch
+        (queries
+         (update :foo
+                 (set-columns {:bar 1
+                               :baz [+ 2] }))
+         (insert :foo
+                 (values {"a" "b" "c" "d"})
+                 (using :timestamp 100000
+                        :ttl 200000)))
+        (using :timestamp 2134))
 
-  (is (= "BEGIN UNLOGGED BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
-         (->raw (batch
-                 (queries
-                  (update :foo
-                          (set-columns {:bar 1
-                                        :baz [+ 2] }))
-                  (insert :foo
-                          (values {"a" "b" "c" "d"})
-                          (using :timestamp 100000
-                                 :ttl 200000)))
-                 (logged false)
-                 (using :timestamp 2134)))))
+       "BEGIN UNLOGGED BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
+       (batch
+        (queries
+         (update :foo
+                 (set-columns {:bar 1
+                               :baz [+ 2] }))
+         (insert :foo
+                 (values {"a" "b" "c" "d"})
+                 (using :timestamp 100000
+                        :ttl 200000)))
+        (logged false)
+        (using :timestamp 2134)))
 
   (is (= ["BEGIN COUNTER BATCH USING TIMESTAMP 1234 \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo (\"a\", \"c\") VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;" [1 2 "b" "d"]]
          (->prepared (batch
@@ -361,14 +359,12 @@
         (->prepared (merge q (columns :bar "baz")))))
 
   (let [q (insert :foo)
-        q2 (merge q
-                  (values  {:a "b" "c" "d"}))]
+        q2 (merge q (values  {:a "b" "c" "d"}))]
     (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b');"
            (->raw q2)))
     (is (= "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') USING TIMESTAMP 100000 AND TTL 200000;"
-           (->raw (merge q2
-                         (using :timestamp 100000
-                                :ttl 200000)))))))
+           (->raw (merge q2 (using :timestamp 100000
+                                   :ttl 200000)))))))
 
 
 (deftest test-functions
@@ -420,14 +416,15 @@
                              (where {:baz 1}))))))
 
 (deftest test-alias
-  (is (= "SELECT name AS user_name, occupation AS user_occupation FROM users;"
-         (->raw (select :users
-                        (columns (as :name :user_name)
-                                 (as :occupation :user_occupation))))))
-  (is (= "SELECT COUNT(*) AS user_count FROM users;"
-         (->raw (select :users
-                        (columns (as (count*)
-                                     :user_count)))))))
+  (are [expected query] (= expected (->raw query))
+       "SELECT name AS user_name, occupation AS user_occupation FROM users;"
+       (select :users
+               (columns (as :name :user_name)
+                        (as :occupation :user_occupation)))
+       "SELECT COUNT(*) AS user_count FROM users;"
+       (select :users
+               (columns (as (count*)
+                            :user_count)))))
 
 
 (deftest test-cql-identifier
@@ -461,28 +458,29 @@
            (apply-map query {:a1 100 :b1 200 :c1 300})))))
 
 (deftest test-types
-  (is (= "SELECT * FROM foo WHERE bar = 0x;"
-         (->raw (select :foo (where {:bar (ByteBuffer/allocate 0)})))))
-
-  (is (= "SELECT * FROM foo WHERE bar = 0x62617a;"
-         (->raw (select :foo (where {:bar (ByteBuffer/wrap (.getBytes "baz"))})))))
-
-  (is (= "SELECT * FROM foo WHERE bar = 0;"
-         (->raw (select :foo (where {:bar (java.util.Date. 0)})))))
-
-  (is (= "SELECT * FROM foo WHERE bar = 0;"
-         (->raw (select :foo (where {:bar (DateTime. 0)})))))
-
   (let [addr (java.net.InetAddress/getLocalHost)]
-    (is (= (str "SELECT * FROM foo WHERE bar = " (.getHostAddress addr) ";")
-           (->raw (select :foo (where {:bar addr}))))))
+    (are [expected query] (= expected (->raw query))
+         "SELECT * FROM foo WHERE bar = 0x;"
+         (select :foo (where {:bar (ByteBuffer/allocate 0)}))
 
-  "SELECT * FROM foo WHERE uuid = 1f84b56b-5481-4ee4-8236-8a3831ee5892;"
-  (select :foo
-          (where {:uuid  #uuid "1f84b56b-5481-4ee4-8236-8a3831ee5892"}))
+         "SELECT * FROM foo WHERE bar = 0x62617a;"
+         (select :foo (where {:bar (ByteBuffer/wrap (.getBytes "baz"))}))
 
-  (is (= "INSERT INTO test (v1, c, k) VALUES (null, 1, 0);"
-         (->raw (insert :test (values {:k 0 :c 1 :v1 nil})))))
+         "SELECT * FROM foo WHERE bar = 0;"
+         (select :foo (where {:bar (java.util.Date. 0)}))
+
+         "SELECT * FROM foo WHERE bar = 0;"
+         (select :foo (where {:bar (DateTime. 0)}))
+
+
+         (str "SELECT * FROM foo WHERE bar = " (.getHostAddress addr) ";")
+         (select :foo (where {:bar addr}))
+
+         "SELECT * FROM foo WHERE uuid = 1f84b56b-5481-4ee4-8236-8a3831ee5892;"
+         (select :foo (where {:uuid  #uuid "1f84b56b-5481-4ee4-8236-8a3831ee5892"}))
+
+         "INSERT INTO test (v1, c, k) VALUES (null, 1, 0);"
+         (insert :test (values {:k 0 :c 1 :v1 nil}))))
 
   (is (= ["INSERT INTO test (v1, c, k) VALUES (?, ?, ?);" [nil 1 0]]
          (->prepared (insert :test (values {:k 0 :c 1 :v1 nil}))))))

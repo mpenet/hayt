@@ -15,6 +15,7 @@
                                    [clj-time "0.5.0"]]}}
   :codox {:src-dir-uri "https://github.com/mpenet/hayt/blob/master"
           :src-linenum-anchor-prefix "L"
+          :output-dir "../hayt-gh/codox"
           :exclude [qbits.hayt.cql
                     qbits.hayt.dsl
                     qbits.hayt.utils
