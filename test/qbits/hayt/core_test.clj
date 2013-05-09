@@ -146,8 +146,10 @@
   (are [expected query] (= expected (->raw query))
        "USE foo;"
        (use-keyspace :foo)
+
        "TRUNCATE foo;"
        (truncate :foo)
+
        "DROP INDEX foo;"
        (drop-index :foo)
 
