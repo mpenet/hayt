@@ -1,6 +1,6 @@
 # Changelog
 
-## X.X.X
+## 1.0.0
 
 * Exposed `cql-raw` and `cql-fn`, the former allows to pass arbitrary raw
   content as value, and the later allows to create function wrappers.
@@ -10,6 +10,8 @@
 * Added alias support
 
 * Added ALTER DROP clause support
+
+* tests, docstrings improvements
 
 ## 0.5.1
 
