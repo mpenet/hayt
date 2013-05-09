@@ -1,5 +1,5 @@
 (ns qbits.hayt.codec.joda-time
-  "Include this namespace if you want hayt to support Joda DateTime
+  "require/use this namespace if you want hayt to support Joda DateTime
 encoding when generating raw queries"
   (:require
    [qbits.hayt.cql :as cql]
