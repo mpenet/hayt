@@ -445,9 +445,10 @@
        1 1))
 
 (deftest test-col-type-sugar
-  (is (= "set<int>" (set-type :int)))
-  (is (= "list<int>" (list-type :int)))
-  (is (= "map<int, text>" (map-type :int :text))))
+  (are [expected gen] (= expected gen)
+    "set<int>" (set-type :int)
+    "list<int>" (list-type :int)
+    "map<int, text>" (map-type :int :text)))
 
 (deftest test-prepare-map
   (let [query (->prepared (select :foo
