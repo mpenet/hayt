@@ -17,8 +17,6 @@ There are already 3 libraries that use Hayt:
 * [clojurewerkz/cassaforte](https://github.com/clojurewerkz/cassaforte)
 * [mpenet/casyn](https://github.com/mpenet/casyn)
 
-Hayt development is the result of collaboration, thanks to our [contributors](https://github.com/mpenet/hayt/contributors).
-
 The different layers of the library are decoupled, that means you
 could only use the query compiler (`qbits.hayt.cql`) and create your
 own dsl on top of it if the one on `qbits.hayt.dsl` is not of your
@@ -116,6 +114,9 @@ If you are curious about what else it can do head to the
 [codox documentation](http://mpenet.github.com/hayt/codox/qbits.hayt.html)
 or the
 [tests](https://github.com/mpenet/hayt/blob/master/test/qbits/hayt/core_test.clj).
+
+
+Hayt development is the result of collaboration, thanks to our [contributors](https://github.com/mpenet/hayt/contributors).
 
 ## Hayt?
 
