@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.2
+
+* Fix Collection types definitions (they were quoted)
+
+* Fix DELETE * statement :emit (no * on delete, it now accepts nil column or :*)
+
+## 1.0.1
+
+* Internals change to accomodate cassaforte
+
 ## 1.0.0
 
 * Exposed `cql-raw` and `cql-fn`, the former allows to pass arbitrary raw
