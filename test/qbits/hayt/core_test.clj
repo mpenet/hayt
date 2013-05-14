@@ -306,7 +306,16 @@
                                       :baz :text
                                       :primary-key [[:foo :baz] :bar]})
                  (with {:compact-storage true
-                        :clustering-order [[:bar :asc]]}))))
+                        :clustering-order [[:bar :asc]]}))
+
+   "CREATE TABLE foo (a varchar, b list<int>, PRIMARY KEY (a));"
+   (create-table :foo
+                 (column-definitions {:a :varchar
+                                      :b (list-type :int)
+                                      :primary-key :a}))
+
+
+   ))
 
 (deftest test-alter-table
   (are-raw
@@ -466,7 +475,7 @@
        1 1))
 
 (deftest test-col-type-sugar
-  (are [expected gen] (= expected gen)
+  (are [expected gen] (= (keyword expected) gen)
        "set<int>" (set-type :int)
        "list<int>" (list-type :int)
        "map<int, text>" (map-type :int :text)))
