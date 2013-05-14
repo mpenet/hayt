@@ -233,14 +233,11 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
           (emit-row q [:using :set-columns :where :if :if-not-exists])))
 
    :delete
-   (fn [q table]
-     (join-spaced
-      (filter identity
-              ["DELETE"
-               (when-not (= :* (:columns q))
-                 ((emit :columns) q (:columns q)))
-               (emit-row (assoc q :from table)
-                         [:from :using :where :if])])))
+   (fn [{:keys [columns] :as q} table]
+     (str "DELETE "
+          (emit-row (cond-> (assoc q :from table)
+                            (= :q columns) (dissoc :columns))
+                    [:columns :from :using :where :if])))
 
    :drop-index
    (fn [q index]
