@@ -236,7 +236,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [{:keys [columns] :as q} table]
      (str "DELETE "
           (emit-row (cond-> (assoc q :from table)
-                            (= :q columns) (dissoc :columns))
+                            (= :* columns) (dissoc :columns))
                     [:columns :from :using :where :if])))
 
    :drop-index

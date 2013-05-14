@@ -26,10 +26,9 @@
 Takes a CQL type as keyword and it's arguments: ex (coll-type :map :int :uuid).
 The possible collection types are :map, :list and :set."
   [t & spec]
-  (keyword
-   (format "%s<%s>"
-           (name t)
-           (cql/join-comma (map name spec)))))
+  (keyword (format "%s<%s>"
+                   (name t)
+                   (cql/join-comma (map name spec)))))
 
 (def map-type
   "Generates a map type definition, takes 2 arguments, for key and
