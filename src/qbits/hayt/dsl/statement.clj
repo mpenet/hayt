@@ -1,4 +1,4 @@
-(ns qbits.hayt.dsl.verb)
+(ns qbits.hayt.dsl.statement)
 
 (defn select
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
