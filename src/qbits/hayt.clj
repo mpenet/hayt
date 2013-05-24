@@ -13,5 +13,4 @@
   cql/->prepared)
 
 (doseq [module '(dsl fns utils)]
-  (let [ns-name (symbol (str "qbits.hayt." module))]
-    (utils/alias-ns ns-name)))
+  (utils/alias-ns (symbol (str "qbits.hayt." module))))

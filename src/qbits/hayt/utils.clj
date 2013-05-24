@@ -57,6 +57,7 @@ The possible collection types are :map, :list and :set."
   `(intern *ns* (with-meta ~sym (meta ~sym)) (deref ~v)))
 
 (defn alias-ns
+  "Alias all the vars from namespace to the curent namespace"
   [ns-name]
   (require ns-name)
   (doseq [[n v] (ns-publics (the-ns ns-name))]
