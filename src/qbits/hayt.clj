@@ -1,6 +1,6 @@
 (ns qbits.hayt
   (:require
-   [flatland.useful.ns :as uns]
+   [qbits.hayt.utils :as utils]
    [qbits.hayt.cql :as cql]))
 
 (def ->raw
@@ -13,4 +13,4 @@
   cql/->prepared)
 
 (doseq [module '(dsl fns utils)]
-  (uns/alias-ns (symbol (str "qbits.hayt." module))))
+  (utils/alias-ns (symbol (str "qbits.hayt." module))))
