@@ -52,3 +52,12 @@ The possible collection types are :map, :list and :set."
   keywords for placeholders and maps the supplied map to it"
   [[query placeholders] parameter-map]
   [query (replace parameter-map placeholders)])
+
+(defmacro defalias ^:private [sym v]
+  `(intern *ns* (with-meta ~sym (meta ~sym)) (deref ~v)))
+
+(defn alias-ns
+  [ns-name]
+  (require ns-name)
+  (doseq [[n v] (ns-publics (the-ns ns-name))]
+    (defalias n v)))
