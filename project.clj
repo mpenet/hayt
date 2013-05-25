@@ -18,6 +18,8 @@
           :output-dir "../hayt-gh/codox"
           :exclude [qbits.hayt.cql
                     qbits.hayt.dsl
+                    qbits.hayt.dsl.clause
+                    qbits.hayt.dsl.statement
                     qbits.hayt.utils
                     qbits.hayt.fns]}
   :warn-on-reflection true)
