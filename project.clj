@@ -16,10 +16,6 @@
   :codox {:src-dir-uri "https://github.com/mpenet/hayt/blob/master"
           :src-linenum-anchor-prefix "L"
           :output-dir "../hayt-gh/codox"
-          :exclude [qbits.hayt.cql
-                    qbits.hayt.dsl
-                    qbits.hayt.dsl.clause
-                    qbits.hayt.dsl.statement
-                    qbits.hayt.utils
-                    qbits.hayt.fns]}
+          :include [qbits.hayt
+                    qbits.hayt.codec.joda-time]}
   :warn-on-reflection true)
