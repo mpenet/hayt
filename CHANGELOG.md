@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+* ns change: `qbits.hayt.dsl.verb` becomes `qbits.hayt.dsl.statement`.
+  This should be backward compatible as long as you don't use them
+  directly, the aliases have been updated.
+
 ## 1.0.2
 
 * Fix Collection types definitions (they were quoted)
