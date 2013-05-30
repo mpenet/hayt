@@ -171,7 +171,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (defn query-cond-sequential-entry [column [op value]]
   (let [col-name (cql-identifier column)]
     (cond
-      (= :in op)
+      (identical? :in op)
       (str col-name
            " IN "
            (->> (map cql-value value)
@@ -236,7 +236,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [{:keys [columns] :as q} table]
      (str "DELETE "
           (emit-row (cond-> (assoc q :from table)
-                            (= :* columns) (dissoc :columns))
+                            (identical? :* columns) (dissoc :columns))
                     [:columns :from :using :where :if])))
 
    :drop-index
@@ -579,7 +579,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   (->> template
        (map (fn [token]
               (let [context (get row token ::empty)]
-                (when-not (= ::empty context)
+                (when-not (identical? ::empty context)
                   ((get emit token emit-catch-all) row context)))))
        (remove nil?)
        (join-spaced)))
