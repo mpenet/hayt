@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4
+
+* Minor perf. improvements
+
 ## 1.0.3
 
 * ns change: `qbits.hayt.dsl.verb` becomes `qbits.hayt.dsl.statement`.
