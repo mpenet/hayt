@@ -13,7 +13,7 @@
 (defn cql-fn
   "Calls supplied function by name, with the supplied args"
   [name & args]
-  (cql/map->CQLFn {:name name :args args}))
+  (cql/->CQLFn name args))
 
 (defn as
   "Aliases a column (selector) to another identifier (id)"

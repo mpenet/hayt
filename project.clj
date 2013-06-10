@@ -17,5 +17,9 @@
           :src-linenum-anchor-prefix "L"
           :output-dir "../hayt-gh/codox"
           :include [qbits.hayt
+                    qbits.hayt.dsl.statement
+                    qbits.hayt.dsl.clause
+                    qbits.hayt.fn
+                    qbits.hayt.utils
                     qbits.hayt.codec.joda-time]}
   :warn-on-reflection true)
