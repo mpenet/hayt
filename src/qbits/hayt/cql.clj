@@ -578,9 +578,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   [row template]
   (->> template
        (map (fn [token]
-              (let [context (get row token ::empty)]
-                (when-not (identical? ::empty context)
-                  ((get emit token emit-catch-all) row context)))))
+              (when (contains? row token)
+                ((get emit token emit-catch-all) row (token row)))))
        (remove nil?)
        (join-spaced)))
 
