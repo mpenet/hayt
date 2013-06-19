@@ -414,15 +414,15 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    :primary-key
    (fn [q primary-key]
      (->> (if (sequential? primary-key)
-            (map (fn [pk]
-                   (if (sequential? pk)
-                     (->  (map cql-identifier pk)
-                          join-comma
-                          wrap-parens)
-                     (cql-identifier pk)))
-                 primary-key)
+            (->> primary-key
+                 (map (fn [pk]
+                        (if (sequential? pk)
+                          (->  (map cql-identifier pk)
+                               join-comma
+                               wrap-parens)
+                          (cql-identifier pk))))
+                 join-comma)
             (cql-identifier primary-key))
-          join-comma
           wrap-parens
           (str "PRIMARY KEY ")))
 

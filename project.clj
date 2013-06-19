@@ -1,4 +1,4 @@
-(defproject cc.qbits/hayt "1.0.4"
+(defproject cc.qbits/hayt "1.0.5"
   :description "CQL Query Generation"
   :url "https://github.com/mpenet/hayt"
   :license {:name "Eclipse Public License"
@@ -19,7 +19,7 @@
           :include [qbits.hayt
                     qbits.hayt.dsl.statement
                     qbits.hayt.dsl.clause
-                    qbits.hayt.fn
+                    qbits.hayt.fns
                     qbits.hayt.utils
                     qbits.hayt.codec.joda-time]}
   :warn-on-reflection true)

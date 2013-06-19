@@ -308,11 +308,11 @@
                  (with {:compact-storage true
                         :clustering-order [[:bar :asc]]}))
 
-   "CREATE TABLE foo (a varchar, b list<int>, PRIMARY KEY (a));"
+   "CREATE TABLE foo (a varchar, b list<int>, PRIMARY KEY (ab));"
    (create-table :foo
                  (column-definitions {:a :varchar
                                       :b (list-type :int)
-                                      :primary-key :a}))
+                                      :primary-key :ab}))
 
 
    ))

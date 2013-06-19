@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5
+
+* Allow :primary-key :abc (value not wrapped in a vector)
+
 ## 1.0.4
 
 * Minor perf. improvements
