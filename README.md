@@ -25,7 +25,7 @@ liking.
 ## Installation
 
 ```clojure
-[cc.qbits/hayt "1.0.5"]
+[cc.qbits/hayt "1.1.0"]
 ```
 
 ## Usage

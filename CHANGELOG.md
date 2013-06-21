@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0
+
+* Add encoding support for byte array values
+
 ## 1.0.5
 
 * Allow :primary-key :abc (value not wrapped in a vector)
