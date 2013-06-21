@@ -497,6 +497,9 @@
      "SELECT * FROM foo WHERE bar = 0x62617a;"
      (select :foo (where {:bar (ByteBuffer/wrap (.getBytes "baz"))}))
 
+     "SELECT * FROM foo WHERE bar = 0x62617a;"
+     (select :foo (where {:bar (.getBytes "baz")}))
+
      "SELECT * FROM foo WHERE bar = 0;"
      (select :foo (where {:bar (java.util.Date. 0)}))
 
