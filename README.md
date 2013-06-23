@@ -15,16 +15,17 @@ There are already 3 libraries that use Hayt:
 
 ## What's in the box?
 
-* **Complete CQL 3.0.3 coverage** including some features in trunk,
-  **DDL**, **CQL Functions**.
+* **Complete CQL 3.0.3 coverage** including some features in Cassandra
+  trunk, **DDL**, **CQL Functions**, **counter** and **collections**
+  operations
 * Support for both **Raw queries** and **Prepared Statements** generation
 * **Great performance**
 * **Extensive test coverage**
 * Decoupled query compiler, allowing you to **build your own DSL** in minutes
-* Highly **composable** using simple maps or the functions provided.
+* Highly **composable** using simple maps or the functions provided
 * Extensible **Clojure data types support**
-* Constantly **kept up to date** with Cassandra changes, almost daily.
-* No macros, no pain.
+* Constantly **kept up to date** with Cassandra changes, almost daily
+* No macros, no pain
 
 ## Installation
 
