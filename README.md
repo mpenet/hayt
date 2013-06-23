@@ -17,7 +17,7 @@ There are already 3 libraries that use Hayt:
 
 * **Complete CQL 3.0.3 coverage** including some features in trunk,
   **DDL**, **CQL Functions**.
-* Support both **Raw queries** and **Prepared Statements** generation
+* Support for both **Raw queries** and **Prepared Statements** generation
 * **Great performance**
 * **Extensive test coverage**
 * Decoupled query compiler, allowing you to **build your own DSL** in minutes
