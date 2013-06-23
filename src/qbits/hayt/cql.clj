@@ -11,7 +11,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (java.nio ByteBuffer)
    (java.util Date)
    (java.net InetAddress)
-   (org.apache.cassandra.utils ByteBufferUtil)))
+   (cc.qbits.hayt Hex)))
 
 (declare emit-query emit-row)
 (def ^:dynamic *param-stack*)
@@ -62,7 +62,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
   ByteBuffer
   (cql-value [x]
-    (maybe-parameterize! x #(str "0x" (ByteBufferUtil/bytesToHex %))))
+    (maybe-parameterize! x #(str "0x" (Hex/bytesToHex %))))
 
   String
   (cql-identifier [x] (dquote-string x))
