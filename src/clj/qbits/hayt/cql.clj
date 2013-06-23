@@ -21,6 +21,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 ;; argument for later encoding.
 (defrecord CQLFn [name args])
 (defrecord CQLRaw [value])
+(defrecord CQLRawPreparable [value])
 (defrecord CQLAlias [selector id])
 
 (defn maybe-parameterize!
@@ -134,6 +135,10 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   CQLRaw
   (cql-identifier [x] x)
   (cql-value [x] x)
+
+  CQLRawPreparable
+  (cql-identifier [x] (maybe-parameterize! (:value x)))
+  (cql-value [x] (maybe-parameterize! (:value x)))
 
   nil
   (cql-value [x]
