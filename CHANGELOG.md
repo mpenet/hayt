@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1
+
+* Dropped dependency on cassandra-all, no api changes
+
 ## 1.1.0
 
 * Add encoding support for byte array values
