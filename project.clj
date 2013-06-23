@@ -20,6 +20,6 @@
                     qbits.hayt.fns
                     qbits.hayt.utils
                     qbits.hayt.codec.joda-time]}
-
-  :java-source-paths ["java"]
+  :source-paths ["src/clj"]
+  :java-source-paths ["src/java"]
   :warn-on-reflection true)
