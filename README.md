@@ -4,12 +4,8 @@ CQL3 DSL for Clojure.
 
 ## Why?
 
-There are a number of clients available for Cassandra for clojure and
-none provides a CQL3 DSL yet.
 Hayt is an attempt to allow the existing and future clients to share
-this, provide a simple but extensible base to build upon.
-The goals from the start were to be feature complete (up to CQL
-v3.0.3), idiomatic, well tested, and performant.
+this layer and provide a simple but extensible base to build upon.
 
 There are already 3 libraries that use Hayt:
 
@@ -17,10 +13,18 @@ There are already 3 libraries that use Hayt:
 * [clojurewerkz/cassaforte](https://github.com/clojurewerkz/cassaforte)
 * [mpenet/casyn](https://github.com/mpenet/casyn)
 
-The different layers of the library are decoupled, that means you
-could only use the query compiler (`qbits.hayt.cql`) and create your
-own dsl on top of it if the one on `qbits.hayt.dsl` is not of your
-liking.
+## What's in the box?
+
+* **Complete CQL 3.0.3 coverage** including some features in trunk,
+  **DDL**, **CQL Functions**.
+* Support both **Raw queries** and **Prepared Statements** generation
+* **Great performance**
+* **Extensive test coverage**
+* Decoupled query compiler, allowing you to **build your own DSL** in minutes
+* Highly **composable** using simple maps or the functions provided.
+* Extensible **Clojure data types support**
+* Constantly **kept up to date** with Cassandra changes, almost daily.
+* No macros, no pain.
 
 ## Installation
 
@@ -33,7 +37,6 @@ liking.
 This should be familiar if you know Korma or ClojureQL.
 One of the major difference is that Hayt doesn't exposes macros.
 
-Some examples:
 
 ```clojure
 
@@ -114,9 +117,6 @@ If you are curious about what else it can do head to the
 [codox documentation](http://mpenet.github.com/hayt/codox/qbits.hayt.html)
 or the
 [tests](https://github.com/mpenet/hayt/blob/master/test/qbits/hayt/core_test.clj).
-
-
-Hayt development is the result of collaboration, thanks to our [contributors](https://github.com/mpenet/hayt/contributors).
 
 ## Hayt?
 
