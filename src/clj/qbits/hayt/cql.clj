@@ -11,7 +11,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (java.nio ByteBuffer)
    (java.util Date)
    (java.net InetAddress)
-   (cc.qbits.hayt Hex)))
+   (qbits.hayt Hex)))
 
 (declare emit-query emit-row)
 (def ^:dynamic *param-stack*)

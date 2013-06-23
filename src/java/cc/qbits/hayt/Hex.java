@@ -19,7 +19,7 @@
 // Various pieces of code taken from cassandra to handle Hex encoding
 // for blob fields.
 
-package cc.qbits.hayt;
+package qbits.hayt;
 
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
