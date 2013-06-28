@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2
+
+* Dropped dependency on clj 1.5
+
 ## 1.1.1
 
 * Dropped dependency on cassandra-all, no api changes
