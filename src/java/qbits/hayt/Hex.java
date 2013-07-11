@@ -65,8 +65,10 @@ public class Hex
     }
 
     /**
-     * Create a String from a char array with zero-copy (if available), using reflection to access a package-protected constructor of String.
-     * */
+     * Create a String from a char array with zero-copy (if
+     * available), using reflection to access a package-protected
+     * constructor of String.
+     */
     public static String wrapCharArray(char[] c)
     {
         if (c == null)
@@ -89,7 +91,8 @@ public class Hex
     }
 
     /**
-     * Used to get access to protected/private constructor of the specified class
+     * Used to get access to protected/private constructor of the
+     * specified class
      * @param klass - name of the class
      * @param paramTypes - types of the constructor parameters
      * @return Constructor if successful, null if the constructor cannot be
