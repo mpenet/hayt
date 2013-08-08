@@ -416,6 +416,10 @@
    (select :foo
            (where {(token :user-id) [> (token "tom")]})))
 
+  "SELECT * FROM foo WHERE token(company-id, user-id) > token('company', 'tom');"
+  (select :foo
+          (where {(token :company-id :user-id) [> (token "company" "tom")]}))
+
   (are-prepared
    ["SELECT * FROM foo WHERE ts = now();" []]
    (select :foo
