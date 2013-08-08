@@ -2,7 +2,7 @@
 
 ## 1.1.3
 
-* qbits.hayt.fns/token is now variadic, allowing composite token values
+* `qbits.hayt.fns/token` is now variadic, allowing composite token values
 
 ## 1.1.2
 
