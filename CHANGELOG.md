@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.3
+
+* qbits.hayt.fns/token is now variadic, allowing composite token values
+
 ## 1.1.2
 
 * Dropped dependency on clj 1.5
