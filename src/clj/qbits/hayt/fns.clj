@@ -56,8 +56,8 @@ when the query is compiled as a prepared statement"
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
 
 Returns a token function with the supplied argument"
-  [token]
-  (cql-fn "token" token))
+  [& tokens]
+  (apply cql-fn "token" tokens))
 
 (defn writetime
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
