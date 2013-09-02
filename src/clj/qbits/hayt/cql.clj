@@ -73,7 +73,10 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   clojure.lang.Keyword
   (cql-identifier [x] (name x))
   (cql-value [x]
-    (maybe-parameterize! x #(cql-value (name %))))
+    (maybe-parameterize! x
+      #(cql-value (if-let [nsp (namespace %)]
+                      (str nsp "/" (name %))
+                      (name %)))))
 
   Date
   (cql-value [x]
