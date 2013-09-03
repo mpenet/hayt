@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.4
+
+* Preserve ns in when using namespaced keywords as values
+
 ## 1.1.3
 
 * `qbits.hayt.fns/token` is now variadic, allowing composite token values
