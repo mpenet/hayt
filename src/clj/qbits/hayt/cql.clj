@@ -74,9 +74,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   (cql-identifier [x] (name x))
   (cql-value [x]
     (maybe-parameterize! x
-      #(cql-value (if-let [nsp (namespace %)]
-                      (str nsp "/" (name %))
-                      (name %)))))
+      #(cql-value (.substring (str %) 1))))
 
   Date
   (cql-value [x]

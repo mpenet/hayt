@@ -472,6 +472,7 @@
   (are [expected value] (= expected (cql-value value))
        "'a'" "a"
        "'a'" :a
+       "'a/b'" :a/b
        "{'a' : 'b', 'c' : 'd'}" {:a :b :c :d}
        "['a', 'b', 'c', 'd']" ["a" "b" "c" "d"]
        "['a', 'b', 'c', 'd']" '("a" "b" "c" "d")
