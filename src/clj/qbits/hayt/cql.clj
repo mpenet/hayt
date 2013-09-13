@@ -224,7 +224,6 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [q table]
      (str "SELECT "
           ((emit :columns) q (:columns q))
-          " "
           (emit-row (assoc q :from table)
                     [:from :where :order-by :limit :allow-filtering])))
 
@@ -232,34 +231,38 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [q table]
      (str "INSERT INTO "
           (cql-identifier table)
-          " "
-          (emit-row q [:values :using])))
+          (emit-row q [:values :if-exists :using])))
 
    :update
    (fn [q table]
      (str "UPDATE "
           (cql-identifier table)
-          " "
-          (emit-row q [:using :set-columns :where :if :if-not-exists])))
+          (emit-row q [:using :set-columns :where :if :if-exists])))
 
    :delete
    (fn [{:keys [columns] :as q} table]
-     (str "DELETE "
+     (str "DELETE"
           (-> (if (identical? :* columns) (dissoc q :columns) q)
               (assoc :from table)
               (emit-row [:columns :from :using :where :if]))))
 
    :drop-index
    (fn [q index]
-     (str "DROP INDEX " (cql-identifier index)))
+     (str "DROP INDEX "
+          (cql-identifier index)
+          (emit-row q [:if-exists])))
 
    :drop-table
    (fn [q table]
-     (str "DROP TABLE " (cql-identifier table)))
+     (str "DROP TABLE "
+          (cql-identifier table)
+          (emit-row q [:if-exists])))
 
    :drop-keyspace
    (fn [q keyspace]
-     (str "DROP KEYSPACE " (cql-identifier keyspace)))
+     (str "DROP KEYSPACE "
+          (cql-identifier keyspace)
+          (emit-row q [:if-exists])))
 
    :use-keyspace
    (fn [q ks]
@@ -273,14 +276,12 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [q permission]
      (str "GRANT "
           ((emit :perm) q permission)
-          " "
           (emit-row q [:resource :user])))
 
    :revoke
    (fn [q permission]
      (str "REVOKE "
           ((emit :perm) q permission)
-          " "
           (emit-row q [:resource :user])))
 
    :create-index
@@ -289,8 +290,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
         column]
      (str "CREATE "
           (when custom "CUSTOM ")
-          "INDEX "
-          (emit-row q [:index-name :on])
+          "INDEX"
+          (emit-row q [:index-name :on :if-exists])
           " " (wrap-parens (cql-identifier column))
           (when (and custom with)
             (str " " ((emit :with) q with)))))
@@ -299,19 +300,19 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [q user]
       (str "CREATE USER "
            (cql-identifier user)
-           " "
            (emit-row q [:password :superuser])))
 
    :alter-user
    (fn [q user]
       (str "ALTER USER "
            (cql-identifier user)
-           " "
            (emit-row q [:password :superuser])))
 
    :drop-user
    (fn [q user]
-     (str "DROP USER " (cql-identifier user)))
+     (str "DROP USER "
+          (cql-identifier user)
+          (emit-row q [:if-exists])))
 
    :list-users
    (constantly "LIST USERS")
@@ -325,38 +326,32 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [q perm]
      (str "LIST "
           ((emit :perm) q perm)
-          " "
           (emit-row q [:resource :user :recursive])))
 
    :create-table
    (fn [q table]
      (str "CREATE TABLE " (cql-identifier table)
-          " "
-          (emit-row q [:column-definitions :with])))
+          (emit-row q [:column-definitions :with :if-exists])))
 
    :alter-table
    (fn [q table]
      (str "ALTER TABLE " (cql-identifier table)
-          " "
           (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
 
    :alter-column-family
    (fn [q cf]
      (str "ALTER COLUMNFAMILY " (cql-identifier cf)
-          " "
           (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
 
    :alter-keyspace
    (fn [q ks]
      (str "ALTER KEYSPACE " (cql-identifier ks)
-          " "
           (emit-row q [:with])))
 
    :create-keyspace
    (fn [q ks]
      (str "CREATE KEYSPACE " (cql-identifier ks)
-          " "
-          (emit-row q [:with])))
+          (emit-row q [:with :if-exists])))
 
    :resource
    (fn [q resource]
@@ -409,9 +404,9 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [q clauses]
      (str "IF " (query-cond clauses)))
 
-   :if-not-exists
-   (fn [q ifne]
-     (when ifne "IF NOT EXISTS"))
+   :if-exists
+   (fn [q b]
+     (str "IF " (when (not b) "NOT ") "EXISTS"))
 
    :order-by
    (fn [q columns]
@@ -507,7 +502,9 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :drop-column
    (fn [q identifier]
-     (str "DROP " (cql-identifier identifier)))
+     (str "DROP "
+          (cql-identifier identifier)
+          (emit-row q [:if-exists])))
 
    :clustering-order
    (fn [q columns]
@@ -591,7 +588,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
               (when (contains? row token)
                 ((get emit token emit-catch-all) row (token row)))))
        (remove nil?)
-       (join-spaced)))
+       (join-spaced)
+       (#(when (seq %) (str " " %)))))
 
 (defn emit-query [query]
   (let [entry-point (find-entry-clause query)]

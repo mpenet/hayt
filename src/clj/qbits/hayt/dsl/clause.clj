@@ -45,12 +45,20 @@ clause of a update/delete query"
   [args]
   {:if args})
 
+(defn if-exists
+  "Clause: Apply only if the target exists"
+  ([b]
+     {:if-exists b})
+  ([]
+     (if-exists true)))
+
+;; we could deprecate this one and favor (if-exists false) instead
 (defn if-not-exists
   "Clause: Apply only if the row does not exist"
   ([b]
-     {:if-not-exists b})
+     (if-exists (not b)))
   ([]
-     (if-not-exists true)))
+     (if-exists false)))
 
 (defn values
   "Clause: Takes a map of columns to be inserted"

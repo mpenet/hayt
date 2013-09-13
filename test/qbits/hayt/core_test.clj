@@ -67,9 +67,10 @@
                   :ttl 200000)))
 
   (are-raw
-   "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') USING TIMESTAMP 100000 AND TTL 200000;"
+   "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') IF NOT EXISTS USING TIMESTAMP 100000 AND TTL 200000;"
    (insert :foo
            (values {"c" "d" :a "b"})
+           (if-exists false)
            (using :timestamp 100000
                   :ttl 200000))))
 
@@ -164,6 +165,9 @@
 
    "DROP INDEX foo;"
    (drop-index :foo)
+
+   "DROP INDEX foo IF EXISTS;"
+   (drop-index :foo (if-exists))
 
    "DROP KEYSPACE foo;"
    (drop-keyspace :foo)

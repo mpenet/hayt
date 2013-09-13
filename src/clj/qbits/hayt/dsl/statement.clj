@@ -58,22 +58,22 @@ Takes a table identifier."
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropKeyspaceStmt
 
 Takes a keyspace identifier"
-  [keyspace]
-  {:drop-keyspace keyspace})
+  [keyspace & clauses]
+  (into {:drop-keyspace keyspace} clauses))
 
 (defn drop-table
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropTableStmt
 
 Takes a table identifier"
-  [table]
-  {:drop-table table})
+  [table & clauses]
+  (into {:drop-table table} clauses))
 
 (defn drop-index
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropIndexStmt
 
 Takes an index identifier."
-  [index]
-  {:drop-index index})
+  [index & clauses]
+  (into {:drop-index index} clauses))
 
 (defn create-index
   "http://cassandra.apache.org/doc/cql3/CQL.html#createIndexStmt
@@ -186,8 +186,8 @@ Takes a keyspace identifier"
 
 (defn drop-user
   "Takes a user identifier"
-  [user]
-  {:drop-user user})
+  [user & clauses]
+  (into {:drop-user user} clauses))
 
 (defn list-users
   ""
