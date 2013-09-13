@@ -52,9 +52,10 @@ clause of a update/delete query"
   ([]
      (if-exists true)))
 
-;; we could deprecate this one and favor (if-exists false) instead
 (defn if-not-exists
-  "Clause: Apply only if the row does not exist"
+  "DEPRECATED use (if-exists false)
+Clause: Apply only if the row does not exist"
+  ^{:deprecated "1.2.0"}
   ([b]
      (if-exists (not b)))
   ([]

@@ -18,7 +18,8 @@ Takes a table identifier and additional clause arguments:
 
 Takes a table identifier and additional clause arguments:
 * values
-* using"
+* using
+* if-exists"
   [table & clauses]
   (into {:insert table} clauses))
 
@@ -31,7 +32,7 @@ Takes a table identifier and additional clause arguments:
 * set-columns
 * where
 * only-if
-* if-not-exists"
+* if-exists"
   [table & clauses]
   (into {:update table} clauses))
 
@@ -57,21 +58,24 @@ Takes a table identifier."
 (defn drop-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropKeyspaceStmt
 
-Takes a keyspace identifier"
+Takes a keyspace identifier and additional clauses:
+* if-exists"
   [keyspace & clauses]
   (into {:drop-keyspace keyspace} clauses))
 
 (defn drop-table
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropTableStmt
 
-Takes a table identifier"
+Takes a table identifier and additional clauses:
+* if-exists"
   [table & clauses]
   (into {:drop-table table} clauses))
 
 (defn drop-index
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropIndexStmt
 
-Takes an index identifier."
+Takes an index identifier and additional clauses:
+* if-exists"
   [index & clauses]
   (into {:drop-index index} clauses))
 
@@ -185,7 +189,8 @@ Takes a keyspace identifier"
   (into {:alter-user user :superuser false} clauses))
 
 (defn drop-user
-  "Takes a user identifier"
+  "Takes a user identifier
+* if-exists"
   [user & clauses]
   (into {:drop-user user} clauses))
 

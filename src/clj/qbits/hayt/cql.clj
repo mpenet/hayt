@@ -502,9 +502,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :drop-column
    (fn [q identifier]
-     (str "DROP "
-          (cql-identifier identifier)
-          (emit-row q [:if-exists])))
+     (str "DROP " (cql-identifier identifier)))
 
    :clustering-order
    (fn [q columns]
