@@ -87,6 +87,11 @@ Returns a dateOf function with the supplied argument"
   [x]
   (cql-fn "dateOf" x))
 
+(defn distinct*
+  ""
+  [x]
+  (cql-raw (str "DISTINCT " (cql/cql-identifier x))))
+
 ;; blob convertion fns
 ;;
 

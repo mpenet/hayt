@@ -20,6 +20,12 @@
    "SELECT * FROM foo;"
    (select :foo)
 
+   "SELECT DISTINCT bar FROM foo;"
+   (select :foo (columns (distinct* :bar)))
+
+   "SELECT DISTINCT \"bar\" FROM foo;"
+   (select :foo (columns (distinct* "bar")))
+
    "SELECT bar, \"baz\" FROM foo;"
    (select :foo
            (columns :bar "baz"))

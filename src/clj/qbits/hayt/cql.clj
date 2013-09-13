@@ -134,8 +134,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
          (cql-identifier id)))
 
   CQLRaw
-  (cql-identifier [x] x)
-  (cql-value [x] x)
+  (cql-identifier [x] (:value x))
+  (cql-value [x] (:value x))
 
   CQLRawPreparable
   (cql-identifier [x] (maybe-parameterize! (:value x)))
