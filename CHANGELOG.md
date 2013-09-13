@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0
+
+* Support up to cql 3.1.1 http://cassandra.apache.org/doc/cql3/CQL.html#a3.1.1
+** Added `qbits.hayt.clause/if-exists`
+** Added `qbits.hayt.fns/distinct*`
+** `qbits.hayt.clause/if-not-exists` is deprecated, use
+   `(qbits.hayt.clause/if-exists false)`
+** minor code cleanups in `qbits.hayt.cql`
+
 ## 1.1.4
 
 * Preserve ns in when using namespaced keywords as values
