@@ -88,7 +88,7 @@ Takes a table identifier and additional clause arguments:
 * columns (defaults to *)
 * using
 * where
-* only-if</pre><div class="src-link"><a href="https://github.com/mpenet/hayt/blob/master/#L39">Source</a></div></div><div class="public" id="var-distinct*"><h3>distinct*</h3><div class="usage"><code>(distinct* x)</code></div><pre class="doc">Returns DISTINCT column id ex: `(select (columns (distinct :foo)))`
+* only-if</pre><div class="src-link"><a href="https://github.com/mpenet/hayt/blob/master/#L39">Source</a></div></div><div class="public" id="var-distinct*"><h3>distinct*</h3><div class="usage"><code>(distinct* x)</code></div><pre class="doc">Returns DISTINCT column id ex: `(select :table (columns (distinct :foo)))`
 </pre><div class="src-link"><a href="https://github.com/mpenet/hayt/blob/master/#L90">Source</a></div></div><div class="public" id="var-double-%3Eblob"><h3>double-&gt;blob</h3><div class="usage"><code>(double-&gt;blob x__809__auto__)</code></div><pre class="doc">Converts double to blob.
 See https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions</pre><div class="src-link"><a href="https://github.com/mpenet/hayt/blob/master/#L118">Source</a></div></div><div class="public" id="var-drop-column"><h3>drop-column</h3><div class="usage"><code>(drop-column id)</code></div><pre class="doc">Clause: Takes a column Identifier
 </pre><div class="src-link"><a href="https://github.com/mpenet/hayt/blob/master/#L99">Source</a></div></div><div class="public" id="var-drop-index"><h3>drop-index</h3><div class="usage"><code>(drop-index index &amp; clauses)</code></div><pre class="doc">http://cassandra.apache.org/doc/cql3/CQL.html#dropIndexStmt
