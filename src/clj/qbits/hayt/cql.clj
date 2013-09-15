@@ -63,9 +63,9 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
   ByteBuffer
   (cql-value [x]
-    (maybe-parameterize! x #(str "0x" (Hex/bytesToHex %))))
+    (maybe-parameterize! x #(Hex/toHexString %)))
   (cql-identifier [x]
-    (maybe-parameterize! x #(str "0x" (Hex/bytesToHex %))))
+    (maybe-parameterize! x #(Hex/toHexString %)))
 
   String
   (cql-identifier [x] (dquote-string x))
