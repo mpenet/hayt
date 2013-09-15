@@ -219,24 +219,21 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
          (format-eq identifier))))
 
 (def emit
-  {;; entry clauses
+  { ;; entry clauses
    :select
    (fn [q table]
-     (str "SELECT "
-          ((emit :columns) q (:columns q))
+     (str "SELECT"
           (emit-row (assoc q :from table)
-                    [:from :where :order-by :limit :allow-filtering])))
+                    [:columns :from :where :order-by :limit :allow-filtering])))
 
    :insert
    (fn [q table]
-     (str "INSERT INTO "
-          (cql-identifier table)
+     (str "INSERT INTO " (cql-identifier table)
           (emit-row q [:values :if-exists :using])))
 
    :update
    (fn [q table]
-     (str "UPDATE "
-          (cql-identifier table)
+     (str "UPDATE " (cql-identifier table)
           (emit-row q [:using :set-columns :where :if :if-exists])))
 
    :delete
@@ -248,20 +245,17 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :drop-index
    (fn [q index]
-     (str "DROP INDEX "
-          (cql-identifier index)
+     (str "DROP INDEX " (cql-identifier index)
           (emit-row q [:if-exists])))
 
    :drop-table
    (fn [q table]
-     (str "DROP TABLE "
-          (cql-identifier table)
+     (str "DROP TABLE " (cql-identifier table)
           (emit-row q [:if-exists])))
 
    :drop-keyspace
    (fn [q keyspace]
-     (str "DROP KEYSPACE "
-          (cql-identifier keyspace)
+     (str "DROP KEYSPACE " (cql-identifier keyspace)
           (emit-row q [:if-exists])))
 
    :use-keyspace
@@ -273,16 +267,15 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
      (str "TRUNCATE " (cql-identifier ks)))
 
    :grant
-   (fn [q permission]
-     (str "GRANT "
-          ((emit :perm) q permission)
-          (emit-row q [:resource :user])))
+   (fn [q perm]
+     (str "GRANT"
+          (emit-row (assoc q :perm perm)
+                    [:perm :resource :user])))
 
    :revoke
-   (fn [q permission]
-     (str "REVOKE "
-          ((emit :perm) q permission)
-          (emit-row q [:resource :user])))
+   (fn [q perm]
+     (str "REVOKE"
+          (emit-row (assoc q :perm perm) [:perm :resource :user])))
 
    :create-index
    (fn [{:keys [custom with]
@@ -298,20 +291,17 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :create-user
    (fn [q user]
-      (str "CREATE USER "
-           (cql-identifier user)
-           (emit-row q [:password :superuser])))
+     (str "CREATE USER " (cql-identifier user)
+          (emit-row q [:password :superuser])))
 
    :alter-user
    (fn [q user]
-      (str "ALTER USER "
-           (cql-identifier user)
-           (emit-row q [:password :superuser])))
+     (str "ALTER USER " (cql-identifier user)
+          (emit-row q [:password :superuser])))
 
    :drop-user
    (fn [q user]
-     (str "DROP USER "
-          (cql-identifier user)
+     (str "DROP USER " (cql-identifier user)
           (emit-row q [:if-exists])))
 
    :list-users
@@ -324,9 +314,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :list-perm
    (fn [q perm]
-     (str "LIST "
-          ((emit :perm) q perm)
-          (emit-row q [:resource :user :recursive])))
+     (str "LIST"
+          (emit-row (assoc q :perm perm) [:perm :resource :user :recursive])))
 
    :create-table
    (fn [q table]
