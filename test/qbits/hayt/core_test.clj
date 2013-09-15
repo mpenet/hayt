@@ -6,7 +6,6 @@
   (:import (java.nio ByteBuffer)
            (org.joda.time DateTime)))
 
-
 (defmacro are-raw [& body]
   `(are [expected query] (= expected (->raw query))
         ~@body))
@@ -14,6 +13,9 @@
 (defmacro are-prepared [& body]
   `(are [expected query] (= expected (->prepared query))
         ~@body))
+
+(def baz-bytes (ByteBuffer/wrap (.getBytes "baz")))
+(def baz-blob "0x62617a")
 
 (deftest test-select
   (are-raw
@@ -418,8 +420,11 @@
    "SELECT TTL(\"bar\") FROM foo;"
    (select :foo (columns (ttl "bar")))
 
-   "SELECT unixTimestampOf(\"bar\"), dateOf(bar) FROM foo;"
-   (select :foo (columns (unix-timestamp-of "bar")
+   (format "SELECT dateOf(blobAsTimeuuid(%s)) FROM foo;" baz-blob)
+   (select :foo (columns (date-of (blob->timeuuid baz-bytes))))
+
+   "SELECT unixTimestampOf(0), dateOf(bar) FROM foo;"
+   (select :foo (columns (unix-timestamp-of 0)
                          (date-of :bar)))
 
    "SELECT * FROM foo WHERE token(user-id) > token('tom');"
@@ -509,11 +514,11 @@
      "SELECT * FROM foo WHERE bar = 0x;"
      (select :foo (where {:bar (ByteBuffer/allocate 0)}))
 
-     "SELECT * FROM foo WHERE bar = 0x62617a;"
-     (select :foo (where {:bar (ByteBuffer/wrap (.getBytes "baz"))}))
+     (format "SELECT * FROM foo WHERE bar = %s;" baz-blob)
+     (select :foo (where {:bar baz-bytes}))
 
-     "SELECT * FROM foo WHERE bar = 0x62617a;"
-     (select :foo (where {:bar (.getBytes "baz")}))
+     (format "SELECT * FROM foo WHERE bar = %s;" baz-blob)
+     (select :foo (where {:bar baz-bytes}))
 
      "SELECT * FROM foo WHERE bar = 0;"
      (select :foo (where {:bar (java.util.Date. 0)}))
