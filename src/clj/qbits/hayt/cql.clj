@@ -58,14 +58,17 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (extend-protocol CQLEntities
 
   (Class/forName "[B")
+  (cql-identifier [x]
+    (cql-value (ByteBuffer/wrap x)))
   (cql-value [x]
     (cql-value (ByteBuffer/wrap x)))
 
+
   ByteBuffer
-  (cql-value [x]
-    (maybe-parameterize! x #(Hex/toHexString ^ByteBuffer %)))
   (cql-identifier [x]
-    (maybe-parameterize! x #(Hex/toHexString ^ByteBuffer %)))
+    (maybe-parameterize! x #(Hex/toHexString %)))
+  (cql-value [x]
+    (maybe-parameterize! x #(Hex/toHexString %)))
 
   String
   (cql-identifier [x] (dquote-string x))

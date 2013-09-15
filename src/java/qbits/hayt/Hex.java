@@ -104,20 +104,6 @@ public final class Hex {
         return toRawHexString(bytes, array, 2);
     }
 
-    /**
-     * Converts a blob to its CQL hex string representation.
-     * <p>
-     * A CQL blob string representation consist of the hexadecimal
-     * representation of the blob bytes prefixed by "0x".
-     *
-     * @param byteArray the blob/bytes array to convert to a string.
-     * @return the CQL string representation of {@code bytes}. If {@code bytes}
-     * is {@code null}, this method returns {@code null}.
-     */
-    public static String toHexString(byte[] byteArray) {
-        return toHexString(ByteBuffer.wrap(byteArray));
-    }
-
     private static String toRawHexString(ByteBuffer bytes, char[] array, int offset) {
         int size = bytes.remaining();
         int bytesOffset = bytes.position();
