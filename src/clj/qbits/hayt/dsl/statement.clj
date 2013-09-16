@@ -71,6 +71,13 @@ Takes a table identifier and additional clauses:
   [table & clauses]
   (into {:drop-table table} clauses))
 
+(defn drop-trigger
+  "http://cassandra.apache.org/doc/cql3/CQL.html#dropTriggerStmt
+
+Takes a trigger identifier and a table identifier"
+  [trigger table]
+  {:drop-trigger trigger :on table})
+
 (defn drop-index
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropIndexStmt
 
@@ -99,6 +106,11 @@ Takes a keyspace identifier and clauses:
   [keyspace & clauses]
   (into {:create-keyspace keyspace} clauses))
 
+(defn create-trigger
+  "http://cassandra.apache.org/doc/cql3/CQL.html#createTriggerStmt"
+  [trigger table using]
+  {:create-trigger trigger :on table :using using})
+
 (defn create-table
   "Takes a table identifier and additional clause arguments:
 
@@ -106,6 +118,18 @@ Takes a keyspace identifier and clauses:
 * with"
   [table & clauses]
   (into {:create-table table} clauses))
+
+(defn create-index
+  "http://cassandra.apache.org/doc/cql3/CQL.html#createIndexStmt
+
+Takes a table identifier and additional clause arguments:
+
+* index-column
+* index-name
+* custom
+* on (overwrites table id)"
+  [table name & clauses]
+  (into {:create-index name :custom false :on table} clauses))
 
 (defn alter-table
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt

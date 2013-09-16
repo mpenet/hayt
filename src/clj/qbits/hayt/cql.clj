@@ -294,6 +294,16 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
           (when (and custom with)
             (str " " ((emit :with) q with)))))
 
+   :create-trigger
+   (fn [{:keys [table using] :as q} name]
+     (str "CREATE TRIGGER " (cql-identifier name)
+          (emit-row q [:on :using])))
+
+   :drop-trigger
+   (fn [q name]
+     (str "DROP TRIGGER " (cql-identifier name)
+          (emit-row q [:on])))
+
    :create-user
    (fn [q user]
      (str "CREATE USER " (cql-identifier user)
@@ -460,12 +470,14 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :using
    (fn [q args]
-     (->> args
-          (map (fn [[n value]]
-                 (str (-> n name string/upper-case)
-                      " " (cql-identifier value))))
-          join-and
-          (str "USING ")))
+     (str "USING "
+          (if (map? args)
+            (->> args
+                 (map (fn [[n value]]
+                        (str (-> n name string/upper-case)
+                             " " (cql-identifier value))))
+                 join-and)
+            (option-value args))))
 
    :compact-storage
    (fn [q v]
@@ -480,7 +492,6 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
      (format "ALTER %s TYPE %s"
              (cql-identifier identifier)
              (cql-identifier type)))
-
 
    :rename-column
    (fn [q [old-name new-name]]
@@ -563,7 +574,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 
 (def entry-clauses #{:select :insert :update :delete :use-keyspace :truncate
-                     :drop-index :drop-table :drop-keyspace :create-index :grant
+                     :drop-index :drop-table :drop-keyspace :create-index
+                     :create-trigger :drop-trigger :grant
                      :revoke :create-user :alter-user :drop-user :list-users
                      :list-perm :batch :create-table :alter-table
                      :alter-column-family :alter-keyspace :create-keyspace})

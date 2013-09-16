@@ -197,6 +197,14 @@
                  (custom true)
                  (with {:options {:class "path.to.the.IndexClass"}}))))
 
+(deftest test-trigger
+  (are-raw
+   "CREATE TRIGGER foo ON bar USING 'baz'"
+   (create-trigger :foo :bar :baz)
+
+   "DROP TRIGGER foo ON bar"
+   (drop-trigger :foo :bar)))
+
 (deftest test-auth-fns
   (are-raw
    "GRANT PERMISSION FULL_ACCESS ON bar TO baz;"
