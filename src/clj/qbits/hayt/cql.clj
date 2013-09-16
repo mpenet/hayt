@@ -22,7 +22,6 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (defrecord CQLFn [name args])
 (defrecord CQLRaw [value])
 (defrecord CQLRawPreparable [value])
-(defrecord CQLAlias [selector id])
 
 (defn maybe-parameterize!
   ([x f]
@@ -135,11 +134,6 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
          (-> (map cql-value args)
              join-comma
              wrap-parens)))
-
-  CQLAlias
-  (cql-identifier [{:keys [selector id]}]
-    (str (cql-identifier selector) " AS "
-         (cql-identifier id)))
 
   CQLRaw
   (cql-identifier [x] (:value x))
