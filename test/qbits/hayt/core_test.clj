@@ -199,7 +199,7 @@
 
 (deftest test-trigger
   (are-raw
-   "CREATE TRIGGER foo ON bar USING 'baz'"
+   "CREATE TRIGGER foo ON bar USING 'baz';"
    (create-trigger :foo :bar :baz)
 
    "DROP TRIGGER foo ON bar;"
