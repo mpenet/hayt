@@ -575,10 +575,10 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
 (def entry-clauses #{:select :insert :update :delete :use-keyspace :truncate
                      :drop-index :drop-table :drop-keyspace :create-index
-                     :create-trigger :drop-trigger :grant
-                     :revoke :create-user :alter-user :drop-user :list-users
-                     :list-perm :batch :create-table :alter-table
-                     :alter-column-family :alter-keyspace :create-keyspace})
+                     :create-trigger :drop-trigger :grant :revoke :create-user
+                     :alter-user :drop-user :list-users :list-perm :batch
+                     :create-table :alter-table :alter-column-family
+                     :alter-keyspace :create-keyspace})
 
 (defn find-entry-clause
   "Finds entry point key from query map"
