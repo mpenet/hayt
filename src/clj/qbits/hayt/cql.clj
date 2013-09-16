@@ -63,7 +63,6 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   (cql-value [x]
     (cql-value (ByteBuffer/wrap x)))
 
-
   ByteBuffer
   (cql-identifier [x]
     (maybe-parameterize! x #(Hex/toHexString %)))
