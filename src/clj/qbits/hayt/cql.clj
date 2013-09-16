@@ -35,6 +35,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (def join-and #(string/join " AND " %))
 (def join-spaced #(string/join " " %))
 (def join-comma #(string/join ", " %))
+(def join-dot #(string/join "." %))
 (def join-lf #(string/join "\n" %))
 (def format-eq #(str %1 " = " %2))
 (def format-kv #(str %1 " : "  %2))
@@ -114,6 +115,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
           wrap-brackets)))
 
   clojure.lang.Sequential
+  (cql-identifier [x]
+    (join-dot (map cql-identifier x)))
   (cql-value [x]
     (maybe-parameterize! x
      #(->> (map cql-value %)

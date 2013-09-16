@@ -22,6 +22,9 @@
    "SELECT * FROM foo;"
    (select :foo)
 
+   "SELECT * FROM foo.\"bar\";"
+   (select [:foo "bar"])
+
    "SELECT DISTINCT bar FROM foo;"
    (select :foo (columns (distinct* :bar)))
 
