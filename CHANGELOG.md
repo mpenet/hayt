@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0
+
+* Added `create-trigger`, `drop-trigger`
+* Added keyspace qualified identifiers (ex: "select * from mykeyspace.mytable;")
+* fix blob->X functions, they now accept bytebuffers and byte array as
+  input and properly encode them
+
 ## 1.2.0
 
 * Support up to cql 3.1.1 http://cassandra.apache.org/doc/cql3/CQL.html#a3.1.1

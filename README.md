@@ -16,8 +16,8 @@ There are already 3 libraries that use Hayt:
 ## What's in the box?
 
 * **Complete CQL 3.1.1+ coverage** including some features in Cassandra
-  trunk, **DDL**, **CQL Functions**, **counter** and **collections**
-  operations
+  trunk, **DDL**, **CQL Functions**, **counter** , **triggers** and
+  **collections** operations
 * Support for both **Raw queries** and **Prepared Statements** generation
 * **Great performance**
 * **Extensive test coverage**
@@ -30,7 +30,7 @@ There are already 3 libraries that use Hayt:
 ## Installation
 
 ```clojure
-[cc.qbits/hayt "1.2.0"]
+[cc.qbits/hayt "1.3.0"]
 ```
 
 ## Usage
