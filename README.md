@@ -103,6 +103,22 @@ To compile the queries just use `->raw` or `->prepared`
 (->raw {:select :foo :columns [:a :b]})
 > "SELECT a, b FROM foo;"
 
+;; or if you want full control of what's prepared you can use
+   `cql-raw` with ->raw compilation:
+
+
+;; here `?` is an alias to `(cql-raw "?")`
+
+(->raw (select :foo (where {:bar 1 :baz ?})))
+> "SELECT * FROM foo WHERE bar = 1 AND baz = ?;"
+
+
+;; and named parameters using cql-raw directly:
+
+(->raw (select :foo (where {:bar 1 :baz (cql-raw :named)})))
+> "SELECT * FROM foo WHERE bar = 1 AND baz = :named;"
+
+
 ```
 
 When compiling prepared queries, the values are untouched in the

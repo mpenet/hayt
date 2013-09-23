@@ -1,5 +1,10 @@
 # Changelog
 
+## [next]
+
+* Added `qbits.hayt.fns/?` to be used as prepared statement value
+  placeholder when using ->raw to generate prepared statements.
+
 ## 1.3.0
 
 * Added `create-trigger`, `drop-trigger`

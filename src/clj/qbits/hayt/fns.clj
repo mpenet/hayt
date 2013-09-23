@@ -94,6 +94,8 @@ Returns a dateOf function with the supplied argument"
   [x]
   (cql-raw (str "DISTINCT " (cql/cql-identifier x))))
 
+(def ? (cql-raw "?"))
+
 ;; blob convertion fns
 ;;
 
