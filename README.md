@@ -104,7 +104,7 @@ To compile the queries just use `->raw` or `->prepared`
 > "SELECT a, b FROM foo;"
 
 ;; or if you want full control of what's prepared you can use
-   `cql-raw` with ->raw compilation:
+;; `cql-raw` with ->raw compilation:
 
 
 ;; here `?` is an alias to `(cql-raw "?")`
