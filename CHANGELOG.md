@@ -1,6 +1,6 @@
 # Changelog
 
-## [next]
+## 1.4.0
 
 * Added `qbits.hayt.fns/?` to be used as prepared statement value
   placeholder when using ->raw to generate prepared statements.
