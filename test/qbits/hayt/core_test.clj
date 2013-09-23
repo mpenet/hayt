@@ -57,6 +57,11 @@
            (where [[:foo  [> 1]]
                    [:foo  [< 10]]])))
 
+   "SELECT * FROM foo WHERE foo > :param1 AND foo < :param2;"
+   (select :foo
+           (where [[:foo  [> (cql-raw :param1)]]
+                   [:foo  [< (cql-raw :param2)]]]))
+
   ;;
   (are-prepared
    ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
