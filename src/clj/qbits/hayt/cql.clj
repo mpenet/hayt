@@ -142,6 +142,10 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   (cql-identifier [x] (maybe-parameterize! (:value x)))
   (cql-value [x] (maybe-parameterize! (:value x)))
 
+  clojure.lang.Symbol
+  (cql-identifier [x] (str x))
+  (cql-value [x] (str x))
+
   nil
   (cql-value [x]
     (maybe-parameterize! x (constantly "null")))

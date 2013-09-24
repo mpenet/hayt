@@ -501,12 +501,14 @@
   (are [expected identifier] (= expected (cql-identifier identifier))
        "\"a\"" "a"
        "a" :a
+       "a" 'a
        "a[2]" {:a 2}
        "a['b']" {:a "b"}
        "blobAsBigint(1)" (blob->bigint 1))
 
   (are [expected value] (= expected (cql-value value))
        "'a'" "a"
+       "a" 'a
        "'a'" :a
        "'a/b'" :a/b
        "{'a' : 'b', 'c' : 'd'}" {:a :b :c :d}
