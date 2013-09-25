@@ -55,19 +55,19 @@
    "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
    (select :foo
            (where [[:foo  [> 1]]
-                   [:foo  [< 10]]])))
+                   [:foo  [< 10]]]))
 
-   "SELECT * FROM foo WHERE foo > :param1 AND foo < :param2;"
+   "SELECT * FROM foo WHERE foo > :param1 AND foo < :param2 AND bar IN :param3;"
    (select :foo
            (where [[:foo  [> :param1]]
                    [:foo  [< :param2]]
                    [:bar [:in :param3]]]))
 
-   "SELECT * FROM foo WHERE foo > ? AND foo < 2;"
+   "SELECT * FROM foo WHERE foo > ? AND bar IN ? AND foo < 2;"
    (select :foo
            (where [[:foo  [> ?]]
                    [:bar [:in ?]]
-                   [:foo  [< 2]]]))
+                   [:foo  [< 2]]])))
 
   (are-prepared
    ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
