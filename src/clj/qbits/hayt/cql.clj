@@ -194,11 +194,12 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
            (if *prepared-statement*
              ;; special case we need to bypass the value encoding of
              ;; Sequential
-             (do (push-stack! value)
-                 "?")
-             (->> (map cql-value value)
-                  join-comma
-                  wrap-parens)))
+             (do (push-stack! value) "?")
+             (if (sequential? value)
+               (->> (map cql-value value)
+                   join-comma
+                   wrap-parens)
+               (cql-value value))))
 
       (fn? op)
       (str col-name
