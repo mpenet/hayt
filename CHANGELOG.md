@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.0.0-beta1
+
+### Breaking changes
+
+* Keywords as values are no longer encoded as strings and return a
+  placeholder for a named prepared statement value. See #18
+
+* When using `->prepared` the values for `using` and `limit` are now
+  parameterized.
+
+* The IN operator in where clauses when using `->prepared` is now
+  variadic (it returns the values as an array in the parameter list
+  and uses a single ? placeholder).
+```clj
+(where {:foo [:in [1 2 3]]}) -> ["...WHERE foo IN ?;" [[1 2 3]]]
+```
+
+* `apply-map` has been removed from `qbits.hayt.utils` (it didn't make
+  sense since we now have proper named prepared statement
+  placeholders).
+
 ## 1.4.0
 
 * Added `qbits.hayt.fns/?` to be used as prepared statement value
