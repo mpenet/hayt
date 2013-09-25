@@ -344,10 +344,7 @@
    (create-table :foo
                  (column-definitions {:a :varchar
                                       :b (list-type :int)
-                                      :primary-key :ab}))
-
-
-   ))
+                                      :primary-key :ab}))))
 
 (deftest test-alter-table
   (are-raw
