@@ -47,7 +47,7 @@
 
    "SELECT * FROM foo WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
    (select :foo
-           (where {:foo :bar
+           (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))
@@ -59,8 +59,8 @@
 
    "SELECT * FROM foo WHERE foo > :param1 AND foo < :param2;"
    (select :foo
-           (where [[:foo  [> (cql-raw :param1)]]
-                   [:foo  [< (cql-raw :param2)]]]))
+           (where [[:foo  [> :param1]]
+                   [:foo  [< :param2]]]))
 
    "SELECT * FROM foo WHERE foo > ? AND foo < 2;"
    (select :foo
@@ -70,9 +70,9 @@
   ;;
   (are-prepared
    ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    [:bar 3 4 5 6 7]]
+    ["bar" 3 4 5 6 7]]
    (select :foo
-           (where {:foo :bar
+           (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))))
@@ -106,7 +106,7 @@
    (update :foo
            (set-columns {:bar 1
                          :baz [+ 2] })
-           (where {:foo :bar
+           (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))
@@ -115,7 +115,7 @@
    (update :foo
            (set-columns {:bar 1
                          :baz [+ 2] })
-           (only-if {:foo :bar
+           (only-if {:foo "bar"
                      :moo [> 3]
                      :meh [:> 4]
                      :baz [:in [5 6 7]]}))
@@ -130,12 +130,12 @@
    (update :foo
            (set-columns {:bar 1
                          :baz [+ {"key" "value"}] })
-           (where {:foo :bar}))
+           (where {:foo "bar"}))
 
    "UPDATE foo SET baz = ['prepended'] + baz WHERE foo = 'bar';"
    (update :foo
            (set-columns {:baz [["prepended"] +] })
-           (where {:foo :bar})))
+           (where {:foo "bar"})))
 
 
   (are-prepared
@@ -145,11 +145,11 @@
                          :baz [+ 2] }))
 
    ["UPDATE foo SET bar = ?, baz = baz + ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    [1 2 :bar 3 4 5 6 7]]
+    [1 2 "bar" 3 4 5 6 7]]
    (update :foo
            (set-columns {:bar 1
                          :baz [+ 2] })
-           (where {:foo :bar
+           (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))))
@@ -157,21 +157,21 @@
 (deftest test-delete
   (are-prepared
    ["DELETE FROM foo USING TIMESTAMP 100000 AND TTL 200000 WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    [:bar 3 4 5 6 7]]
+    ["bar" 3 4 5 6 7]]
    (delete :foo
            (using :timestamp 100000
                   :ttl 200000)
-           (where {:foo :bar
+           (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))
 
    ["DELETE FROM foo USING TIMESTAMP 100000 AND TTL 200000 IF foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    [:bar 3 4 5 6 7]]
+    ["bar" 3 4 5 6 7]]
    (delete :foo
            (using :timestamp 100000
                   :ttl 200000)
-           (only-if {:foo :bar
+           (only-if {:foo "bar"
                      :moo [> 3]
                      :meh [:> 4]
                      :baz [:in [5 6 7]]}))))
@@ -509,9 +509,8 @@
   (are [expected value] (= expected (cql-value value))
        "'a'" "a"
        "a" 'a
-       "'a'" :a
-       "'a/b'" :a/b
-       "{'a' : 'b', 'c' : 'd'}" {:a :b :c :d}
+       ":a" :a
+       "{'a' : 'b', 'c' : 'd'}" {"a" "b" "c" "d"}
        "['a', 'b', 'c', 'd']" ["a" "b" "c" "d"]
        "['a', 'b', 'c', 'd']" '("a" "b" "c" "d")
        "{'a', 'b', 'c', 'd'}" #{"a" "b" "c" "d"}
@@ -522,14 +521,6 @@
        "set<int>" (set-type :int)
        "list<int>" (list-type :int)
        "map<int, text>" (map-type :int :text)))
-
-(deftest test-prepare-map
-  (let [query (->prepared (select :foo
-                                  (where {:a :a1
-                                          :b :b1
-                                          :c :c1})))]
-    (is (= ["SELECT * FROM foo WHERE a = ? AND c = ? AND b = ?;" [100 300 200]]
-           (apply-map query {:a1 100 :b1 200 :c1 300})))))
 
 (deftest test-types
   (let [addr (java.net.InetAddress/getLocalHost)]
