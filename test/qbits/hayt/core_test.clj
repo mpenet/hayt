@@ -67,21 +67,19 @@
            (where [[:foo  [> ?]]
                    [:foo  [< 2]]]))
 
-  ;;
   (are-prepared
-   ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    ["bar" 3 4 5 6 7]]
+   ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
+    ["bar" 3 4 [5 6 7]]]
    (select :foo
            (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))))
 
-
 (deftest test-insert
   (are-prepared
-   ["INSERT INTO foo (\"c\", a) VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;"
-    ["d" "b"]]
+   ["INSERT INTO foo (\"c\", a) VALUES (?, ?) USING TIMESTAMP ? AND TTL ?;"
+    ["d" "b" 100000 200000]]
    (insert :foo
            (values {"c" "d" :a "b" })
            (using :timestamp 100000
@@ -144,8 +142,9 @@
            (set-columns {:bar 1
                          :baz [+ 2] }))
 
-   ["UPDATE foo SET bar = ?, baz = baz + ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    [1 2 "bar" 3 4 5 6 7]]
+
+   ["UPDATE foo SET bar = ?, baz = baz + ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
+    [1 2 "bar" 3 4 [5 6 7]]]
    (update :foo
            (set-columns {:bar 1
                          :baz [+ 2] })
@@ -156,8 +155,8 @@
 
 (deftest test-delete
   (are-prepared
-   ["DELETE FROM foo USING TIMESTAMP 100000 AND TTL 200000 WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    ["bar" 3 4 5 6 7]]
+   ["DELETE FROM foo USING TIMESTAMP ? AND TTL ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
+    [100000 200000 "bar" 3 4 [5 6 7]]]
    (delete :foo
            (using :timestamp 100000
                   :ttl 200000)
@@ -166,8 +165,8 @@
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))
 
-   ["DELETE FROM foo USING TIMESTAMP 100000 AND TTL 200000 IF foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    ["bar" 3 4 5 6 7]]
+   ["DELETE FROM foo USING TIMESTAMP ? AND TTL ? IF foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
+    [100000 200000 "bar" 3 4 [5 6 7]]]
    (delete :foo
            (using :timestamp 100000
                   :ttl 200000)
@@ -297,7 +296,7 @@
     (using :timestamp 2134)))
 
   (are-prepared
-   ["BEGIN COUNTER BATCH USING TIMESTAMP 1234 \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo (\"a\", \"c\") VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;" [1 2 "b" "d"]]
+   ["BEGIN COUNTER BATCH USING TIMESTAMP ? \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo (\"a\", \"c\") VALUES (?, ?) USING TIMESTAMP ? AND TTL ?;\n APPLY BATCH;" [1234 1 2 "b" "d" 100000 200000]]
    (batch
     (queries
      (update :foo
