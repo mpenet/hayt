@@ -7,16 +7,14 @@
 * Keywords as values are no longer encoded as strings and return a
   placeholder for a named prepared statement value. See #18
 
-The following
-```clj
-(->raw (select :foo (where {:bar :baz})))
-```
-
-used to generate this:
-```"SELECT FROM foo WHERE bar = 'baz';"```
-
-and now this:
-```"SELECT FROM foo WHERE bar = :baz;"```
+  The following
+  ```clj
+  (->raw (select :foo (where {:bar :baz})))
+  ```
+  used to generate this:
+  ```"SELECT FROM foo WHERE bar = 'baz';"```
+  and now this:
+  ```"SELECT FROM foo WHERE bar = :baz;"```
 
 * When using `->prepared` the values for `using` and `limit` are now
   parameterized.
