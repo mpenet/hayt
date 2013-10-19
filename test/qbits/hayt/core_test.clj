@@ -54,20 +54,20 @@
 
    "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
    (select :foo
-           (where [[:foo  [> 1]]
-                   [:foo  [< 10]]]))
+           (where [[:foo [> 1]]
+                   [:foo [< 10]]]))
 
    "SELECT * FROM foo WHERE foo > :param1 AND foo < :param2 AND bar IN :param3;"
    (select :foo
-           (where [[:foo  [> :param1]]
-                   [:foo  [< :param2]]
+           (where [[:foo [> :param1]]
+                   [:foo [< :param2]]
                    [:bar [:in :param3]]]))
 
    "SELECT * FROM foo WHERE foo > ? AND bar IN ? AND foo < 2;"
    (select :foo
-           (where [[:foo  [> ?]]
+           (where [[:foo [> ?]]
                    [:bar [:in ?]]
-                   [:foo  [< 2]]])))
+                   [:foo [< 2]]])))
 
   (are-prepared
    ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
@@ -100,12 +100,12 @@
    "UPDATE foo SET bar = 1, baz = baz + 2;"
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ 2] }))
+                         :baz [+ 2]}))
 
    "UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ 2] })
+                         :baz [+ 2]})
            (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
@@ -114,7 +114,7 @@
    "UPDATE foo SET bar = 1, baz = baz + 2 IF foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ 2] })
+                         :baz [+ 2]})
            (only-if {:foo "bar"
                      :moo [> 3]
                      :meh [:> 4]
@@ -129,12 +129,12 @@
    "UPDATE foo SET bar = 1, baz = baz + {'key' : 'value'} WHERE foo = 'bar';"
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ {"key" "value"}] })
+                         :baz [+ {"key" "value"}]})
            (where {:foo "bar"}))
 
    "UPDATE foo SET baz = ['prepended'] + baz WHERE foo = 'bar';"
    (update :foo
-           (set-columns {:baz [["prepended"] +] })
+           (set-columns {:baz [["prepended"] +]})
            (where {:foo "bar"})))
 
 
@@ -142,14 +142,14 @@
    ["UPDATE foo SET bar = ?, baz = baz + ?;" [1 2]]
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ 2] }))
+                         :baz [+ 2]}))
 
 
    ["UPDATE foo SET bar = ?, baz = baz + ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
     [1 2 "bar" 3 4 [5 6 7]]]
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ 2] })
+                         :baz [+ 2]})
            (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
@@ -277,7 +277,7 @@
     (queries
      (update :foo
              (set-columns {:bar 1
-                           :baz [+ 2] }))
+                           :baz [+ 2]}))
      (insert :foo
              (values {"a" "b" "c" "d"})
              (using :timestamp 100000
@@ -289,7 +289,7 @@
     (queries
      (update :foo
              (set-columns {:bar 1
-                           :baz [+ 2] }))
+                           :baz [+ 2]}))
      (insert :foo
              (values {"a" "b" "c" "d"})
              (using :timestamp 100000
@@ -303,7 +303,7 @@
     (queries
      (update :foo
              (set-columns {:bar 1
-                           :baz [+ 2] }))
+                           :baz [+ 2]}))
      (insert :foo
              (values {"a" "b" "c" "d"})
              (using :timestamp 100000
@@ -391,7 +391,7 @@
    (create-keyspace :foo
                     (with {:replication
                            {:class "SimpleStrategy"
-                            :replication_factor 3 }}))
+                            :replication_factor 3}}))
 
    "CREATE KEYSPACE foo WITH durable_writes = true;"
    (create-keyspace :foo
@@ -401,7 +401,7 @@
    (alter-keyspace :foo
                    (with {:replication
                           {:class "SimpleStrategy"
-                           :replication_factor 3 }
+                           :replication_factor 3}
                           :something 1
                           :something-else "foo"}))))
 
