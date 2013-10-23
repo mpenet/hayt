@@ -94,13 +94,6 @@ Returns a dateOf function with the supplied argument"
   [x]
   (cql-raw (str "DISTINCT " (cql/cql-identifier x))))
 
-(def ?
-  "? can be used as a query value to mark a prepared statement value
-ex:    (select :foo
-           (where [[:foo  [> ?]]
-                   [:foo  [< 2]]]))"
-  (cql-raw "?"))
-
 ;; blob convertion fns
 ;;
 
