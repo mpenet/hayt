@@ -187,7 +187,7 @@
    "DROP INDEX foo;"
    (drop-index :foo)
 
-   "DROP INDEX foo IF EXISTS;"
+   "DROP INDEX IF EXISTS foo;"
    (drop-index :foo (if-exists))
 
    "DROP KEYSPACE foo;"
@@ -312,8 +312,9 @@
 
 (deftest test-create-table
   (are-raw
-   "CREATE TABLE foo (a varchar, b int, PRIMARY KEY (a));"
+   "CREATE TABLE IF NOT EXISTS foo (a varchar, b int, PRIMARY KEY (a));"
    (create-table :foo
+                 (if-not-exists)
                  (column-definitions {:a :varchar
                                       :b :int
                                       :primary-key :a}))
@@ -369,16 +370,23 @@
                 (with {:compact-storage true
                        :clustering-order [[:bar :asc]]}))))
 
-(deftest test-alter-column-family
+(deftest test-alter-columnfamily
   (are-raw
    "ALTER COLUMNFAMILY foo ALTER bar TYPE int;"
-   (alter-column-family :foo (alter-column :bar :int))
+   (alter-columnfamily :foo (alter-column :bar :int))
 
    "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text RENAME foo TO bar;"
-   (alter-column-family :foo
+   (alter-columnfamily :foo
                         (alter-column :bar :int)
                         (rename-column :foo :bar)
                         (add-column :baz :text))
+
+   "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
+   (alter-columnfamily :foo
+                        (alter-column :bar :int)
+                        (add-column :baz :text)
+                        (with {:compact-storage true
+                               :clustering-order [[:bar :asc]]}))
 
    "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
    (alter-column-family :foo
@@ -389,8 +397,9 @@
 
 (deftest test-create-alter-keyspace
   (are-raw
-   "CREATE KEYSPACE foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
+   "CREATE KEYSPACE IF NOT EXISTS foo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
    (create-keyspace :foo
+                    (if-exists false)
                     (with {:replication
                            {:class "SimpleStrategy"
                             :replication_factor 3 }}))

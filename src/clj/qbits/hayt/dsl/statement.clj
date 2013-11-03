@@ -71,6 +71,14 @@ Takes a table identifier and additional clauses:
   [table & clauses]
   (into {:drop-table table} clauses))
 
+(defn drop-columnfamily
+  "http://cassandra.apache.org/doc/cql3/CQL.html#dropTableStmt
+
+Takes a column family identifier and additional clauses:
+* if-exists"
+  [cf & clauses]
+  (into {:drop-columnfamily cf} clauses))
+
 (defn drop-trigger
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropTriggerStmt
 
@@ -145,10 +153,10 @@ Takes a table identifier and additional clause arguments:
   [table & clauses]
   (into {:alter-table table} clauses))
 
-(defn alter-column-family
+(defn alter-columnfamily
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
 
-Takes a column-familiy identifier and additional clause arguments:
+Takes a columnfamiliy identifier and additional clause arguments:
 
 * alter-column
 * add-column
@@ -156,8 +164,10 @@ Takes a column-familiy identifier and additional clause arguments:
 * rename-column
 * drop-column
 * with"
-  [column-family & clauses]
-  (into {:alter-column-family column-family} clauses))
+  [columnfamily & clauses]
+  (into {:alter-columnfamily columnfamily} clauses))
+
+(def ^{:deprecated "1.5.0"} alter-column-family alter-columnfamily)
 
 (defn alter-keyspace
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterKeyspaceStmt

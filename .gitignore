@@ -10,3 +10,4 @@ pom.xml
 .lein-plugins
 /doc
 /perfs
+/pom.xml.asc

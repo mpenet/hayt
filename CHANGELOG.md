@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.1
+
+* fix `IF NOT EXISTS` clauses in create/drop statements
+* add drop-columnfamily, alter-columnfamily
+* Moved `?` into utils.clj
+
 ## 1.4.0
 
 * Added `qbits.hayt.fns/?` to be used as prepared statement value
