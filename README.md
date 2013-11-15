@@ -113,9 +113,9 @@ To compile the queries just use `->raw` or `->prepared`
 > "SELECT * FROM foo WHERE bar = 1 AND baz = ?;"
 
 
-;; and named parameters using cql-raw directly:
+;; and named parameters using keywords
 
-(->raw (select :foo (where {:bar 1 :baz (cql-raw :named)})))
+(->raw (select :foo (where {:bar 1 :baz :named)}))
 > "SELECT * FROM foo WHERE bar = 1 AND baz = :named;"
 
 
