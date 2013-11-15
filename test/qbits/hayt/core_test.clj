@@ -47,41 +47,41 @@
 
    "SELECT * FROM foo WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
    (select :foo
-           (where {:foo :bar
+           (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))
 
    "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
    (select :foo
-           (where [[:foo  [> 1]]
-                   [:foo  [< 10]]])))
+           (where [[:foo [> 1]]
+                   [:foo [< 10]]]))
 
-   "SELECT * FROM foo WHERE foo > :param1 AND foo < :param2;"
+   "SELECT * FROM foo WHERE foo > :param1 AND foo < :param2 AND bar IN :param3;"
    (select :foo
-           (where [[:foo  [> (cql-raw :param1)]]
-                   [:foo  [< (cql-raw :param2)]]]))
+           (where [[:foo [> :param1]]
+                   [:foo [< :param2]]
+                   [:bar [:in :param3]]]))
 
-   "SELECT * FROM foo WHERE foo > ? AND foo < 2;"
+   "SELECT * FROM foo WHERE foo > ? AND bar IN ? AND foo < 2;"
    (select :foo
-           (where [[:foo  [> ?]]
-                   [:foo  [< 2]]]))
+           (where [[:foo [> ?]]
+                   [:bar [:in ?]]
+                   [:foo [< 2]]])))
 
-  ;;
   (are-prepared
-   ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    [:bar 3 4 5 6 7]]
+   ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
+    ["bar" 3 4 [5 6 7]]]
    (select :foo
-           (where {:foo :bar
+           (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))))
 
-
 (deftest test-insert
   (are-prepared
-   ["INSERT INTO foo (\"c\", a) VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;"
-    ["d" "b"]]
+   ["INSERT INTO foo (\"c\", a) VALUES (?, ?) USING TIMESTAMP ? AND TTL ?;"
+    ["d" "b" 100000 200000]]
    (insert :foo
            (values {"c" "d" :a "b" })
            (using :timestamp 100000
@@ -100,13 +100,13 @@
    "UPDATE foo SET bar = 1, baz = baz + 2;"
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ 2] }))
+                         :baz [+ 2]}))
 
    "UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ 2] })
-           (where {:foo :bar
+                         :baz [+ 2]})
+           (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))
@@ -114,8 +114,8 @@
    "UPDATE foo SET bar = 1, baz = baz + 2 IF foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ 2] })
-           (only-if {:foo :bar
+                         :baz [+ 2]})
+           (only-if {:foo "bar"
                      :moo [> 3]
                      :meh [:> 4]
                      :baz [:in [5 6 7]]}))
@@ -129,49 +129,50 @@
    "UPDATE foo SET bar = 1, baz = baz + {'key' : 'value'} WHERE foo = 'bar';"
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ {"key" "value"}] })
-           (where {:foo :bar}))
+                         :baz [+ {"key" "value"}]})
+           (where {:foo "bar"}))
 
    "UPDATE foo SET baz = ['prepended'] + baz WHERE foo = 'bar';"
    (update :foo
-           (set-columns {:baz [["prepended"] +] })
-           (where {:foo :bar})))
+           (set-columns {:baz [["prepended"] +]})
+           (where {:foo "bar"})))
 
 
   (are-prepared
    ["UPDATE foo SET bar = ?, baz = baz + ?;" [1 2]]
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ 2] }))
+                         :baz [+ 2]}))
 
-   ["UPDATE foo SET bar = ?, baz = baz + ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    [1 2 :bar 3 4 5 6 7]]
+
+   ["UPDATE foo SET bar = ?, baz = baz + ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
+    [1 2 "bar" 3 4 [5 6 7]]]
    (update :foo
            (set-columns {:bar 1
-                         :baz [+ 2] })
-           (where {:foo :bar
+                         :baz [+ 2]})
+           (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))))
 
 (deftest test-delete
   (are-prepared
-   ["DELETE FROM foo USING TIMESTAMP 100000 AND TTL 200000 WHERE foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    [:bar 3 4 5 6 7]]
+   ["DELETE FROM foo USING TIMESTAMP ? AND TTL ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
+    [100000 200000 "bar" 3 4 [5 6 7]]]
    (delete :foo
            (using :timestamp 100000
                   :ttl 200000)
-           (where {:foo :bar
+           (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
                    :baz [:in [5 6 7]]}))
 
-   ["DELETE FROM foo USING TIMESTAMP 100000 AND TTL 200000 IF foo = ? AND moo > ? AND meh > ? AND baz IN (?, ?, ?);"
-    [:bar 3 4 5 6 7]]
+   ["DELETE FROM foo USING TIMESTAMP ? AND TTL ? IF foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
+    [100000 200000 "bar" 3 4 [5 6 7]]]
    (delete :foo
            (using :timestamp 100000
                   :ttl 200000)
-           (only-if {:foo :bar
+           (only-if {:foo "bar"
                      :moo [> 3]
                      :meh [:> 4]
                      :baz [:in [5 6 7]]}))))
@@ -276,7 +277,7 @@
     (queries
      (update :foo
              (set-columns {:bar 1
-                           :baz [+ 2] }))
+                           :baz [+ 2]}))
      (insert :foo
              (values {"a" "b" "c" "d"})
              (using :timestamp 100000
@@ -288,7 +289,7 @@
     (queries
      (update :foo
              (set-columns {:bar 1
-                           :baz [+ 2] }))
+                           :baz [+ 2]}))
      (insert :foo
              (values {"a" "b" "c" "d"})
              (using :timestamp 100000
@@ -297,12 +298,12 @@
     (using :timestamp 2134)))
 
   (are-prepared
-   ["BEGIN COUNTER BATCH USING TIMESTAMP 1234 \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo (\"a\", \"c\") VALUES (?, ?) USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;" [1 2 "b" "d"]]
+   ["BEGIN COUNTER BATCH USING TIMESTAMP ? \nUPDATE foo SET bar = ?, baz = baz + ?;\nINSERT INTO foo (\"a\", \"c\") VALUES (?, ?) USING TIMESTAMP ? AND TTL ?;\n APPLY BATCH;" [1234 1 2 "b" "d" 100000 200000]]
    (batch
     (queries
      (update :foo
              (set-columns {:bar 1
-                           :baz [+ 2] }))
+                           :baz [+ 2]}))
      (insert :foo
              (values {"a" "b" "c" "d"})
              (using :timestamp 100000
@@ -346,10 +347,7 @@
    (create-table :foo
                  (column-definitions {:a :varchar
                                       :b (list-type :int)
-                                      :primary-key :ab}))
-
-
-   ))
+                                      :primary-key :ab}))))
 
 (deftest test-alter-table
   (are-raw
@@ -402,7 +400,7 @@
                     (if-exists false)
                     (with {:replication
                            {:class "SimpleStrategy"
-                            :replication_factor 3 }}))
+                            :replication_factor 3}}))
 
    "CREATE KEYSPACE foo WITH durable_writes = true;"
    (create-keyspace :foo
@@ -412,7 +410,7 @@
    (alter-keyspace :foo
                    (with {:replication
                           {:class "SimpleStrategy"
-                           :replication_factor 3 }
+                           :replication_factor 3}
                           :something 1
                           :something-else "foo"}))))
 
@@ -518,9 +516,8 @@
   (are [expected value] (= expected (cql-value value))
        "'a'" "a"
        "a" 'a
-       "'a'" :a
-       "'a/b'" :a/b
-       "{'a' : 'b', 'c' : 'd'}" {:a :b :c :d}
+       ":a" :a
+       "{'a' : 'b', 'c' : 'd'}" {"a" "b" "c" "d"}
        "['a', 'b', 'c', 'd']" ["a" "b" "c" "d"]
        "['a', 'b', 'c', 'd']" '("a" "b" "c" "d")
        "{'a', 'b', 'c', 'd'}" #{"a" "b" "c" "d"}
@@ -531,14 +528,6 @@
        "set<int>" (set-type :int)
        "list<int>" (list-type :int)
        "map<int, text>" (map-type :int :text)))
-
-(deftest test-prepare-map
-  (let [query (->prepared (select :foo
-                                  (where {:a :a1
-                                          :b :b1
-                                          :c :c1})))]
-    (is (= ["SELECT * FROM foo WHERE a = ? AND c = ? AND b = ?;" [100 300 200]]
-           (apply-map query {:a1 100 :b1 200 :c1 300})))))
 
 (deftest test-types
   (let [addr (java.net.InetAddress/getLocalHost)]

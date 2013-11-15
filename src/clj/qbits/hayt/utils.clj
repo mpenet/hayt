@@ -45,14 +45,6 @@ The possible collection types are :map, :list and :set."
   the set elements type"
   (partial coll-type :set))
 
-;; Utilities
-
-(defn apply-map
-  "Takes a generated prepared query with its arg vector containing
-  keywords for placeholders and maps the supplied map to it"
-  [[query placeholders] parameter-map]
-  [query (replace parameter-map placeholders)])
-
 (def ?
   "? can be used as a query value to mark a prepared statement value
 ex:    (select :foo

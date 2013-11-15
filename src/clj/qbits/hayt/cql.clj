@@ -23,10 +23,14 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (defrecord CQLRaw [value])
 (defrecord CQLRawPreparable [value])
 
+(defn push-stack!
+  [x]
+  (swap! *param-stack* conj x))
+
 (defn maybe-parameterize!
   ([x f]
      (if *prepared-statement*
-       (do (swap! *param-stack* conj x) "?")
+       (do (push-stack! x) "?")
        (f x)))
   ([x]
      (maybe-parameterize! x identity)))
@@ -76,9 +80,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
   clojure.lang.Keyword
   (cql-identifier [x] (name x))
-  (cql-value [x]
-    (maybe-parameterize! x
-      #(cql-value (.substring (str %) 1))))
+  (cql-value [x] (str x))
 
   Date
   (cql-value [x]
@@ -189,9 +191,15 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
       (identical? :in op)
       (str col-name
            " IN "
-           (->> (map cql-value value)
-                join-comma
-                wrap-parens))
+           (if *prepared-statement*
+             ;; special case we need to bypass the value encoding of
+             ;; Sequential
+             (do (push-stack! value) "?")
+             (if (sequential? value)
+               (->> (map cql-value value)
+                   join-comma
+                   wrap-parens)
+               (cql-value value))))
 
       (fn? op)
       (str col-name
@@ -453,7 +461,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :limit
    (fn [q limit]
-     (str "LIMIT " limit))
+     (str "LIMIT " (cql-value limit)))
 
    :values
    (fn [q values-map]
@@ -481,7 +489,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
             (->> args
                  (map (fn [[n value]]
                         (str (-> n name string/upper-case)
-                             " " (cql-identifier value))))
+                             " " (cql-value value))))
                  join-and)
             (option-value args))))
 

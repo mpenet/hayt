@@ -30,7 +30,7 @@ There are already 3 libraries that use Hayt:
 ## Installation
 
 ```clojure
-[cc.qbits/hayt "1.4.1"]
+[cc.qbits/hayt "2.0.0-beta1"]
 ```
 
 ## Usage
