@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.0-beta2
+
+Add support for vectors in set-columns and values. Ex: `(insert :foo (values [[:a 1] [:b 2]]))`
+See Issue #19 for details.
+
 ## 2.0.0-beta1
 
 Some changes require you to run against Cassandra 2.0+ !!
