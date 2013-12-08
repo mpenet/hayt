@@ -109,8 +109,8 @@
 
    "UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
    (update :foo
-           (set-columns {:bar 1
-                         :baz [+ 2]})
+           (set-columns [[:bar 1]
+                         [:baz [+ 2]]])
            (where {:foo "bar"
                    :moo [> 3]
                    :meh [:> 4]
@@ -177,10 +177,10 @@
    (delete :foo
            (using :timestamp 100000
                   :ttl 200000)
-           (only-if {:foo "bar"
-                     :moo [> 3]
-                     :meh [:> 4]
-                     :baz [:in [5 6 7]]}))))
+           (only-if [[:foo "bar"]
+                     [:moo [> 3]]
+                     [:meh [:> 4]]
+                     [:baz [:in [5 6 7]]]]))))
 
 (deftest test-ddl
   (are-raw
