@@ -88,6 +88,11 @@
                   :ttl 200000)))
 
   (are-raw
+
+   "INSERT INTO foo (a, b) VALUES (?, ?);"
+   (insert :foo
+           (values [[:a ?] [:b ?]]))
+
    "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') IF NOT EXISTS USING TIMESTAMP 100000 AND TTL 200000;"
    (insert :foo
            (values {"c" "d" :a "b"})

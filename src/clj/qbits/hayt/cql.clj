@@ -464,12 +464,10 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
      (str "LIMIT " (cql-value limit)))
 
    :values
-   (fn [q values-map]
-     (let [columns (keys values-map)
-           values (vals values-map)]
-       (str (wrap-parens (join-comma (map cql-identifier columns)))
-            " VALUES "
-            (wrap-parens (join-comma (map cql-value values))))))
+   (fn [q x]
+     (str (wrap-parens (join-comma (map #(cql-identifier (first %)) x)))
+          " VALUES "
+          (wrap-parens (join-comma (map #(cql-value (second %)) x)))))
 
    :set-columns
    (fn [q values]
