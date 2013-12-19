@@ -152,3 +152,7 @@ Long (and complex) story short, he eventually becomes the husband of
 Copyright © 2013 [Max Penet](https://twitter.com/mpenet)
 
 Distributed under the Eclipse Public License, the same as Clojure.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mpenet/hayt/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
