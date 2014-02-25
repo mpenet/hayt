@@ -11,3 +11,6 @@ pom.xml
 /doc
 /perfs
 /pom.xml.asc
+/.nrepl-port
+/.lein-env
+/todo.org
