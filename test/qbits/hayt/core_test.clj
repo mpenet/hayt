@@ -100,11 +100,12 @@
                    [< :foo 2]])))
 
   (are-prepared
-   ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
-    ["bar" 3 4 [5 6 7]]]
+   ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND (a, b, \"d\") > (?, ?, ?) AND meh > ? AND baz IN ?;"
+    ["bar" 3 "a" "b" "c" 4 [5 6 7]]]
    (select :foo
            (where [[= :foo "bar"]
                    [> :moo 3]
+                   [> [:a :b "d"] ["a" "b" "c"]]
                    [:> :meh 4]
                    [:in :baz [5 6 7]]]))))
 
