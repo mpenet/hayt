@@ -174,17 +174,30 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   (cql-identifier [x] x)
   (cql-value [x] (maybe-parameterize! x)))
 
-(def operators {= "="
-                > ">"
-                < "<"
-                <= "<="
-                >= ">="
-                + "+"
-                - "-"})
+(def contains-key (fn []))
+(def contains (fn []))
+
+(defonce operators
+  (let [ops {'= "="
+             '> ">"
+             '< "<"
+             '<= "<="
+             '>= ">="
+             '+ "+"
+             '- "-"
+             'contains "CONTAINS"
+             'contains-key "CONTAINS KEY"}]
+    (reduce-kv
+     (fn [m k v]
+       (-> m
+           (assoc (keyword k) v)
+           (assoc (eval k) v)))
+     {}
+     ops)))
+
 (defn operator?
   [op]
-  (or (keyword? op)
-      (get operators op)))
+  (get operators op))
 
 (defn option-value
   [x]
@@ -217,21 +230,15 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
              ;; special case we need to bypass the value encoding of
              ;; Sequential
              (do (push-stack! value) "?")
-
              (if (sequential? value)
                (-> (map cql-value value)
                    join-comma
                    wrap-parens)
                (cql-value value))))
 
-      (fn? op)
+      (or (fn? op) (keyword? op))
       (str col-name
            " " (operators op) " "
-           (cql-value value))
-
-      (keyword? op)
-      (str col-name
-           " " (name op) " "
            (cql-value value)))))
 
 (defn query-cond

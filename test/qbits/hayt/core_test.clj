@@ -45,14 +45,16 @@
    (select :foo
            (order-by [:bar :desc]))
 
-   "SELECT * FROM foo WHERE foo = 'bar' AND (a, b, \"c\") = ('a', 'b', 'c') AND (a, b, \"d\") > ('a', 'b', 'c') AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
+   "SELECT * FROM foo WHERE foo = 'bar' AND (a, b, \"c\") = ('a', 'b', 'c') AND (a, b, \"d\") > ('a', 'b', 'c') AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7) AND baz CONTAINS 1 AND baz CONTAINS KEY 1;"
    (select :foo
            (where [[= :foo "bar"]
                    [= [:a :b "c"] ["a" "b" "c"]]
                    [> [:a :b "d"] ["a" "b" "c"]]
                    [> :moo 3]
                    [:> :meh 4]
-                   [:in :baz [5 6 7]]]))
+                   [:in :baz [5 6 7]]
+                   [contains :baz 1]
+                   [contains-key :baz 1]]))
 
    "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
    (select :foo

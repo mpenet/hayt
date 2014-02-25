@@ -57,6 +57,8 @@ ex:    (select :foo
 ex:    (select :foo (where [[in :foo  [1 2 3]]]))"
 :in)
 
+(def contains cql/contains)
+(def contains-key cql/contains-key)
 
 (defn ^:private add-tail
   [x]
