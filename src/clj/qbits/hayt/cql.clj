@@ -222,8 +222,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                           (CQLComposite. value)]
                          [column value] )
         col-name (cql-identifier column)]
-    (cond
-      (identical? :in op)
+    (if (identical? :in op)
       (str col-name
            " IN "
            (if *prepared-statement*
@@ -235,8 +234,6 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                    join-comma
                    wrap-parens)
                (cql-value value))))
-
-      (or (fn? op) (keyword? op))
       (str col-name
            " " (operators op) " "
            (cql-value value)))))
