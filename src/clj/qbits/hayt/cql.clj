@@ -22,6 +22,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (defrecord CQLFn [name args])
 (defrecord CQLRaw [value])
 (defrecord CQLRawPreparable [value])
+(defrecord CQLNamespaced [value])
+(defrecord CQLComposite [value])
 
 (defn push-stack!
   [x]
@@ -105,6 +107,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
       ;; handles foo['bar'] lookups
       (str (cql-identifier coll)
            (wrap-sqbrackets (cql-value k)))))
+
   (cql-value [x]
     (maybe-parameterize! x
      #(->> %
@@ -115,13 +118,24 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
           wrap-brackets)))
 
   clojure.lang.Sequential
-  (cql-identifier [x]
-    (join-dot (map cql-identifier x)))
   (cql-value [x]
     (maybe-parameterize! x
      #(->> (map cql-value %)
            join-comma
            wrap-sqbrackets)))
+
+  CQLComposite
+  (cql-identifier [{:keys [value]}]
+    (->> value
+         (map cql-identifier)
+         join-comma
+         wrap-parens))
+  (cql-value [{:keys [value]}]
+    (->> value
+         (map cql-value)
+         join-comma
+         wrap-parens))
+
 
   ;; CQL Function are always safe, their arguments might not be though
   CQLFn
@@ -147,6 +161,10 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   clojure.lang.Symbol
   (cql-identifier [x] (str x))
   (cql-value [x] (str x))
+
+  CQLNamespaced
+  (cql-identifier [xs]
+    (join-dot (map cql-identifier (:value xs))))
 
   nil
   (cql-value [x]
@@ -185,8 +203,12 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
 
 ;; secondary index clauses helpers
-(defn query-cond-sequential-entry [column [op value]]
-  (let [col-name (cql-identifier column)]
+(defn query-cond-sequential-entry [op column value]
+  (let [[column value] (if (sequential? column)
+                         [(CQLComposite. column)
+                          (CQLComposite. value)]
+                         [column value] )
+        col-name (cql-identifier column)]
     (cond
       (identical? :in op)
       (str col-name
@@ -195,8 +217,9 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
              ;; special case we need to bypass the value encoding of
              ;; Sequential
              (do (push-stack! value) "?")
+
              (if (sequential? value)
-               (->> (map cql-value value)
+               (-> (map cql-value value)
                    join-comma
                    wrap-parens)
                (cql-value value))))
@@ -214,12 +237,12 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (defn query-cond
   [clauses]
   (->> clauses
-       (map (fn [[k v]]
-              (if (sequential? v)
-                ;; Sequence, we do the complex thing first
-                (query-cond-sequential-entry k v)
-                ;; else we just append if its a simple map val
-                (format-eq (cql-identifier k) (cql-value v)))))
+       (map (fn [xs]
+              (if (= 3 (count xs))
+                (query-cond-sequential-entry (first xs)
+                                             (second xs)
+                                             (last xs))
+                (query-cond-sequential-entry = (first xs) (second xs)))))
        join-and))
 
 ;; x and y can be an operator or a value
@@ -407,7 +430,6 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [q table]
      (str "INTO " (cql-identifier table)))
 
-
    :columns
    (fn [q columns]
      (if (sequential? columns)
@@ -416,7 +438,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :where
    (fn [q clauses]
-     (str "WHERE " (query-cond clauses)))
+     (str "WHERE " (query-cond (seq clauses))))
 
    :if
    (fn [q clauses]

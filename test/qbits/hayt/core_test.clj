@@ -23,7 +23,7 @@
    (select :foo)
 
    "SELECT * FROM foo.\"bar\";"
-   (select [:foo "bar"])
+   (select (cql-ns :foo "bar"))
 
    "SELECT DISTINCT bar FROM foo;"
    (select :foo (columns (distinct* :bar)))
@@ -45,38 +45,66 @@
    (select :foo
            (order-by [:bar :desc]))
 
-   "SELECT * FROM foo WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
+   "SELECT * FROM foo WHERE foo = 'bar' AND (a, b, \"c\") = ('a', 'b', 'c') AND (a, b, \"d\") > ('a', 'b', 'c') AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
    (select :foo
-           (where {:foo "bar"
-                   :moo [> 3]
-                   :meh [:> 4]
-                   :baz [:in [5 6 7]]}))
+           (where [[= :foo "bar"]
+                   [= [:a :b "c"] ["a" "b" "c"]]
+                   [> [:a :b "d"] ["a" "b" "c"]]
+                   [> :moo 3]
+                   [:> :meh 4]
+                   [:in :baz [5 6 7]]]))
 
    "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
    (select :foo
-           (where [[:foo [> 1]]
-                   [:foo [< 10]]]))
+           (where [[> :foo 1]
+                   [< :foo 10]]))
 
-   "SELECT * FROM foo WHERE foo > :param1 AND foo < :param2 AND bar IN :param3;"
+   "SELECT * FROM foo WHERE foo2 = 10 AND foo = 1 AND (a, b, \"c\") = ('a', 'b', 'c');"
    (select :foo
-           (where [[:foo [> :param1]]
-                   [:foo [< :param2]]
-                   [:bar [:in :param3]]]))
+           (where {:foo 1
+                   :foo2 10
+                   [:a :b "c"] ["a" "b" "c"]}))
+
+   "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
+   (select :foo
+           (where [[> :foo 1]
+                   [< :foo 10]]))
+
+   "SELECT * FROM foo WHERE foo > :param1 AND foo < :param2 AND bar IN :param3 AND baz IN (:param4);"
+   (select :foo
+           (where' [> :foo :param1]
+                   [< :foo :param2]
+                   [in :bar :param3]
+                   [in :baz [:param4]]))
+
+   "SELECT * FROM foo WHERE foo > :param1 AND foo2 < :param2 AND bar IN :param3 AND baz IN (:param4);"
+   (select :foo
+           (where-v1 {:foo [> :param1]
+                      :foo2 [< :param2]
+                      :bar [:in :param3]
+                      :baz [:in [:param4]]}))
+
+      "SELECT * FROM foo WHERE foo > :param1 AND foo2 < :param2 AND bar IN :param3 AND baz IN (:param4);"
+   (select :foo
+           (where-v1 [[:foo [> :param1]]
+                      [:foo2 [< :param2]]
+                      [:bar [:in :param3]]
+                      [:baz [:in [:param4]]]]))
 
    "SELECT * FROM foo WHERE foo > ? AND bar IN ? AND foo < 2;"
    (select :foo
-           (where [[:foo [> ?]]
-                   [:bar [:in ?]]
-                   [:foo [< 2]]])))
+           (where [[> :foo ?]
+                   [:in :bar ?]
+                   [< :foo 2]])))
 
   (are-prepared
    ["SELECT * FROM foo WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
     ["bar" 3 4 [5 6 7]]]
    (select :foo
-           (where {:foo "bar"
-                   :moo [> 3]
-                   :meh [:> 4]
-                   :baz [:in [5 6 7]]}))))
+           (where [[= :foo "bar"]
+                   [> :moo 3]
+                   [:> :meh 4]
+                   [:in :baz [5 6 7]]]))))
 
 (deftest test-insert
   (are-prepared
@@ -111,19 +139,19 @@
    (update :foo
            (set-columns [[:bar 1]
                          [:baz [+ 2]]])
-           (where {:foo "bar"
-                   :moo [> 3]
-                   :meh [:> 4]
-                   :baz [:in [5 6 7]]}))
+           (where [[:foo "bar"]
+                   [> :moo 3]
+                   [:> :meh 4]
+                   [:in :baz [5 6 7]]]))
 
    "UPDATE foo SET bar = 1, baz = baz + 2 IF foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
    (update :foo
            (set-columns {:bar 1
                          :baz [+ 2]})
-           (only-if {:foo "bar"
-                     :moo [> 3]
-                     :meh [:> 4]
-                     :baz [:in [5 6 7]]}))
+           (only-if [[= :foo "bar"]
+                     [> :moo 3]
+                     [:> :meh 4]
+                     [:in :baz [5 6 7]]]))
 
    "UPDATE foo SET bar = 1, baz = baz + 2 IF NOT EXISTS;"
    (update :foo
@@ -135,15 +163,26 @@
    (update :foo
            (set-columns {:bar 1
                          :baz [+ {"key" "value"}]})
-           (where {:foo "bar"}))
+           (where [[:foo "bar"]]))
+
+   "UPDATE foo SET baz = ['prepended'] + baz WHERE foo = 'bar';"
+   (update :foo
+           (set-columns {:baz (prepend ["prepended"])})
+           (where [[:foo "bar"]]))
 
    "UPDATE foo SET baz = ['prepended'] + baz WHERE foo = 'bar';"
    (update :foo
            (set-columns {:baz [["prepended"] +]})
-           (where {:foo "bar"})))
+           (where [[:foo "bar"]])))
 
 
   (are-prepared
+   ["UPDATE foo SET bar = ?, baz = baz + ?;" [1 2]]
+   (update :foo
+           (set-columns {:bar 1
+                         :baz (inc-by 2)}))
+
+
    ["UPDATE foo SET bar = ?, baz = baz + ?;" [1 2]]
    (update :foo
            (set-columns {:bar 1
@@ -155,10 +194,10 @@
    (update :foo
            (set-columns {:bar 1
                          :baz [+ 2]})
-           (where {:foo "bar"
-                   :moo [> 3]
-                   :meh [:> 4]
-                   :baz [:in [5 6 7]]}))))
+           (where [[:foo "bar"]
+                   [> :moo 3]
+                   [:> :meh  4]
+                   [:in :baz [5 6 7]]]))))
 
 (deftest test-delete
   (are-prepared
@@ -167,10 +206,10 @@
    (delete :foo
            (using :timestamp 100000
                   :ttl 200000)
-           (where {:foo "bar"
-                   :moo [> 3]
-                   :meh [:> 4]
-                   :baz [:in [5 6 7]]}))
+           (where [[:foo "bar"]
+                   [> :moo 3]
+                   [:> :meh 4]
+                   [:in :baz [5 6 7]]]))
 
    ["DELETE FROM foo USING TIMESTAMP ? AND TTL ? IF foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
     [100000 200000 "bar" 3 4 [5 6 7]]]
@@ -178,9 +217,9 @@
            (using :timestamp 100000
                   :ttl 200000)
            (only-if [[:foo "bar"]
-                     [:moo [> 3]]
-                     [:meh [:> 4]]
-                     [:baz [:in [5 6 7]]]]))))
+                     [> :moo 3]
+                     [:> :meh 4]
+                     [:in :baz [5 6 7]]]))))
 
 (deftest test-ddl
   (are-raw
@@ -462,40 +501,40 @@
 
    "SELECT * FROM foo WHERE token(user-id) > token('tom');"
    (select :foo
-           (where {(token :user-id) [> (token "tom")]})))
+           (where [[> (token :user-id) (token "tom")]])))
 
   "SELECT * FROM foo WHERE token(company-id, user-id) > token('company', 'tom');"
   (select :foo
-          (where {(token :company-id :user-id) [> (token "company" "tom")]}))
+          (where [[> (token :company-id :user-id) (token "company" "tom")]]))
 
   (are-prepared
    ["SELECT * FROM foo WHERE ts = now();" []]
    (select :foo
-           (where {:ts (now)}))
+           (where [[= :ts (now)]]))
 
    ["SELECT * FROM foo WHERE token(user-id) > token(?);" ["tom"]]
    (select :foo
-           (where {(token :user-id) [> (token "tom")]})))
+           (where [[> (token :user-id) (token "tom")]])))
 
   (let [d (java.util.Date. 0)]
     (are-raw
      "SELECT * FROM foo WHERE ts > maxTimeuuid(0) AND ts < minTimeuuid(0);"
      (select :foo
-             (where [[:ts  [> (max-timeuuid d)]]
-                     [:ts  [< (min-timeuuid d)]]])))))
+             (where [[> :ts  (max-timeuuid d)]
+                     [< :ts  (min-timeuuid d)]])))))
 
 (deftest test-coll-lookup
   (are-raw
    "DELETE bar[2] FROM foo WHERE baz = 1;"
    (delete :foo
            (columns {:bar 2})
-           (where {:baz 1})))
+           (where [[= :baz 1]])))
 
   (are-prepared
    ["DELETE bar[?] FROM foo WHERE baz = ?;" [2 1]]
    (delete :foo
            (columns {:bar 2})
-           (where {:baz 1}))))
+           (where [[= :baz 1]]))))
 
 (deftest test-alias
   (are-raw

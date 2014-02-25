@@ -48,6 +48,33 @@ The possible collection types are :map, :list and :set."
 (def ?
   "? can be used as a query value to mark a prepared statement value
 ex:    (select :foo
-           (where [[:foo  [> ?]]
-                   [:foo  [< 2]]]))"
+           (where [[> :foo ?]
+                   [< :foo 2]]]))"
   (cql/->CQLRaw "?"))
+
+(def in
+  "`in` can be used as a query value to mark IN in where clause
+ex:    (select :foo (where [[in :foo  [1 2 3]]]))"
+:in)
+
+
+(defn ^:private add-tail
+  [x]
+  [+ x])
+
+(defn ^:private add-head
+  [x]
+  [x +])
+
+(defn ^:private remove-tail
+  [x]
+  [- x])
+
+(defn ^:private remove-head
+  [x]
+  [x -])
+
+(def inc-by add-tail)
+(def dec-by remove-head)
+(def prepend add-head)
+(def append add-tail)

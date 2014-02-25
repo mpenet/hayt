@@ -21,6 +21,11 @@ when the query is compiled as a prepared statement"
   [name & args]
   (cql/->CQLFn name args))
 
+(defn cql-ns
+  "handles namespaced identifiers"
+  [& xs]
+  (cql/->CQLNamespaced xs))
+
 (defn as
   "Aliases a column (selector) to another identifier (id)"
   [selector id]

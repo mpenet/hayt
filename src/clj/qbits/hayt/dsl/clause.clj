@@ -39,10 +39,30 @@ clause of a select/update/delete query"
   [args]
   {:where args})
 
+(defn where'
+  "Same as `where` but for people who prefer unrolled args"
+  [& args]
+  {:where args})
+
+(defn where-v1
+  "backward compatible with hayt 1.0 and 2.0 betas"
+  [args]
+  {:where (map (fn [[k v]]
+                 (if (sequential? v)
+                   [(first v) k (second v)]
+                   [k v]))
+               args)})
+
 (defn only-if
   "Clause: takes a map or a vector of pairs (same as `where`) to compose the if
 clause of a update/delete query"
   [args]
+  {:if args})
+
+(defn only-if'
+  "Clause: takes a map or a vector of pairs (same as `where`) to compose the if
+clause of a update/delete query"
+  [& args]
   {:if args})
 
 (defn if-exists
