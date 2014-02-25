@@ -515,7 +515,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
           (if (map? args)
             (->> args
                  (map (fn [[n value]]
-                        (str (-> n name string/upper-case)
+                        (str (-> n name StringUtils/upperCase)
                              " " (cql-value value))))
                  join-and)
             (option-value args))))
