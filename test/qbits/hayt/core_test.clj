@@ -84,7 +84,7 @@
                       :bar [:in :param3]
                       :baz [:in [:param4]]}))
 
-      "SELECT * FROM foo WHERE foo > :param1 AND foo2 < :param2 AND bar IN :param3 AND baz IN (:param4);"
+   "SELECT * FROM foo WHERE foo > :param1 AND foo2 < :param2 AND bar IN :param3 AND baz IN (:param4);"
    (select :foo
            (where-v1 [[:foo [> :param1]]
                       [:foo2 [< :param2]]
@@ -419,16 +419,16 @@
 
    "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text RENAME foo TO bar;"
    (alter-columnfamily :foo
-                        (alter-column :bar :int)
-                        (rename-column :foo :bar)
-                        (add-column :baz :text))
+                       (alter-column :bar :int)
+                       (rename-column :foo :bar)
+                       (add-column :baz :text))
 
    "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
    (alter-columnfamily :foo
-                        (alter-column :bar :int)
-                        (add-column :baz :text)
-                        (with {:compact-storage true
-                               :clustering-order [[:bar :asc]]}))
+                       (alter-column :bar :int)
+                       (add-column :baz :text)
+                       (with {:compact-storage true
+                              :clustering-order [[:bar :asc]]}))
 
    "ALTER COLUMNFAMILY foo ALTER bar TYPE int ADD baz text WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
    (alter-column-family :foo
