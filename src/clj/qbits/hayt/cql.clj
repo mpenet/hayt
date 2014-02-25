@@ -445,7 +445,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :where
    (fn [q clauses]
-     (str "WHERE " (query-cond (seq clauses))))
+     (str "WHERE " (query-cond clauses)))
 
    :if
    (fn [q clauses]
