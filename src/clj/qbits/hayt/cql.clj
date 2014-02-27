@@ -479,7 +479,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [q column-definitions]
      (->> column-definitions
           (mapv (fn [[k & xs]]
-                  (if (= :primary-key k)
+                  (if (identical? :primary-key k)
                     ((:primary-key emit) q (first xs))
                     (join-spaced (map cql-identifier (cons k xs))))))
           join-comma
