@@ -1,5 +1,43 @@
 # Changelog
 
+## 2.0.0-beta3 Cassandra 2.1+ support: Introduced Breaking changes!
+
+* new `where` syntax, matches clojure style more closely (prefix
+  notation), it now expects a seq of seq:
+
+  ```clojure
+  (where [[= :a 1] [> :b 2]])```
+
+  It can still receive a map, but it will only assume =, a vector of 2
+  elements will asume = too.
+
+** `where'` is the same but allows to skip passing the wrapping vector:
+```clojure
+(where' [= :b 2] [> :c 3])
+```
+
+* `where-v1` is the equivalent of the previous `where` syntax from v1
+  and early v2 betas. ex: `(where {:a [> 2]}}`
+
+* Add support for paging on composite in `where`
+
+```clojure
+(where [[= :a 1]
+        [>= [:b :c :d] [1 2 3]]])
+```
+
+* Add support for secondary index on collections in where CASSANDRA-4511
+
+```clojure
+(where [contains :l 1]}
+```
+
+```clojure
+(where [contains-key :m 2]}
+```
+
+* Add support for static columns in schemas
+
 ## 2.0.0-beta2
 
 Add support for vectors in set-columns and values. Ex: `(insert :foo (values [[:a 1] [:b 2]]))`
