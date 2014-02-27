@@ -115,8 +115,8 @@
     ["d" "b" 100000 200000]]
    (insert :foo
            (values {"c" "d" :a "b" })
-           (using :timestamp 100000
-                  :ttl 200000)))
+           (using {:timestamp 100000
+                   :ttl 200000})))
 
   (are-raw
 

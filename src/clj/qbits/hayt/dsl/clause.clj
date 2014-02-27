@@ -14,8 +14,9 @@ ex: (columns :foo \"bar\" :baz) "
 
 (defn using
   "Clause: Sets USING, takes keyword/value pairs for :timestamp and :ttl"
-  [& args]
-  {:using (apply hash-map args)})
+  ([opts] {:using opts})
+  ([x y & args]
+     {:using (apply hash-map x y args)}))
 
 (defn limit
   "Clause: Sets LIMIT, takes a numeric value"
