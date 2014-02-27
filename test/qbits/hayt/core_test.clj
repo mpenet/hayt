@@ -360,20 +360,20 @@
 
 (deftest test-create-table
   (are-raw
-   "CREATE TABLE IF NOT EXISTS foo (a varchar, b int, PRIMARY KEY (a));"
+   "CREATE TABLE IF NOT EXISTS foo (a varchar, b int, c int static, PRIMARY KEY (a));"
    (create-table :foo
                  (if-not-exists)
-                 (column-definitions {:a :varchar
-                                      :b :int
-                                      :primary-key :a}))
+                 (column-definitions [[:a :varchar]
+                                      [:b :int]
+                                      [:c :int :static]
+                                      [:primary-key :a]]))
 
-   "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar));"
+   "CREATE TABLE foo (PRIMARY KEY (foo, bar), foo varchar, bar int);"
    (create-table :foo
                  (column-definitions {:foo :varchar
                                       :bar :int
                                       :primary-key [:foo :bar]}))
-
-   "CREATE TABLE foo (foo varchar, bar int, PRIMARY KEY (foo, bar)) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
+   "CREATE TABLE foo (PRIMARY KEY (foo, bar), foo varchar, bar int) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
    (create-table :foo
                  (column-definitions {:foo :varchar
                                       :bar :int
@@ -381,7 +381,7 @@
                  (with {:compact-storage true
                         :clustering-order [[:bar :asc]]}))
 
-   "CREATE TABLE foo (foo varchar, bar int, baz text, PRIMARY KEY ((foo, baz), bar)) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
+   "CREATE TABLE foo (PRIMARY KEY ((foo, baz), bar), foo varchar, bar int, baz text) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
    (create-table :foo
                  (column-definitions {:foo :varchar
                                       :bar :int

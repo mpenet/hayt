@@ -476,14 +476,14 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
           (str "PRIMARY KEY ")))
 
    :column-definitions
-   (fn [q {:keys [primary-key] :as column-definitions}]
-     (-> (mapv (fn [[k v]]
-                 (join-spaced [(cql-identifier k)
-                               (cql-identifier v)]))
-               (dissoc column-definitions :primary-key))
-         (conj ((:primary-key emit) q primary-key))
-         join-comma
-         wrap-parens))
+   (fn [q column-definitions]
+     (->> column-definitions
+          (mapv (fn [[k & xs]]
+                  (if (= :primary-key k)
+                    ((:primary-key emit) q (first xs))
+                    (join-spaced (map cql-identifier (cons k xs))))))
+          join-comma
+          wrap-parens))
 
    :limit
    (fn [q limit]
