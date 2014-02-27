@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0-beta3 Cassandra 2.1+ support: Introduced Breaking changes!
+## 2.0.0-beta3 - Breaking changes (backward compatible fns available)!
 
 * new `where` syntax, matches clojure style more closely (prefix
   notation), it now expects a seq of seq:
