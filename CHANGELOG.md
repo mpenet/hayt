@@ -6,12 +6,13 @@
   notation), it now expects a seq of seq:
 
   ```clojure
-  (where [[= :a 1] [> :b 2]])```
+  (where [[= :a 1] [> :b 2]])
+  ```
 
   It can still receive a map, but it will only assume =, a vector of 2
   elements will asume = too.
 
-** `where'` is the same but allows to skip passing the wrapping vector:
+* `where'` same as `where` but allows to skip passing the wrapping vector:
 ```clojure
 (where' [= :b 2] [> :c 3])
 ```
