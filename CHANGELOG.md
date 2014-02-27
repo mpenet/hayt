@@ -39,6 +39,26 @@
 
 * Add support for static columns in schemas
 
+* Add sugar for operations on collections and counters
+
+```clojure
+(update :foo
+        (set-columns {:bar 1
+                      :baz (inc-by 2)}))
+
+(update :foo
+        (set-columns {:bar 1
+                      :baz (dec-by 2)}))
+
+(update :foo
+        (set-columns {:baz (prepend ["asdf"])})
+        (where [[:foo "bar"]]))
+
+(update :foo
+        (set-columns {:baz (append ["asdf"])})
+        (where [[:foo "bar"]]))
+```
+
 ## 2.0.0-beta2
 
 Add support for vectors in set-columns and values. Ex: `(insert :foo (values [[:a 1] [:b 2]]))`
