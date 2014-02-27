@@ -133,7 +133,7 @@ handle custom type encoding.
 If you are curious about what else it can do head to the
 [codox documentation](http://mpenet.github.com/hayt/codox/qbits.hayt.html)
 or the
-[tests](https://github.com/mpenet/hayt/blob/master/test/qbits/hayt/core_test.clj).
+[tests](https://github.com/mpenet/hayt/blob/db46ff531860911251023add45caa3f0a40e056a/test/qbits/hayt/core_test.clj).
 
 ## Hayt?
 
