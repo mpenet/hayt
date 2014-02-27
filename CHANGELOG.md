@@ -10,7 +10,7 @@
   ```
 
   It can still receive a map, but it will only assume =, a vector of 2
-  elements will asume = too.
+  elements will assume = too.
 
 * `where'` same as `where` but allows to skip passing the wrapping vector:
 ```clojure
