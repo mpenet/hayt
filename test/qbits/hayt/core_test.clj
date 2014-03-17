@@ -31,7 +31,7 @@
    "SELECT DISTINCT \"bar\" FROM foo;"
    (select :foo (columns (distinct* "bar")))
 
-   "SELECT DISTINCT foo,bar,baz FROM foo;"
+   "SELECT DISTINCT foo, bar, baz FROM foo;"
    (select :foo (columns (distinct* :foo :bar :baz)))
 
    "SELECT bar, \"baz\" FROM foo;"
