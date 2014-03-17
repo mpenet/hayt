@@ -96,8 +96,8 @@ Returns a dateOf function with the supplied argument"
 
 (defn distinct*
   "Returns DISTINCT column id ex: `(select :table (columns (distinct :foo)))`"
-  [x]
-  (cql-raw (str "DISTINCT " (cql/cql-identifier x))))
+  [& xs]
+  (cql-raw (str "DISTINCT " (string/join "," (map  cql/cql-identifier xs)))))
 
 ;; blob convertion fns
 ;;
