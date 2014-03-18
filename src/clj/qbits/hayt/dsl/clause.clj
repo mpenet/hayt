@@ -45,7 +45,7 @@ clause of a select/update/delete query"
   [& args]
   {:where args})
 
-(defn where-v1
+(defn where1
   "backward compatible with hayt 1.0 and 2.0 betas"
   [args]
   {:where (map (fn [[k v]]
