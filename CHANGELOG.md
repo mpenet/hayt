@@ -10,15 +10,19 @@
   ```
 
   It can still receive a map, but it will only assume =, a vector of 2
-  elements will assume = too.
+  elements will assume =.
+
+```clojure
+  (where {:a 1 :b 2})
+```
 
 * `where'` same as `where` but allows to skip passing the wrapping vector:
 ```clojure
 (where' [= :b 2] [> :c 3])
 ```
 
-* `where-v1` is the equivalent of the previous `where` syntax from v1
-  and early v2 betas. ex: `(where {:a [> 2]}}`
+* `where1` is the equivalent of the previous `where` syntax from v1
+  and early v2 betas. ex: `(where1 {:a [> 2]}}`
 
 * Add support for paging on composite in `where`
 

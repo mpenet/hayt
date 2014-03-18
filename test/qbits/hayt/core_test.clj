@@ -84,14 +84,14 @@
 
    "SELECT * FROM foo WHERE foo > :param1 AND foo2 < :param2 AND bar IN :param3 AND baz IN (:param4);"
    (select :foo
-           (where-v1 {:foo [> :param1]
+           (where1 {:foo [> :param1]
                       :foo2 [< :param2]
                       :bar [:in :param3]
                       :baz [:in [:param4]]}))
 
    "SELECT * FROM foo WHERE foo > :param1 AND foo2 < :param2 AND bar IN :param3 AND baz IN (:param4);"
    (select :foo
-           (where-v1 [[:foo [> :param1]]
+           (where1 [[:foo [> :param1]]
                       [:foo2 [< :param2]]
                       [:bar [:in :param3]]
                       [:baz [:in [:param4]]]]))
