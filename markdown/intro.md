@@ -364,8 +364,8 @@ The values can take different forms:
   `contains-key`, keywords are also accepted. `:in ` will have a
   sequential value, that will generate an IN sequence.
 
-The map keys will be the column identifiers and in map form we will
-assume it's a `=` check.
+If it's a map argument, the map keys will be the column identifiers and in map form we will
+assume it's a `=` check, same as the pair.
 
 Ex:
 
@@ -374,6 +374,10 @@ Ex:
         [> :moo 3]
         [:> :meh 4]
         [:in :baz [5 6 7]]])
+```
+
+```clojure
+(where {:a 1, :b 2})
 ```
 
 #### columns
