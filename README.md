@@ -30,7 +30,7 @@ There are already 3 libraries that use Hayt:
 ## Installation
 
 ```clojure
-[cc.qbits/hayt "2.0.0-beta2"]
+[cc.qbits/hayt "2.0.0-beta3"]
 ```
 
 ## Usage
@@ -48,11 +48,11 @@ One of the major difference is that Hayt doesn't exposes macros.
 
 (update :some-table
          (set-columns {:bar 1
-                       :baz [+ 2]})
-         (where {:foo :bar
-                 :moo [> 3]
-                 :meh [:> 4]
-                 :baz [:in [5 6 7]]}))
+                       :baz (inc-by 2)})
+         (where [[= :foo :bar]
+                 [> :moo 3]
+                 [:> :meh 4]
+                 [:in :baz [5 6 7]]]}))
 ```
 
 All these functions do is generate maps, if you want to build your own
@@ -61,19 +61,19 @@ DSL on top of it, or use maps direcly feel free to do so.
 ```clojure
 (select :users
         (columns :a :b)
-        (where {:foo :bar
-                :moo [> 3]
-                :meh [:> 4]
-                :baz [:in [5 6 7]]}))
+        (where [[= :foo :bar]
+                [> :moo 3]
+                [:> :meh 4]
+                [:in :baz [5 6 7]]])})
 
 ;; generates the following
 
 >> {:select :users
     :columns [:a :b]
-    :where {:foo :bar
-            :moo [> 3]
-            :meh [:> 4]
-            :baz [:in [5 6 7]]}}
+    :where [[= :foo :bar]
+            [> :moo 3]
+            [:> :meh 4]
+            [:in :baz [5 6 7]]]}
 ```
 
 Since Queries are just maps they are composable using the usual `merge`
