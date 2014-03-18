@@ -33,10 +33,10 @@ Ex:
 ```clojure
 (select :foo
         (columns :foo :moo :baz :meh)
-        (where {:foo :bar
-                :moo [> 3]
-                :meh [:> 4]
-                :baz [:in [5 6 7]]}))
+        (where [[= :foo :bar]
+                [> :moo 3]
+                [:> :meh 4]
+                [:in :baz [5 6 7]]]))
 ```
 
 #### Insert
@@ -67,10 +67,10 @@ Ex:
 (update :foo
         (set-columns {:bar 1
                       :baz [+ 2]})
-        (where {:foo :bar
-                :moo [> 3]
-                :meh [:> 4]
-                :baz [:in [5 6 7]]}))
+        (where [[= :foo :bar]
+                [> :moo 3]
+                [:> :meh 4]
+                [:in :baz [5 6 7]]])))
 ```
 
 #### Delete
@@ -86,10 +86,10 @@ Ex:
 (delete :foo
         (using :timestamp 100000
                :ttl 200000)
-        (where {:foo :bar
-                :moo [> 3]
-                :meh [:> 4]
-                :baz [:in [5 6 7]]}))
+        (where [[= :foo :bar]
+                [> :moo 3]
+                [:> :meh 4]
+                [:in :baz [5 6 7]]]))
 ```
 
 #### Truncate
@@ -355,30 +355,25 @@ Ex:
 
 #### where
 
-`where` takes a map, or a sequence of pairs.
-The map keys will be the column identifiers.
+`where` a sequence of pairs or a map
+
 The values can take different forms:
-* If it's a simple value, it will generate an `=` match with the key
-* If it's a vector, the first value will be an operator and the second its value.
-  Operators supported are: `=` `>` `<` `>=` `<=`, keywords are also
-  accepted. `:in ` will have a sequential value, that will generate an
-  IN sequence.
+* If it's a pair, it will generate an `=` match with the key
+* If it's a seq with more than 2 elements, the first value will be an operator and the second its value.
+  Operators supported are: `=` `>` `<` `>=` `<=` `contains` `in`
+  `contains-key`, keywords are also accepted. `:in ` will have a
+  sequential value, that will generate an IN sequence.
+
+The map keys will be the column identifiers and in map form we will
+assume it's a `=` check.
 
 Ex:
 
 ```clojure
-(where {:foo :bar
-        :moo [> 3]
-        :meh [:> 4]
-        :baz [:in [5 6 7]]})
-```
-
-The second case (sequence of pairs) that allow multiple checks on the
-same column:
-
-```clojure
-(where [[:foo [> 1]]
-        [:foo [< 100]]])
+(where [[= :foo :bar]
+        [> :moo 3]
+        [:> :meh 4]
+        [:in :baz [5 6 7]]])
 ```
 
 #### columns
@@ -530,7 +525,7 @@ Query generation can be achieved in two ways, if you need the raw
 query with the values hardcoded you can then call `->raw` on it.
 
 ```clojure
-(->raw (select :foo (where :bar 1)) )
+(->raw (select :foo (where {:bar 1})) )
 > "SELECT * FROM foo WHERE bar=1;"
 ```
 
@@ -545,29 +540,6 @@ for later binding.
 (->prepared (select :foo (where {:bar 1})))
 > ["SELECT * FROM foo WHERE bar=?;" [1]]
 ```
-
-#### apply-map
-But you don't want to have to deal with the index of
-an argument in the list of parameters to feed it to your client lib.,
-a way to prevent this is using `apply-map`.
-
-It takes a generated prepared query with its arg vector containing
-keywords for value placeholders and maps the supplied clojure map to it.
-
-ex:
-```clojure
-(def query (->prepared (select :foo
-                                (where {:a :a-placholder
-                                        :b :b-placeholder
-                                        :c :c-placeholder}))))
-
-(println (apply-map query {:a-placholder 100
-                           :b-placeholder 200
-                           :c-placeholder 300}))
-
->> ["SELECT * FROM foo WHERE a = ? AND c = ? AND b = ?;" [100 300 200]]
-```
-
 
 ### Sugar for collection type definitions
 
