@@ -22,6 +22,12 @@
 
 * Add support for paging on composite in `where`
 
+* qbits.hayt/distinct* is now variadic, thanks @pyr
+
+```clojure
+(select :foo (columns (distinct* :foo :bar :baz)))
+```
+
 ```clojure
 (where [[= :a 1]
         [>= [:b :c :d] [1 2 3]]])
