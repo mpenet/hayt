@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0-beta3 - Breaking changes (backward compatible fns available)!
+## 2.0.0-beta3 - **Breaking changes (backward compatible fns available)**
 
 * new `where` syntax, matches clojure style more closely (prefix
   notation), it now expects a seq of seq:
@@ -37,7 +37,7 @@
         [>= [:b :c :d] [1 2 3]]])
 ```
 
-* Add support for secondary index on collections in where CASSANDRA-4511
+* Add support for secondary index on collections in `where` CASSANDRA-4511
 
 ```clojure
 (where [contains :l 1]}
