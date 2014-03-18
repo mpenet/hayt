@@ -29,6 +29,10 @@ There are already 3 libraries that use Hayt:
 
 ## Installation
 
+Please check the
+[Changelog](https://github.com/mpenet/hayt/blob/master/CHANGELOG.md) first
+if you are upgrading.
+
 ```clojure
 [cc.qbits/hayt "2.0.0-beta3"]
 ```
