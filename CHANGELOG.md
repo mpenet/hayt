@@ -2,7 +2,7 @@
 
 ## 2.0.0-beta4
 
-* test against on clojure 1.6
+* use clojure 1.6
 
 * `where1`, `using`, `set-columns`, `values`, `with` now supports
   cassaforte like signatures (unspliced map `(where1 :a 1 :b 2)` or
