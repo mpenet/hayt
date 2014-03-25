@@ -54,7 +54,7 @@ clause of a select/update/delete query"
                       [k v]))
                   args)})
   ([x y & more]
-     (where1 (apply array-map x y more))))
+     (where1 (partition 2 (concat [x y] more)))))
 
 (defn only-if
   "Clause: takes a map or a vector of pairs (same as `where`) to compose the if
@@ -100,8 +100,10 @@ Clause: Apply only if the row does not exist"
 
 (defn with
   "Clause: compiles to a CQL with clause (possibly nested maps)"
-  [values]
-  {:with values})
+  ([values]
+     {:with values})
+  ([x y & more]
+     (with (partition 2 (concat [x y] more)))))
 
 (defn index-name
   "Clause: Takes an index identifier"
