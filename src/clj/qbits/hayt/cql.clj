@@ -509,7 +509,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    :using
    (fn [q args]
      (str "USING "
-          (if (map? args)
+          (if (coll? args)
             (->> args
                  (map (fn [[n value]]
                         (str (-> n name StringUtils/upperCase)

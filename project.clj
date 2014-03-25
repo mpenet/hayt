@@ -1,9 +1,9 @@
-(defproject cc.qbits/hayt "2.0.0-beta3"
+(defproject cc.qbits/hayt "2.0.0-beta4"
   :description "CQL Query Generation"
   :url "https://github.com/mpenet/hayt"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.5.1"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.flatland/useful "0.10.1"]
                  [org.apache.commons/commons-lang3 "3.1"]]
   :profiles {:1.4  {:dependencies [[org.clojure/clojure "1.4.0"]]}

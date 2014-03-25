@@ -15,8 +15,8 @@ ex: (columns :foo \"bar\" :baz) "
 (defn using
   "Clause: Sets USING, takes keyword/value pairs for :timestamp and :ttl"
   ([opts] {:using opts})
-  ([x y & args]
-     {:using (apply hash-map x y args)}))
+  ([x y & more]
+     (using (partition 2 (concat [x y] more)))))
 
 (defn limit
   "Clause: Sets LIMIT, takes a numeric value"
@@ -47,12 +47,14 @@ clause of a select/update/delete query"
 
 (defn where1
   "backward compatible with hayt 1.0 and 2.0 betas"
-  [args]
-  {:where (map (fn [[k v]]
-                 (if (sequential? v)
-                   [(first v) k (second v)]
-                   [k v]))
-               args)})
+  ([args]
+     {:where (map (fn [[k v]]
+                    (if (sequential? v)
+                      [(first v) k (second v)]
+                      [k v]))
+                  args)})
+  ([x y & more]
+     (where1 (apply array-map x y more))))
 
 (defn only-if
   "Clause: takes a map or a vector of pairs (same as `where`) to compose the if
@@ -84,13 +86,17 @@ Clause: Apply only if the row does not exist"
 
 (defn values
   "Clause: Takes a map of columns to be inserted"
-  [values]
-  {:values values})
+  ([values]
+     {:values values})
+  ([x y & more]
+     (values (partition 2 (concat [x y] more)))))
 
 (defn set-columns
   "Clause: Takes a map of columns to be updated"
-  [values]
-  {:set-columns values})
+  ([values]
+     {:set-columns values})
+  ([x y & more]
+     (set-columns (partition 2 (concat [x y] more)))))
 
 (defn with
   "Clause: compiles to a CQL with clause (possibly nested maps)"

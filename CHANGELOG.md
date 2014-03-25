@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0-beta4
+
+* test against on clojure 1.6
+
 ## 2.0.0-beta3 - **Breaking changes (backward compatible fns available)**
 
 * new `where` syntax, matches clojure style more closely (prefix

@@ -64,10 +64,10 @@
            (where [[> :foo 1]
                    [< :foo 10]]))
 
-   "SELECT * FROM foo WHERE foo2 = 10 AND foo = 1 AND (a, b, \"c\") = ('a', 'b', 'c');"
+   "SELECT * FROM foo WHERE (a, b, \"c\") = ('a', 'b', 'c') AND foo = 1 AND foo2 = 10;"
    (select :foo
-           (where {:foo 1
-                   :foo2 10
+           (where {:foo2 10
+                   :foo 1
                    [:a :b "c"] ["a" "b" "c"]}))
 
    "SELECT * FROM foo WHERE foo > 1 AND foo < 10;"
@@ -85,16 +85,23 @@
    "SELECT * FROM foo WHERE foo > :param1 AND foo2 < :param2 AND bar IN :param3 AND baz IN (:param4);"
    (select :foo
            (where1 {:foo [> :param1]
-                      :foo2 [< :param2]
-                      :bar [:in :param3]
-                      :baz [:in [:param4]]}))
+                    :foo2 [< :param2]
+                    :bar [:in :param3]
+                    :baz [:in [:param4]]}))
+
+   "SELECT * FROM foo WHERE foo > :param1 AND foo2 < :param2 AND bar IN :param3 AND baz IN (:param4);"
+   (select :foo
+           (where1 :foo [> :param1]
+                   :foo2 [< :param2]
+                   :bar [:in :param3]
+                   :baz [:in [:param4]]))
 
    "SELECT * FROM foo WHERE foo > :param1 AND foo2 < :param2 AND bar IN :param3 AND baz IN (:param4);"
    (select :foo
            (where1 [[:foo [> :param1]]
-                      [:foo2 [< :param2]]
-                      [:bar [:in :param3]]
-                      [:baz [:in [:param4]]]]))
+                    [:foo2 [< :param2]]
+                    [:bar [:in :param3]]
+                    [:baz [:in [:param4]]]]))
 
    "SELECT * FROM foo WHERE foo > ? AND bar IN ? AND foo < 2;"
    (select :foo
@@ -114,8 +121,8 @@
 
 (deftest test-insert
   (are-prepared
-   ["INSERT INTO foo (\"c\", a) VALUES (?, ?) USING TIMESTAMP ? AND TTL ?;"
-    ["d" "b" 100000 200000]]
+   ["INSERT INTO foo (\"c\", a) VALUES (?, ?) USING TTL ? AND TIMESTAMP ?;"
+    ["d" "b" 200000 100000]]
    (insert :foo
            (values {"c" "d" :a "b" })
            (using {:timestamp 100000
@@ -129,7 +136,7 @@
 
    "INSERT INTO foo (\"c\", a) VALUES ('d', 'b') IF NOT EXISTS USING TIMESTAMP 100000 AND TTL 200000;"
    (insert :foo
-           (values {"c" "d" :a "b"})
+           (values [["c" "d"] [:a "b"]])
            (if-exists false)
            (using :timestamp 100000
                   :ttl 200000))))
@@ -138,8 +145,8 @@
   (are-raw
    "UPDATE foo SET bar = 1, baz = baz + 2;"
    (update :foo
-           (set-columns {:bar 1
-                         :baz [+ 2]}))
+           (set-columns :bar 1
+                        :baz [+ 2]))
 
    "UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
    (update :foo
@@ -371,12 +378,13 @@
                                       [:c :int :static]
                                       [:primary-key :a]]))
 
-   "CREATE TABLE foo (PRIMARY KEY (foo, bar), foo varchar, bar int);"
+   "CREATE TABLE foo (bar int, foo varchar, PRIMARY KEY (foo, bar));"
    (create-table :foo
                  (column-definitions {:foo :varchar
                                       :bar :int
                                       :primary-key [:foo :bar]}))
-   "CREATE TABLE foo (PRIMARY KEY (foo, bar), foo varchar, bar int) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
+
+   "CREATE TABLE foo (bar int, foo varchar, PRIMARY KEY (foo, bar)) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
    (create-table :foo
                  (column-definitions {:foo :varchar
                                       :bar :int
@@ -384,7 +392,7 @@
                  (with {:compact-storage true
                         :clustering-order [[:bar :asc]]}))
 
-   "CREATE TABLE foo (PRIMARY KEY ((foo, baz), bar), foo varchar, bar int, baz text) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
+   "CREATE TABLE foo (baz text, bar int, foo varchar, PRIMARY KEY ((foo, baz), bar)) WITH CLUSTERING ORDER BY (bar asc) AND COMPACT STORAGE;"
    (create-table :foo
                  (column-definitions {:foo :varchar
                                       :bar :int
@@ -456,7 +464,7 @@
    (create-keyspace :foo
                     (with {:durable_writes true}))
 
-   "ALTER KEYSPACE foo WITH something-else = 'foo' AND something = 1 AND replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};"
+   "ALTER KEYSPACE foo WITH something-else = 'foo' AND replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3} AND something = 1;"
    (alter-keyspace :foo
                    (with {:replication
                           {:class "SimpleStrategy"
@@ -570,7 +578,7 @@
        "{'a' : 'b', 'c' : 'd'}" {"a" "b" "c" "d"}
        "['a', 'b', 'c', 'd']" ["a" "b" "c" "d"]
        "['a', 'b', 'c', 'd']" '("a" "b" "c" "d")
-       "{'a', 'b', 'c', 'd'}" #{"a" "b" "c" "d"}
+       "{'a', 'b', 'c', 'd'}" (sorted-set "a" "b" "c" "d") ;; #{"a" "b" "c" "d"}
        1 1))
 
 (deftest test-col-type-sugar
@@ -605,8 +613,8 @@
      (select :foo (where {:uuid  #uuid "1f84b56b-5481-4ee4-8236-8a3831ee5892"}))
 
      "INSERT INTO test (v1, c, k) VALUES (null, 1, 0);"
-     (insert :test (values {:k 0 :c 1 :v1 nil}))))
+     (insert :test (values [[:v1 nil] [:c 1] [:k 0]]))))
 
   (are-prepared
    ["INSERT INTO test (v1, c, k) VALUES (?, ?, ?);" [nil 1 0]]
-   (insert :test (values {:k 0 :c 1 :v1 nil}))))
+   (insert :test (values [[:v1 nil] [:c 1] [:k 0]]))))
