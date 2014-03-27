@@ -37,6 +37,8 @@ if you are upgrading.
 [cc.qbits/hayt "2.0.0-beta3"]
 ```
 
+Note: while in beta the API is still subject to changes.
+
 ## Usage
 
 This should be familiar if you know Korma or ClojureQL.
