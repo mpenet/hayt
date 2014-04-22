@@ -76,7 +76,18 @@ ex:    (select :foo (where [[in :foo  [1 2 3]]]))"
   [x]
   [x -])
 
-(def inc-by add-tail)
-(def dec-by remove-head)
-(def prepend add-head)
-(def append add-tail)
+(def inc-by
+  "Increment counter by x, usable in `values` and `set-columns`"
+  add-tail)
+
+(def dec-by
+  "Decrement counter by x, usable in `values` and `set-columns`"
+  remove-head)
+
+(def prepend
+  "Prepend element to List"
+  add-head)
+
+(def append
+    "Append/conjoin element to Map/Set/List"
+    add-tail)
