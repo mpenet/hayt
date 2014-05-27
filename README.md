@@ -58,7 +58,7 @@ One of the major difference is that Hayt doesn't exposes macros.
          (where [[= :foo :bar]
                  [> :moo 3]
                  [:> :meh 4]
-                 [:in :baz [5 6 7]]]}))
+                 [:in :baz [5 6 7]]]))
 ```
 
 All these functions do is generate maps, if you want to build your own
