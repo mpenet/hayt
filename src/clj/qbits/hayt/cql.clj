@@ -5,7 +5,9 @@ https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 This one is really up to date:
 https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g
 And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/cql_tests.py"
-  (:require [clojure.string :as string])
+  (:require
+   [clojure.string :as string]
+   [qbits.pod :as p])
   (:import
    (org.apache.commons.lang3 StringUtils)
    (java.nio ByteBuffer)
@@ -27,7 +29,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
 (defn push-stack!
   [x]
-  (swap! *param-stack* conj x))
+  (p/swap! *param-stack* conj x))
 
 (defn maybe-parameterize!
   ([x f]
@@ -648,6 +650,6 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   query and a vector of parameters."
   [query]
   (binding [*prepared-statement* true
-            *param-stack* (atom [])]
+            *param-stack* (p/pod [])]
     [(emit-query query)
      @*param-stack*]))
