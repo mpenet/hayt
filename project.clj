@@ -6,12 +6,15 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [cc.qbits/pod "0.1.0"]
                  [org.flatland/useful "0.10.1"]
-                 [org.apache.commons/commons-lang3 "3.1"]]
+                 [org.apache.commons/commons-lang3 "3.3.2"]]
   :profiles {:1.4  {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.5  {:dependencies [[org.clojure/clojure "1.5.1"]]}
-             :1.6  {:dependencies [[org.clojure/clojure "1.6.0-master-SNAPSHOT"]]}
-             :dev  {:dependencies [[clj-time "0.6.0"]]}
-             :test {:dependencies [[clj-time "0.6.0"]]}}
+             :1.6  {:dependencies [[org.clojure/clojure "1.6.0"]]}
+             :1.7  {:dependencies [[org.clojure/clojure "1.7.0-master-SNAPSHOT"]]}
+             :dev  {:dependencies [[clj-time "0.8.0"]
+                                   ;; [com.taoensso/timbre "3.2.1"]
+                                   ]}
+             :test {:dependencies [[clj-time "0.8.0"]]}}
   :codox {:src-dir-uri "https://github.com/mpenet/hayt/blob/master"
           :src-linenum-anchor-prefix "L"
           :output-dir "../hayt-gh/codox"
