@@ -144,6 +144,11 @@ Takes a table identifier and additional clause arguments:
   [table name & clauses]
   (into {:create-index name :custom false :on table} clauses))
 
+(defn alter-type
+  "http://cassandra.apache.org/doc/cql3/CQL.html#alterTypeStmt"
+  [type & clauses]
+  (into {:alter-type type} clauses))
+
 (defn alter-table
   "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
 

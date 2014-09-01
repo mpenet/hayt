@@ -391,6 +391,11 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
      (str "ALTER TABLE " (cql-identifier table)
           (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
 
+   :alter-type
+   (fn [q type]
+     (str "ALTER TYPE " (cql-identifier type)
+          (emit-row q [:alter-column :add-column :rename-column :drop-column])))
+
    :alter-columnfamily
    (fn [q cf]
      (str "ALTER COLUMNFAMILY " (cql-identifier cf)
