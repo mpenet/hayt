@@ -30,7 +30,7 @@ The possible collection types are :map, :list and :set."
                    (name t)
                    (cql/join-comma (map name spec)))))
 
-(def ^:no-doc ^:deprecated coll-type complete-type)
+(def ^:no-doc ^:deprecated coll-type complex-type)
 
 (def map-type
   "Generates a map type definition, takes 2 arguments, for key and
