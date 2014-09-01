@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0
+
+* Add `qbits.hayt/create-type`
+* Slightly improved perf/ressource use
+* Add tests for UDT litterals
+
 ## 2.0.0-beta4
 
 * use clojure 1.6

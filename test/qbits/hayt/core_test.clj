@@ -627,7 +627,24 @@
      (select :foo (where {:uuid  #uuid "1f84b56b-5481-4ee4-8236-8a3831ee5892"}))
 
      "INSERT INTO test (v1, c, k) VALUES (null, 1, 0);"
-     (insert :test (values [[:v1 nil] [:c 1] [:k 0]]))))
+     (insert :test (values [[:v1 nil] [:c 1] [:k 0]]))
+
+     "UPDATE user_profiles SET addresses = addresses + {'work' : {'city' : 'Santa Clara', 'street' : '3975 Freedom Circle Blvd', 'zip' : 95050}} WHERE login = 'tsmith';"
+     (update :user_profiles
+             (set-columns {:addresses
+                           [+ {"work" {"street" "3975 Freedom Circle Blvd"
+                                       "city" "Santa Clara"
+                                       "zip" 95050}}]})
+             (where [[= :login "tsmith"]]))
+
+     "INSERT INTO user_profiles (login, first_name, last_name, email, addresses) VALUES ('tsmith', 'Tom', 'Smith', 'tsmith@gmail.com', {'home' : {'city' : 'San Fransisco', 'street' : '1021 West 4th St. #202', 'zip' : 94110}});"
+     (insert :user_profiles (values [[:login "tsmith"]
+                                     [:first_name "Tom"]
+                                     [:last_name "Smith"]
+                                     [:email "tsmith@gmail.com"]
+                                     [:addresses {"home" {"street" "1021 West 4th St. #202"
+                                                          "city" "San Fransisco"
+                                                          "zip" 94110}}]]))))
 
   (are-prepared
    ["INSERT INTO test (v1, c, k) VALUES (?, ?, ?);" [nil 1 0]]
