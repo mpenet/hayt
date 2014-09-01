@@ -599,7 +599,9 @@
   (are [expected gen] (= (keyword expected) gen)
        "set<int>" (set-type :int)
        "list<int>" (list-type :int)
-       "map<int, text>" (map-type :int :text)))
+       "map<int, text>" (map-type :int :text)
+       "tuple<int, text, int>" (tuple-type :int :text :int)
+       ))
 
 (deftest test-types
   (let [addr (java.net.InetAddress/getLocalHost)]
