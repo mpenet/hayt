@@ -119,6 +119,11 @@ Takes a keyspace identifier and clauses:
   [trigger table using]
   {:create-trigger trigger :on table :using using})
 
+(defn create-type
+  "http://cassandra.apache.org/doc/cql3/CQL.html#createTypeStmt"
+  [type & clauses]
+  (into {:create-type type} clauses))
+
 (defn create-table
   "Takes a table identifier and additional clause arguments:
 

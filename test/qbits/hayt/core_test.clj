@@ -407,6 +407,20 @@
                                       :b (list-type :int)
                                       :primary-key :ab}))))
 
+(deftest test-create-type
+  (are-raw
+   "CREATE TYPE IF NOT EXISTS foo (a varchar, b int, c int static);"
+   (create-type :foo
+                 (if-not-exists)
+                 (column-definitions [[:a :varchar]
+                                      [:b :int]
+                                      [:c :int :static]]))
+
+   "CREATE TYPE foo (bar int, foo varchar);"
+   (create-type :foo
+                 (column-definitions {:foo :varchar
+                                      :bar :int}))))
+
 (deftest test-alter-table
   (are-raw
    "ALTER TABLE foo ALTER bar TYPE int;"

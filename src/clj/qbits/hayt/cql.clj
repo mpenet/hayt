@@ -380,6 +380,12 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
           (emit-row (assoc q :table table)
                     [:if-exists :table :column-definitions :with])))
 
+   :create-type
+   (fn [q type]
+     (str "CREATE TYPE"
+          (emit-row (assoc q :type type)
+                    [:if-exists :type :column-definitions])))
+
    :alter-table
    (fn [q table]
      (str "ALTER TABLE " (cql-identifier table)
@@ -618,7 +624,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                      :create-index :create-trigger :drop-trigger :grant :revoke
                      :create-user :alter-user :drop-user :list-users :list-perm
                      :batch :create-table :alter-table :alter-columnfamily
-                     :alter-keyspace :create-keyspace})
+                     :alter-keyspace :create-keyspace :create-type})
 
 (defn find-entry-clause
   "Finds entry point key from query map"
