@@ -12,12 +12,12 @@
              :1.6  {:dependencies [[org.clojure/clojure "1.6.0"]]}
              :1.7  {:dependencies [[org.clojure/clojure "1.7.0-master-SNAPSHOT"]]}
              :dev  {:dependencies [[clj-time "0.8.0"]
-                                   ;; [com.taoensso/timbre "3.2.1"]
-                                   ]}
+                                   [codox "0.8.10"]]}
              :test {:dependencies [[clj-time "0.8.0"]]}}
   :codox {:src-dir-uri "https://github.com/mpenet/hayt/blob/master"
           :src-linenum-anchor-prefix "L"
           :output-dir "../hayt-gh/codox"
+          :defaults {:doc/format :markdown}
           :include [qbits.hayt
                     qbits.hayt.dsl.statement
                     qbits.hayt.dsl.clause

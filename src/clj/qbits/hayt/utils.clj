@@ -51,6 +51,11 @@ The possible collection types are :map, :list and :set."
   "Generates a tuple type definition, takes n arguments"
   (partial complex-type :tuple))
 
+(defn user-type
+  "Marks a map as CQL User "
+  [m]
+  (cql/->CQLUserType m))
+
 (def ?
   "? can be used as a query value to mark a prepared statement value
 ex:    (select :foo

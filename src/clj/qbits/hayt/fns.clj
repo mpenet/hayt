@@ -33,11 +33,6 @@ when the query is compiled as a prepared statement"
                      " AS "
                      (cql/cql-identifier id))))
 
-(defn user-type
-  "Marks a map as CQL User type "
-  [m]
-  (cql/->CQLUserType m))
-
 (def now
   "Returns a now() CQL function"
   (constantly (cql-fn "now")))
