@@ -2,7 +2,7 @@
 
 ## 2.0.0
 
-* Add `qbits.hayt/create-type`
+* Add `qbits.hayt/create-type`, `qbits.hayt/user-type`
 * Slightly improved perf/ressource use
 * Add tests for UDT litterals
 
