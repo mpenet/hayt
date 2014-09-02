@@ -52,7 +52,7 @@ The possible collection types are :map, :list and :set."
   (partial complex-type :tuple))
 
 (defn user-type
-  "Marks a map as CQL User "
+  "Marks a map as User Data Type"
   [m]
   (cql/->CQLUserType m))
 
