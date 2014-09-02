@@ -26,6 +26,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (defrecord CQLRawPreparable [value])
 (defrecord CQLNamespaced [value])
 (defrecord CQLComposite [value])
+(defrecord CQLUserType [value])
 
 (defn push-stack!
   [x]
@@ -126,14 +127,33 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
            join-comma
            wrap-sqbrackets)))
 
+  CQLUserType
+  (cql-identifier [x]
+    (maybe-parameterize! (:value x)
+     #(->> %
+          (map (fn [[k v]]
+                 (format-kv (cql-identifier k)
+                            (cql-value v))))
+          join-comma
+          wrap-brackets)))
+  (cql-value [x]
+    (maybe-parameterize! (:value x)
+     #(->> %
+          (map (fn [[k v]]
+                 (format-kv (cql-identifier k)
+                            (cql-value v))))
+          join-comma
+          wrap-brackets)))
+
+
   CQLComposite
-  (cql-identifier [{:keys [value]}]
-    (->> value
+  (cql-identifier [c]
+    (->> (:value c)
          (map cql-identifier)
          join-comma
          wrap-parens))
-  (cql-value [{:keys [value]}]
-    (->> value
+  (cql-value [c]
+    (->> (:value c)
          (map cql-value)
          join-comma
          wrap-parens))
