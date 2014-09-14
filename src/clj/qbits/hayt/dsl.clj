@@ -1,4 +1,5 @@
 (ns qbits.hayt.dsl
+  (:refer-clojure :exclude [update])
   (:require [flatland.useful.ns :as uns]))
 
 (doseq [module '(statement clause)]

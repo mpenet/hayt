@@ -1,4 +1,5 @@
 (ns qbits.hayt.core-test
+  (:refer-clojure :exclude [update])
   (:use clojure.test
         qbits.hayt
         qbits.hayt.codec.joda-time

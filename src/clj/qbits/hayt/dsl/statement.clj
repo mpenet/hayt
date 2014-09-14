@@ -1,4 +1,5 @@
-(ns qbits.hayt.dsl.statement)
+(ns qbits.hayt.dsl.statement
+  (:refer-clojure :exclude [update]))
 
 (defn select
   "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
