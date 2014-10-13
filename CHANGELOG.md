@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0-rc3
+
+* no longer depend on flatland/useful
+
 ## 2.0.0-rc1 - Cassandra 2.1 features
 
 * Add `qbits.hayt/create-type` statement and `qbits.hayt/user-type` type marker for UDT values

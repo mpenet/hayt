@@ -2,7 +2,7 @@
   "This namespace contains aliases for qbits.dsl.*, qbits.fns and qbits.utils"
   (:refer-clojure :exclude [update])
   (:require
-   [flatland.useful.ns :as uns]
+   [qbits.commons.ns :as uns]
    [qbits.hayt.cql :as cql]))
 
 (def ->raw
