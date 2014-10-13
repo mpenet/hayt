@@ -333,6 +333,7 @@
    "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
    (batch
     (queries
+     nil
      (update :foo
              (set-columns {:bar 1
                            :baz [+ 2]}))

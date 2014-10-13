@@ -627,7 +627,10 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
           " BATCH "
           (when-let [using (:using q)]
             (str ((emit :using) q using) " "))
-          (->> (let [subqs (join-lf (map emit-query queries))]
+          (->> (let [subqs (->> queries
+                                (remove nil?)
+                                (map emit-query)
+                                join-lf)]
                  (if *prepared-statement*
                    [subqs @*param-stack*])
                  subqs)
