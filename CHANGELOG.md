@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0-rc4
+
+* nil queries are ignored in `batch`, see #30
+
 ## 2.0.0-rc3
 
 * no longer depend on flatland/useful
