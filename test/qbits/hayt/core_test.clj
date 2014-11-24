@@ -217,7 +217,7 @@
 
   (are-raw
    "DELETE FROM foo['test'] where bar = 1;"
-   (delete {:foo "test"} (where [[:bar 1]])))
+   (delete {:foo "test"} (where [[= :bar 1]])))
 
   (are-prepared
    ["DELETE FROM foo USING TIMESTAMP ? AND TTL ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
