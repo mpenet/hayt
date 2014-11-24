@@ -214,6 +214,11 @@
                    [:in :baz [5 6 7]]]))))
 
 (deftest test-delete
+
+  (are-raw
+   "DELETE FROM foo['test'] where bar = 1;"
+   (delete {:foo "test"} (where [[:bar 1]])))
+
   (are-prepared
    ["DELETE FROM foo USING TIMESTAMP ? AND TTL ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
     [100000 200000 "bar" 3 4 [5 6 7]]]
