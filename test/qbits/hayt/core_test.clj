@@ -216,8 +216,10 @@
 (deftest test-delete
 
   (are-raw
-   "DELETE FROM foo['test'] WHERE bar = 1;"
-   (delete {:foo "test"} (where [[= :bar 1]])))
+   "DELETE bar[2] FROM foo WHERE baz = 1;"
+   (delete :foo
+           (columns {:bar 2})
+           (where [[= :baz 1]])))
 
   (are-prepared
    ["DELETE FROM foo USING TIMESTAMP ? AND TTL ? WHERE foo = ? AND moo > ? AND meh > ? AND baz IN ?;"
