@@ -216,7 +216,7 @@
 (deftest test-delete
 
   (are-raw
-   "DELETE FROM foo['test'] where bar = 1;"
+   "DELETE FROM foo['test'] WHERE bar = 1;"
    (delete {:foo "test"} (where [[= :bar 1]])))
 
   (are-prepared
