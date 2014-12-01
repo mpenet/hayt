@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0
+
+Release 2.0.0 (check past logs for changes)
+
 ## 2.0.0-rc4
 
 * nil queries are ignored in `batch`, see #30
