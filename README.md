@@ -34,7 +34,7 @@ Please check the
 if you are upgrading.
 
 ```clojure
-[cc.qbits/hayt "2.0.0"]
+[cc.qbits/hayt "2.1.0"]
 ```
 
 Note: while in beta the API is still subject to changes.

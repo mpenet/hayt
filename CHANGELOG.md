@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0
+
+* Add 2.1+ udt support, `qbits.hayt/frozen` see tests
+
 ## 2.0.0
 
 Release 2.0.0 (check past logs for changes)
