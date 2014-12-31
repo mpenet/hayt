@@ -51,6 +51,10 @@ The possible collection types are :map, :list and :set."
   "Generates a tuple type definition, takes n arguments"
   (partial complex-type :tuple))
 
+(def frozen
+  "Generates a frozen type definition, takes n arguments"
+  (partial complex-type :frozen))
+
 (defn user-type
   "Marks a map as User Data Type"
   [m]

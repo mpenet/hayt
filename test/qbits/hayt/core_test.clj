@@ -610,7 +610,8 @@
        "list<int>" (list-type :int)
        "map<int, text>" (map-type :int :text)
        "tuple<int, text, int>" (tuple-type :int :text :int)
-       ))
+       "frozen<foo>" (frozen :foo)
+       "frozen<tuple<foo>>" (frozen (tuple-type :foo))))
 
 (deftest test-types
   (let [addr (java.net.InetAddress/getLocalHost)]
