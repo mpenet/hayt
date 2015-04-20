@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.0.0
+
+* upgrade to clj 1.7, removed/updated some dependencies
+
+* Performance improvements (raw speed, mem, allocations)
+
+* Remove prepared statements generation with values
+qbits.hayt/->prepared since it's used by nobody now.  You can still
+use the ? placeholer and actually control what's happening
+ex: `(select :foo (where {:id ?}))`.
+
+
 ## 2.1.0
 
 * Add 2.1+ udt support, `qbits.hayt/frozen` see tests

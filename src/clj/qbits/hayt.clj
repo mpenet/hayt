@@ -9,10 +9,5 @@
   "Compiles a hayt query into its raw string value"
   cql/->raw)
 
-(def ->prepared
-  "Compiles a hayt query into a vector composed of the prepared string
-  query and a vector of parameters."
-  cql/->prepared)
-
 (doseq [module '(dsl fns utils)]
   (uns/alias-ns (symbol (str "qbits.hayt." module))))

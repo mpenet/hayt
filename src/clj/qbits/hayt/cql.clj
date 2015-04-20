@@ -5,9 +5,6 @@ https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 This one is really up to date:
 https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g
 And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/cql_tests.py"
-  (:require
-   [clojure.string :as string]
-   [qbits.pod :as p])
   (:import
    (org.apache.commons.lang3 StringUtils)
    (java.nio ByteBuffer)
@@ -16,8 +13,6 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (qbits.hayt Hex)))
 
 (declare emit-query emit-row)
-(def ^:dynamic *param-stack*)
-(def ^:dynamic *prepared-statement* false)
 
 ;; Wraps a CQL function (a template to clj.core/format and its
 ;; argument for later encoding.
@@ -28,23 +23,15 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (defrecord CQLComposite [value])
 (defrecord CQLUserType [value])
 
-(defn push-stack!
-  [x]
-  (p/swap! *param-stack* conj x))
+(defn join [^java.lang.Iterable coll ^String sep]
+  (when (seq coll)
+    (StringUtils/join coll sep)))
 
-(defn maybe-parameterize!
-  ([x f]
-     (if *prepared-statement*
-       (do (push-stack! x) "?")
-       (f x)))
-  ([x]
-     (maybe-parameterize! x identity)))
-
-(def join-and #(string/join " AND " %))
-(def join-spaced #(string/join " " %))
-(def join-comma #(string/join ", " %))
-(def join-dot #(string/join "." %))
-(def join-lf #(string/join "\n" %))
+(def join-and #(join % " AND "))
+(def join-spaced #(join % " "))
+(def join-comma #(join % ", "))
+(def join-dot #(join % "."))
+(def join-lf #(join % "\n" ))
 (def format-eq #(str %1 " = " %2))
 (def format-kv #(str %1 " : "  %2))
 (def quote-string #(str "'" (StringUtils/replace % "'" "''") "'"))
@@ -61,8 +48,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   (cql-identifier [x]
     "Encodes CQL identifiers")
   (cql-value [x]
-    "Encodes a CQL value, pushing it to *param-stack* if
-     it's a prepared statement and replacing it with ?"))
+    "Encodes a CQL value"))
 
 (extend-protocol CQLEntities
 
@@ -74,14 +60,13 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
   ByteBuffer
   (cql-identifier [x]
-    (maybe-parameterize! x #(Hex/toHexString %)))
+    (Hex/toHexString x))
   (cql-value [x]
-    (maybe-parameterize! x #(Hex/toHexString %)))
+    (Hex/toHexString x))
 
   String
   (cql-identifier [x] (dquote-string x))
-  (cql-value [x]
-    (maybe-parameterize! x quote-string))
+  (cql-value [x] (quote-string x))
 
   clojure.lang.Keyword
   (cql-identifier [x] (name x))
@@ -89,20 +74,19 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
   Date
   (cql-value [x]
-    (maybe-parameterize! x #(.getTime ^Date %)))
+    (.getTime ^Date x))
 
   InetAddress
   (cql-value [x]
-    (maybe-parameterize! x #(.getHostAddress ^InetAddress %)))
+    (.getHostAddress ^InetAddress x))
 
   ;; Collections are just for cassandra collection types, not to
   ;; generate query parts
   clojure.lang.IPersistentSet
   (cql-value [x]
-    (maybe-parameterize! x
-      #(->> (map cql-value %)
-            join-comma
-            wrap-brackets)))
+    (->> (map cql-value x)
+         join-comma
+         wrap-brackets))
 
   clojure.lang.IPersistentMap
   (cql-identifier [x]
@@ -112,38 +96,34 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
            (wrap-sqbrackets (cql-value k)))))
 
   (cql-value [x]
-    (maybe-parameterize! x
-     #(->> %
-          (map (fn [[k v]]
-                 (format-kv (cql-value k)
-                            (cql-value v))))
-          join-comma
-          wrap-brackets)))
+    (->> x
+         (map (fn [[k v]]
+                (format-kv (cql-value k)
+                           (cql-value v))))
+         join-comma
+         wrap-brackets))
 
   clojure.lang.Sequential
   (cql-value [x]
-    (maybe-parameterize! x
-     #(->> (map cql-value %)
-           join-comma
-           wrap-sqbrackets)))
+    (->> (map cql-value x)
+          join-comma
+          wrap-sqbrackets))
 
   CQLUserType
   (cql-identifier [x]
-    (maybe-parameterize! (:value x)
-     #(->> %
-          (map (fn [[k v]]
-                 (format-kv (cql-identifier k)
-                            (cql-value v))))
-          join-comma
-          wrap-brackets)))
+    (->> (:value x)
+         (map (fn [[k v]]
+                (format-kv (cql-identifier k)
+                           (cql-value v))))
+         join-comma
+         wrap-brackets))
   (cql-value [x]
-    (maybe-parameterize! (:value x)
-     #(->> %
-          (map (fn [[k v]]
-                 (format-kv (cql-identifier k)
-                            (cql-value v))))
-          join-comma
-          wrap-brackets)))
+    (->> (:value x)
+         (map (fn [[k v]]
+                (format-kv (cql-identifier k)
+                           (cql-value v))))
+         join-comma
+         wrap-brackets))
 
 
   CQLComposite
@@ -177,8 +157,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   (cql-value [x] (:value x))
 
   CQLRawPreparable
-  (cql-identifier [x] (maybe-parameterize! (:value x)))
-  (cql-value [x] (maybe-parameterize! (:value x)))
+  (cql-identifier [x] (:value x))
+  (cql-value [x] (:value x))
 
   clojure.lang.Symbol
   (cql-identifier [x] (str x))
@@ -189,12 +169,11 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
     (join-dot (map cql-identifier (:value xs))))
 
   nil
-  (cql-value [x]
-    (maybe-parameterize! x (constantly "null")))
+  (cql-value [x] "null")
 
   Object
   (cql-identifier [x] x)
-  (cql-value [x] (maybe-parameterize! x)))
+  (cql-value [x] x))
 
 (def contains-key (fn []))
 (def contains (fn []))
@@ -247,15 +226,11 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
     (if (identical? :in op)
       (str col-name
            " IN "
-           (if *prepared-statement*
-             ;; special case we need to bypass the value encoding of
-             ;; Sequential
-             (do (push-stack! value) "?")
-             (if (sequential? value)
-               (-> (map cql-value value)
-                   join-comma
-                   wrap-parens)
-               (cql-value value))))
+           (if (sequential? value)
+             (-> (map cql-value value)
+                 join-comma
+                 wrap-parens)
+             (cql-value value)))
       (str col-name
            " " (operators op) " "
            (cql-value value)))))
@@ -284,45 +259,45 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   { ;; entry clauses
    :select
    (fn [q table]
-     (str "SELECT"
+     (str "SELECT "
           (emit-row (assoc q :from table)
                     [:columns :from :where :order-by :limit :allow-filtering])))
 
    :insert
    (fn [q table]
-     (str "INSERT INTO " (cql-identifier table)
+     (str "INSERT INTO " (cql-identifier table) " "
           (emit-row q [:values :if-exists :using])))
 
    :update
    (fn [q table]
-     (str "UPDATE " (cql-identifier table)
+     (str "UPDATE " (cql-identifier table) " "
           (emit-row q [:using :set-columns :where :if :if-exists])))
 
    :delete
    (fn [{:keys [columns] :as q} table]
-     (str "DELETE"
+     (str "DELETE "
           (-> (if (identical? :* columns) (dissoc q :columns) q)
               (assoc :from table)
               (emit-row [:columns :from :using :where :if]))))
 
    :drop-index
    (fn [q index]
-     (str "DROP INDEX"
+     (str "DROP INDEX "
           (emit-row (assoc q :index index) [:if-exists :index])))
 
    :drop-table
    (fn [q table]
-     (str "DROP TABLE"
+     (str "DROP TABLE "
           (emit-row (assoc q :table table) [:if-exists :table])))
 
    :drop-column-family
    (fn [q cf]
-     (str "DROP COLUMNFAMILY"
+     (str "DROP COLUMNFAMILY "
           (emit-row (assoc q :cf cf) [:if-exists :cf])))
 
    :drop-keyspace
    (fn [q keyspace]
-     (str "DROP KEYSPACE"
+     (str "DROP KEYSPACE "
           (emit-row (assoc q :ks keyspace) [:if-exists :ks])))
 
    :use-keyspace
@@ -335,13 +310,13 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :grant
    (fn [q perm]
-     (str "GRANT"
+     (str "GRANT "
           (emit-row (assoc q :perm perm)
                     [:perm :resource :user])))
 
    :revoke
    (fn [q perm]
-     (str "REVOKE"
+     (str "REVOKE "
           (emit-row (assoc q :perm perm) [:perm :resource :user])))
 
    :create-index
@@ -350,7 +325,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
         column]
      (str "CREATE "
           (when custom "CUSTOM ")
-          "INDEX"
+          "INDEX "
           (emit-row q [:if-exists :index-name :on])
           " " (wrap-parens (cql-identifier column))
           (when (and custom with)
@@ -358,28 +333,29 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :create-trigger
    (fn [{:keys [table using] :as q} name]
-     (str "CREATE TRIGGER " (cql-identifier name)
+     (str "CREATE TRIGGER " (cql-identifier name) " "
           (emit-row q [:on :using])))
 
    :drop-trigger
    (fn [q name]
-     (str "DROP TRIGGER " (cql-identifier name)
+     (str "DROP TRIGGER " (cql-identifier name) " "
           (emit-row q [:on])))
 
    :create-user
    (fn [q user]
-     (str "CREATE USER " (cql-identifier user)
+     (str "CREATE USER " (cql-identifier user) " "
           (emit-row q [:password :superuser])))
 
    :alter-user
    (fn [q user]
-     (str "ALTER USER " (cql-identifier user)
+     (str "ALTER USER " (cql-identifier user) " "
           (emit-row q [:password :superuser])))
 
    :drop-user
    (fn [q user]
      (str "DROP USER " (cql-identifier user)
-          (emit-row q [:if-exists])))
+          (when-let [exists (emit-row q [:if-exists])]
+            (str " " exists))))
 
    :list-users
    (constantly "LIST USERS")
@@ -391,44 +367,44 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :list-perm
    (fn [q perm]
-     (str "LIST"
+     (str "LIST "
           (emit-row (assoc q :perm perm) [:perm :resource :user :recursive])))
 
    :create-table
    (fn [q table]
-     (str "CREATE TABLE"
+     (str "CREATE TABLE "
           (emit-row (assoc q :table table)
                     [:if-exists :table :column-definitions :with])))
 
    :create-type
    (fn [q type]
-     (str "CREATE TYPE"
+     (str "CREATE TYPE "
           (emit-row (assoc q :type type)
                     [:if-exists :type :column-definitions])))
 
    :alter-table
    (fn [q table]
-     (str "ALTER TABLE " (cql-identifier table)
+     (str "ALTER TABLE " (cql-identifier table) " "
           (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
 
    :alter-type
    (fn [q type]
-     (str "ALTER TYPE " (cql-identifier type)
+     (str "ALTER TYPE " (cql-identifier type) " "
           (emit-row q [:alter-column :add-column :rename-column :drop-column])))
 
    :alter-columnfamily
    (fn [q cf]
-     (str "ALTER COLUMNFAMILY " (cql-identifier cf)
+     (str "ALTER COLUMNFAMILY " (cql-identifier cf) " "
           (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
 
    :alter-keyspace
    (fn [q ks]
-     (str "ALTER KEYSPACE " (cql-identifier ks)
+     (str "ALTER KEYSPACE " (cql-identifier ks) " "
           (emit-row q [:with])))
 
    :create-keyspace
    (fn [q ks]
-     (str "CREATE KEYSPACE"
+     (str "CREATE KEYSPACE "
           (emit-row (assoc q :ks ks) [:if-exists :ks :with])))
 
    :resource
@@ -626,24 +602,16 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
           (when counter " COUNTER")
           " BATCH "
           (when-let [using (:using q)]
-            (str ((emit :using) q using) " "))
-          (->> (let [subqs (->> queries
-                                (remove nil?)
-                                (map emit-query)
-                                join-lf)]
-                 (if *prepared-statement*
-                   [subqs @*param-stack*])
-                 subqs)
-               (format "\n%s\n"))
-          " APPLY BATCH"))
+            (str ((emit :using) q using) " \n"))
+          (->> queries
+               (remove nil?)
+               (map emit-query)
+               join-lf)
+          "\n APPLY BATCH"))
 
    :queries
    (fn [q queries]
-     (->> (let [subqs (join-lf (map emit-query queries))]
-            (if *prepared-statement*
-              [subqs @*param-stack*])
-            subqs)
-          (format "\n%s\n")))})
+     (->> (str "\n" (join-lf (map emit-query queries)) "\n")))})
 
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 
@@ -666,8 +634,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
               (when (contains? row token)
                 ((get emit token emit-catch-all) row (token row)))))
        (remove nil?)
-       (join-spaced)
-       (#(when (seq %) (str " " %)))))
+       (join-spaced)))
 
 (defn emit-query [query]
   (let [entry-point (find-entry-clause query)]
@@ -676,14 +643,4 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (defn ->raw
   "Compiles a hayt query into its raw/string value"
   [query]
-  (binding [*prepared-statement* false]
-    (emit-query query)))
-
-(defn ->prepared
-  "Compiles a hayt query into a vector composed of the prepared string
-  query and a vector of parameters."
-  [query]
-  (binding [*prepared-statement* true
-            *param-stack* (p/pod [])]
-    [(emit-query query)
-     @*param-stack*]))
+  (emit-query query))
