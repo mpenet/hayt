@@ -96,14 +96,11 @@ Since Queries are just maps they are composable using the usual `merge`
 
 ```
 
-To compile the queries just use `->raw` or `->prepared`
+To compile the queries just use `->raw`
 
 ```clojure
 (->raw (select :foo))
 > "SELECT * FROM foo;"
-
-(->prepared (select :foo (where {:bar 1})))
-> ["SELECT * FROM foo WHERE bar=?;" [1]]
 
 
 (->raw {:select :foo :columns [:a :b]})
@@ -123,12 +120,8 @@ To compile the queries just use `->raw` or `->prepared`
 
 (->raw (select :foo (where {:bar 1 :baz :named)}))
 > "SELECT * FROM foo WHERE bar = 1 AND baz = :named;"
-
-
 ```
 
-When compiling prepared queries, the values are untouched in the
-returned vector.
 When compiling with `->raw` we take care of the encoding/escaping
 required by CQL. This process is also open via the
 `qbits.hayt.CQLEntities` protocol for both values and identifiers. We
