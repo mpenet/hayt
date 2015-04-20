@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.0
+## 3.0.0-rc1
 
 * upgrade to clj 1.7, removed/updated some dependencies
 
