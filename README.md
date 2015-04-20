@@ -7,12 +7,6 @@ CQL3 DSL for Clojure.
 Hayt is an attempt to allow the existing and future clients to share
 this layer and provide a simple but extensible base to build upon.
 
-There are already 3 libraries that use Hayt:
-
-* [mpenet/alia](https://github.com/mpenet/alia)
-* [clojurewerkz/cassaforte](https://github.com/clojurewerkz/cassaforte)
-* [mpenet/casyn](https://github.com/mpenet/casyn)
-
 ## What's in the box?
 
 * **Complete CQL 3.1.1+ coverage** including some features in Cassandra
