@@ -126,6 +126,10 @@
            (set-columns :bar 1
                         :baz [+ 2]))
 
+   "UPDATE foo SET baz = [1, 2];"
+   (update :foo
+           (set-columns :baz [1 2]))
+
    "UPDATE foo SET bar = 1, baz = baz + 2 WHERE foo = 'bar' AND moo > 3 AND meh > 4 AND baz IN (5, 6, 7);"
    (update :foo
            (set-columns [[:bar 1]
