@@ -508,7 +508,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [q values]
      (->> values
           (map (fn [[k v]]
-                 (if (and (vector? v) (some operator? v))
+                 (if (and (sequential? v)
+                          (some operator? v))
                    (counter k v)
                    (format-eq (cql-identifier k)
                               (cql-value v)))))
