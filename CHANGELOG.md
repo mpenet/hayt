@@ -2,6 +2,10 @@
 
 ## 3.0.0-rc1
 
+* allow any sequential in counter/collection ops
+
+## 3.0.0-rc1
+
 * upgrade to clj 1.7, removed/updated some dependencies
 
 * Performance improvements (raw speed, mem, allocations)
