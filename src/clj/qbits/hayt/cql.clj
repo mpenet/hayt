@@ -227,7 +227,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
       (str col-name
            " IN "
            (if (sequential? value)
-             (-> (map cql-value value)
+             (-> (mapv cql-value value)
                  join-comma
                  wrap-parens)
              (cql-value value)))
