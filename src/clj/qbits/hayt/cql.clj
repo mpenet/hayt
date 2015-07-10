@@ -44,6 +44,11 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                       (StringUtils/replaceChars \- \_)))
 (def terminate #(str % ";"))
 
+(defn sequential-or-set?
+  [x]
+  (or (sequential? x)
+      (set? x)))
+
 (defprotocol CQLEntities
   (cql-identifier [x]
     "Encodes CQL identifiers")
@@ -226,7 +231,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
     (if (identical? :in op)
       (str col-name
            " IN "
-           (if (sequential? value)
+           (if (sequential-or-set? value)
              (-> (mapv cql-value value)
                  join-comma
                  wrap-parens)
