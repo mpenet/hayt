@@ -44,10 +44,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                       (StringUtils/replaceChars \- \_)))
 (def terminate #(str % ";"))
 
-(defn sequential-or-set?
-  [x]
-  (or (sequential? x)
-      (set? x)))
+(def sequential-or-set? (some-fn sequential? set?))
 
 (defprotocol CQLEntities
   (cql-identifier [x]
