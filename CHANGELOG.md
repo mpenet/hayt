@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.0-rc1
+## 3.0.0-rc2
 
 * allow any sequential in counter/collection ops
 

@@ -28,7 +28,7 @@ Please check the
 if you are upgrading.
 
 ```clojure
-[cc.qbits/hayt "3.0.0-rc2"]
+[cc.qbits/hayt "3.0.0-rc3"]
 ```
 
 Note: while in beta the API is still subject to changes.
