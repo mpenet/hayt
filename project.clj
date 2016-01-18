@@ -30,5 +30,5 @@
                     qbits.hayt.codec.joda-time]}
   :source-paths ["src/clj"]
   :java-source-paths ["src/java"]
-  :javac-options ["-source" "1.6" "-target" "1.6" "-g"]
+  :javac-options ["-source" "1.7" "-target" "1.7" "-g"]
   :global-vars {*warn-on-reflection* true})
