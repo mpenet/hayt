@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.0
+
+* auto-extend alia protocols if alia is detected
+
 ## 3.0.0-rc2
 
 * allow any sequential in counter/collection ops
