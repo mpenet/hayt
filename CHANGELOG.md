@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1
+
+* add missing entry point for `alter-type`. Thanks @acron0 -> https://github.com/mpenet/hayt/pull/39
+
 ## 3.0.0
 
 * auto-extend alia protocols if alia is detected
