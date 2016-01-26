@@ -352,6 +352,18 @@
                 (column-definitions {:bar :int
                                      :foo :varchar}))))
 
+(deftest test-alter-type
+  (are-raw
+   "ALTER TYPE foo ADD bar text;"
+   (alter-type :foo
+               (add-column :bar :text))
+
+   "ALTER TYPE foo ALTER baz TYPE int ADD bar text RENAME foo TO bar;"
+   (alter-type :foo
+               (alter-column :baz :int)
+               (add-column :bar :text)
+               (rename-column :foo :bar))))
+
 (deftest test-alter-table
   (are-raw
    "ALTER TABLE foo ALTER bar TYPE int;"

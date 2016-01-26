@@ -623,7 +623,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                      :create-index :create-trigger :drop-trigger :grant :revoke
                      :create-user :alter-user :drop-user :list-users :list-perm
                      :batch :create-table :alter-table :alter-columnfamily
-                     :alter-keyspace :create-keyspace :create-type})
+                     :alter-keyspace :create-keyspace :create-type :alter-type})
 
 (defn find-entry-clause
   "Finds entry point key from query map"
