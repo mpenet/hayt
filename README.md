@@ -36,7 +36,7 @@ Note: while in beta the API is still subject to changes.
 ## Usage
 
 This should be familiar if you know Korma or ClojureQL.
-One of the major difference is that Hayt doesn't exposes macros.
+One of the major differences is that Hayt doesn't expose macros.
 
 
 ```clojure
@@ -56,7 +56,7 @@ One of the major difference is that Hayt doesn't exposes macros.
 ```
 
 All these functions do is generate maps, if you want to build your own
-DSL on top of it, or use maps direcly feel free to do so.
+DSL on top of it or use maps directly, feel free to do so.
 
 ```clojure
 (select :users
@@ -123,7 +123,7 @@ also supply a joda-time codec for you to use if you require to in
 `qbits.hayt.codec.joda-time`. This codec is a good example of how to
 handle custom type encoding.
 
-If you are curious about what else it can do head to the
+If you are curious about what else it can do, head to the
 [codox documentation](http://mpenet.github.com/hayt/codox/qbits.hayt.html)
 or the
 [tests](https://github.com/mpenet/hayt/blob/master/test/qbits/hayt/core_test.clj).
