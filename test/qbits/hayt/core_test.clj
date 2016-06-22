@@ -462,6 +462,18 @@
    (format "SELECT dateOf(blobAsTimeuuid(%s)) FROM foo;" baz-blob)
    (select :foo (columns (date-of (blob->timeuuid baz-bytes))))
 
+   "SELECT toDate(0) FROM foo;"
+   (select :foo (columns (to-date 0)))
+
+   "SELECT toTimestamp(0) FROM foo;"
+   (select :foo (columns (to-timestamp 0)))
+
+   "SELECT toUnixTimestamp(0) FROM foo;"
+   (select :foo (columns (to-unix-timestamp 0)))
+
+   "SELECT toUnixTimestamp(last_updated) FROM foo;"
+   (select :foo (columns (to-unix-timestamp :last_updated)))
+
    "SELECT unixTimestampOf(0), dateOf(bar) FROM foo;"
    (select :foo (columns (unix-timestamp-of 0)
                          (date-of :bar)))
