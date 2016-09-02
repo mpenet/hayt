@@ -72,6 +72,15 @@ Takes a table identifier and additional clauses:
   [table & clauses]
   (into {:drop-table table} clauses))
 
+(defn drop-type
+  "http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlRefDropType.html
+
+Takes a type identifier and additional clauses:
+* if-exists"
+  [type & clauses]
+  (into {:drop-type type} clauses))
+
+
 (defn drop-columnfamily
   "http://cassandra.apache.org/doc/cql3/CQL.html#dropTableStmt
 

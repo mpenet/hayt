@@ -287,6 +287,11 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
      (str "DROP INDEX "
           (emit-row (assoc q :index index) [:if-exists :index])))
 
+   :drop-type
+   (fn [q index]
+     (str "DROP TYPE "
+          (emit-row (assoc q :index index) [:if-exists :index])))
+
    :drop-table
    (fn [q table]
      (str "DROP TABLE "
@@ -619,7 +624,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (def emit-catch-all (fn [q x] (cql-identifier x)))
 
 (def entry-clauses #{:select :insert :update :delete :use-keyspace :truncate
-                     :drop-index :drop-table :drop-keyspace :drop-columnfamily
+                     :drop-index :drop-type :drop-table :drop-keyspace :drop-columnfamily
                      :create-index :create-trigger :drop-trigger :grant :revoke
                      :create-user :alter-user :drop-user :list-users :list-perm
                      :batch :create-table :alter-table :alter-columnfamily
