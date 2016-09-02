@@ -192,6 +192,12 @@
    "DROP INDEX IF EXISTS foo;"
    (drop-index :foo (if-exists))
 
+   "DROP TYPE foo;"
+   (drop-type :foo)
+
+   "DROP TYPE IF EXISTS foo;"
+   (drop-type :foo (if-exists))
+
    "DROP KEYSPACE foo;"
    (drop-keyspace :foo)
 
