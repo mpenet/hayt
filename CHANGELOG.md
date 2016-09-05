@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.0
+
+* Added DROP TYPE
+
 ## 3.1.0
 
 * Add new cql functions
