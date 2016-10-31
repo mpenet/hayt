@@ -93,7 +93,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (.append sb x))
   ([^StringBuilder sb] (.toString sb)))
 
-(defn make-wrapped-string-builder [head tail]
+(defn make-wrapped-string-builder [^String head
+                                   ^String tail]
   (fn
     ([] (StringBuilder. head))
     ([^StringBuilder sb x]
@@ -792,10 +793,3 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   "Compiles a hayt query into its raw/string value"
   [query]
   (emit-query (StringBuilder.) query))
-
-
-           ;; (->raw {:select "foo" :columns :* :where [[:bar "baz"]]})
-
-;; (dotimes [_ 5 ]
-;;   (time (dotimes [i 1000000]
-;;            (->raw {:select "foo" :columns :* :where [[:bar "baz"]]}))))
