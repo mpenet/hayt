@@ -769,11 +769,6 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
         template)
   sb)
 
-;; (prn (->raw {:select "foo" :where [[:bar (CQLFn. "now" [])]]}))
-;; (dotimes [_ 5 ]
-;;   (time (dotimes [i 1]
-;;           (->raw {:select "foo"}))))
-
 (defn emit-query [sb query]
   (let [entry-point (find-entry-clause query)]
     (terminate ((emit entry-point) sb query (entry-point query)))))
