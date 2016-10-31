@@ -51,13 +51,20 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
     (StringUtils/join coll sep)))
 
 (def join-and #(join % " AND "))
+(def interpose-and (interpose " AND "))
+
 (def join-spaced #(join % " "))
+(def interpose-space (interpose " "))
+
 (def join-comma #(join % ", "))
 (def interpose-comma (interpose ", "))
-(def join-dot #(join % "."))
+
 (def join-lf #(join % "\n" ))
+(def interpose-lf (interpose "\n" ))
+
 (def format-eq #(str* %1 " = " %2))
 (def format-kv #(str* %1 " : "  %2))
+
 (def quote-string #(str* "'" (StringUtils/replace % "'" "''") "'"))
 (def dquote-string #(str* "\"" (StringUtils/replace % "\" " "\"\"") "\""))
 (def wrap-parens #(str* "(" (or % "") ")"))
@@ -66,33 +73,69 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (def kw->c*const #(-> (name %)
                       StringUtils/upperCase
                       (StringUtils/replaceChars \- \_)))
-(def terminate #(str+ % \; ))
+(def terminate #(.toString (str+ % \; )))
 (def sequential-or-set? (some-fn sequential? set?))
 
+(def map-cql-value (map #'cql-value))
+(def map-cql-identifier (map #'cql-identifier))
+
 (def cql-values-join-comma-xform
-  (comp (map #'cql-value)
+  (comp map-cql-value
         interpose-comma))
 
 (def cql-identifiers-join-comma-xform
-  (comp (map #'cql-identifier)
+  (comp map-cql-identifier
         interpose-comma))
 
-
-(defn str-fold
+(defn string-builder
   ([] (StringBuilder.))
   ([^StringBuilder sb x]
    (.append sb x))
   ([^StringBuilder sb] (.toString sb)))
 
+(defn make-wrapped-string-builder [head tail]
+  (fn
+    ([] (StringBuilder. head))
+    ([^StringBuilder sb x]
+     (.append sb x))
+    ([^StringBuilder sb]
+     (.append sb tail)
+     (.toString sb))))
+
+(def string-builder+brackets (make-wrapped-string-builder "{" "}"))
+(def string-builder+square-brackets (make-wrapped-string-builder "[" "]"))
+(def string-builder+parens (make-wrapped-string-builder "(" ")"))
+
 (defn cql-values-join-comma [xs]
   (transduce cql-values-join-comma-xform
-             str-fold
+             string-builder
+             xs))
+
+(defn cql-values-join-comma+brackets [xs]
+  (transduce cql-values-join-comma-xform
+             string-builder+brackets
+             xs))
+
+(defn cql-values-join-comma+square-brackets [xs]
+  (transduce cql-values-join-comma-xform
+             string-builder+square-brackets
+             xs))
+
+(defn cql-values-join-comma+parens [xs]
+  (transduce cql-values-join-comma-xform
+             string-builder+parens
              xs))
 
 (defn cql-identifiers-join-comma
   [xs]
   (transduce cql-identifiers-join-comma-xform
-             str-fold
+             string-builder
+             xs))
+
+(defn cql-identifiers-join-comma+parens
+  [xs]
+  (transduce cql-identifiers-join-comma-xform
+             string-builder+parens
              xs))
 
 (extend-protocol CQLEntities
@@ -129,71 +172,57 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   ;; generate query parts
   clojure.lang.IPersistentSet
   (cql-value [x]
-    (->> x
-         cql-values-join-comma
-         wrap-brackets))
+    (cql-values-join-comma+brackets x))
 
   clojure.lang.IPersistentMap
   (cql-identifier [x]
     (let [[coll k] (first x) ]
       ;; handles foo['bar'] lookups
       (str* (cql-identifier coll)
-           (wrap-sqbrackets (cql-value k)))))
-
+            (wrap-sqbrackets (cql-value k)))))
   (cql-value [x]
-    (->> x
-         (map (fn [[k v]]
-                (format-kv (cql-value k)
-                           (cql-value v))))
-         join-comma
-         wrap-brackets))
+    (transduce (comp (map (fn [[k v]]
+                            (format-kv (cql-value k)
+                                       (cql-value v))))
+                     interpose-comma)
+               string-builder+brackets
+               x))
 
   clojure.lang.Sequential
   (cql-value [x]
-    (->> x
-         cql-values-join-comma
-         wrap-sqbrackets))
+    (cql-values-join-comma+square-brackets x))
 
   CQLUserType
   (cql-identifier [x]
-    (->> (:value x)
-         (map (fn [[k v]]
-                (format-kv (cql-identifier k)
-                           (cql-value v))))
-         join-comma
-         wrap-brackets))
+    (transduce
+     (comp (map (fn [[k v]]
+                  (format-kv (cql-identifier k)
+                             (cql-value v))))
+           interpose-comma)
+     string-builder+brackets
+     (:value x)))
   (cql-value [x]
-    (->> (:value x)
-         (map (fn [[k v]]
-                (format-kv (cql-identifier k)
-                           (cql-value v))))
-         join-comma
-         wrap-brackets))
-
+    (transduce (comp (map (fn [[k v]]
+                            (format-kv (cql-identifier k)
+                                       (cql-value v))))
+                     interpose-comma)
+               string-builder+brackets
+               (:value x)))
 
   CQLComposite
   (cql-identifier [c]
-    (->> (:value c)
-         cql-identifiers-join-comma
-         wrap-parens))
+    (cql-identifiers-join-comma+parens (:value c)))
   (cql-value [c]
-    (->> (:value c)
-         cql-values-join-comma
-         wrap-parens))
-
+    (cql-values-join-comma+parens (:value c)))
 
   ;; CQL Function are always safe, their arguments might not be though
   CQLFn
   (cql-identifier [{fn-name :name  args :args}]
     (str (name fn-name)
-         (-> args
-             cql-identifiers-join-comma
-             wrap-parens)))
+         (cql-identifiers-join-comma+parens args)))
   (cql-value [{fn-name :name  args :args}]
     (str (name fn-name)
-         (-> args
-             cql-values-join-comma
-             wrap-parens)))
+         (cql-values-join-comma+parens args)))
 
   CQLRaw
   (cql-identifier [x] (:value x))
@@ -209,7 +238,10 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
   CQLNamespaced
   (cql-identifier [xs]
-    (join-dot (map cql-identifier (:value xs))))
+    (transduce (comp map-cql-identifier
+                     (interpose "."))
+               string-builder
+               (:value xs)))
 
   nil
   (cql-value [x] "null")
@@ -251,13 +283,12 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
     (quote-string (name x))))
 
 (defn option-map [m]
-  (->> m
-       (map (fn [[k v]]
-              (format-kv (quote-string (name k))
-                         (option-value v))))
-       join-comma
-       wrap-brackets))
-
+  (transduce (comp (map (fn [[k v]]
+                          (format-kv (quote-string (name k))
+                                     (option-value v))))
+                   interpose-comma)
+             string-builder+brackets
+             m))
 
 ;; secondary index clauses helpers
 (defn query-cond-sequential-entry [op column value]
@@ -270,24 +301,21 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
       (str* col-name
             " IN "
             (if (sequential-or-set? value)
-              (-> value
-                  cql-values-join-comma
-                  wrap-parens)
+              (cql-values-join-comma+parens value)
               (cql-value value)))
       (str* col-name
             " " (operators op) " "
             (cql-value value)))))
 
-(defn query-cond
-  [clauses]
-  (->> clauses
-       (map (fn [xs]
-              (if (= 3 (count xs))
-                (query-cond-sequential-entry (first xs)
-                                             (second xs)
-                                             (last xs))
-                (query-cond-sequential-entry = (first xs) (second xs)))))
-       join-and))
+(def query-cond
+  (let [xform (comp (map (fn [xs]
+                           (if (= 3 (count xs))
+                             (query-cond-sequential-entry (first xs)
+                                                          (second xs)
+                                                          (last xs))
+                             (query-cond-sequential-entry = (first xs) (second xs)))))
+                    interpose-and)]
+    #(transduce xform string-builder %)))
 
 ;; x and y can be an operator or a value
 (defn counter [column [x y]]
@@ -543,84 +571,79 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
      (str+ sb " IF" (if (not b) " NOT " " ") "EXISTS"))
 
    :order-by
-   (fn [sb q columns]
-     (->> columns
-          (map (fn [col-values] ;; Values are a pair of col and order
-                 (join-spaced (map cql-identifier col-values))))
-          join-comma
-          (str+ sb " ORDER BY ")))
+
+   (let [xform-inner (comp map-cql-identifier
+                           interpose-space)
+         xform (comp (map #(transduce xform-inner string-builder %))
+                     interpose-comma)]
+     (fn [sb q columns]
+       (->> (transduce xform string-builder columns)
+            (str+ sb " ORDER BY "))))
 
    :primary-key
-   (fn [sb q primary-key]
-     (->> (if (sequential? primary-key)
-            (->> primary-key
-                 (map (fn [pk]
-                        (if (sequential? pk)
-                          (->  (cql-identifiers-join-comma pk)
-                               wrap-parens)
-                          (cql-identifier pk))))
-                 join-comma)
-            (cql-identifier primary-key))
-          wrap-parens
-          (str+ sb "PRIMARY KEY ")))
+   (let [xform (comp (map (fn [pk]
+                          (if (sequential? pk)
+                            (cql-identifiers-join-comma+parens pk)
+                            (cql-identifier pk))))
+                     interpose-comma)]
+     (fn [sb q primary-key]
+       (->> (if (sequential? primary-key)
+              (transduce xform string-builder primary-key)
+              (cql-identifier primary-key))
+            wrap-parens
+            (str+ sb "PRIMARY KEY "))))
 
    :column-definitions
-   (fn [sb q column-definitions]
-     (->> column-definitions
-          (mapv (fn [[k & xs]]
-                  (if (identical? :primary-key k)
-                    ((:primary-key emit) (StringBuilder.) q (first xs))
-                    (join-spaced (map cql-identifier (cons k xs))))))
-          join-comma
-          wrap-parens
-          (str+ sb " ")))
+   (let [xform-inner (comp map-cql-identifier
+                           interpose-space)]
+     (fn [sb q column-definitions]
+       (->> (transduce (comp (map (fn [[k & xs]]
+                            (if (identical? :primary-key k)
+                              ((:primary-key emit) (StringBuilder.) q (first xs))
+                              (transduce xform-inner string-builder (cons k xs)))))
+                             interpose-comma)
+                       string-builder+parens
+                       column-definitions)
+            (str+ sb " "))))
 
    :limit
    (fn [sb q limit]
      (str+ sb  " LIMIT " (cql-value limit)))
 
    :values
-   (fn [sb q x]
-     (str+ sb
-           (wrap-parens
-            (transduce (comp (map #(cql-identifier (first %)))
-                             interpose-comma)
-                       str-fold
-                       x))
-           " VALUES "
-           (wrap-parens
-            (transduce (comp (map #(cql-value (second %)))
-                             interpose-comma)
-                       str-fold
-                       x))))
+   (let [xform-values (comp (map #(cql-value (second %)))
+                              interpose-comma)
+         xform-ids (comp (map #(cql-identifier (first %)))
+                              interpose-comma)]
+       (fn [sb q x]
+      (str+ sb
+            (transduce xform-ids string-builder+parens x)
+            " VALUES "
+            (transduce xform-values string-builder+parens x))))
 
    :set-columns
-   (fn [sb q values]
-     (-> sb
-         (str+ "SET "
-               (transduce
-                (comp
-                 (map (fn [[k v]]
-                        (if (and (sequential? v)
-                                 (some operator? v))
-                          (counter k v)
-                          (format-eq (cql-identifier k)
-                                     (cql-value v)))))
-                 (interpose ", "))
-                str-fold
-                values))))
+   (let [xform (comp
+                (map (fn [[k v]]
+                       (if (and (sequential? v)
+                                (some operator? v))
+                         (counter k v)
+                         (format-eq (cql-identifier k)
+                                    (cql-value v)))))
+                (interpose ", "))]
+     (fn [sb q values]
+       (str+ sb "SET " (transduce xform string-builder values))))
 
    :using
-   (fn [sb q args]
-     (-> sb
-         (str+ " USING "
-               (if (coll? args)
-                 (->> args
-                      (map (fn [[n value]]
-                             (str (-> n name StringUtils/upperCase)
-                                  " " (cql-value value))))
-                      join-and)
-                 (option-value args)))))
+   (let [xform (comp (map (fn [[n value]]
+                               (str (-> n name StringUtils/upperCase)
+                                    " " (cql-value value))))
+                     (interpose " AND "))]
+     (fn [sb q args]
+       (-> sb
+           (str+ " USING "
+                 (if (coll? args)
+                   (transduce xform string-builder args)
+                   (option-value args))))))
 
    :compact-storage
    (fn [sb q v]
@@ -635,8 +658,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
      (str+ sb
            " ALTER "
            (cql-identifier identifier)
-            " TYPE "
-            (cql-identifier type)))
+           " TYPE "
+           (cql-identifier type)))
 
    :rename-column
    (fn [sb q [old-name new-name]]
@@ -659,24 +682,27 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
      (str+ sb " DROP " (cql-identifier identifier)))
 
    :clustering-order
-   (fn [sb q columns]
-     (->> columns
-          (map (fn [col-values] ;; Values are a pair of col and order
-                 (join-spaced (map cql-identifier col-values))))
-          join-comma
-          wrap-parens
-          (str+ sb "CLUSTERING ORDER BY ")))
+   (let [xform-inner (comp map-cql-identifier
+                           (interpose " "))
+         xform (comp (map #(transduce xform-inner string-builder %))
+                           (interpose ", "))]
+     (fn [sb q columns]
+       (->> (transduce xform string-builder+parens columns)
+            (str+ sb "CLUSTERING ORDER BY "))))
 
    :with
    (fn [sb q value-map]
-     (->> (for [[k v] value-map]
-            (if-let [with-entry (k emit)]
-              (with-entry (StringBuilder.) q v)
-              (format-eq (cql-identifier k)
-                         (if (map? v)
-                           (option-map v)
-                           (option-value v)))))
-          join-and
+     (->> value-map
+          (transduce (comp
+                      (map (fn [[k v]]
+                             (if-let [with-entry (k emit)]
+                               (with-entry (StringBuilder.) q v)
+                               (format-eq (cql-identifier k)
+                                          (if (map? v)
+                                            (option-map v)
+                                            (option-value v))))))
+                      interpose-and)
+                     string-builder)
           (str+ sb " WITH ")))
 
    :password
@@ -726,9 +752,10 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    ;;        "\n APPLY BATCH"))
 
    :queries
-   (fn [sb q queries]
-     (str+ sb "\n" (join-lf (map emit-query queries)) "\n"))
-  })
+   (let [xform (comp (map emit-query)
+                     interpose-lf)]
+     (fn [sb q queries]
+       (str+ sb "\n" (transduce xform string-builder queries) "\n")))})
 
 (def emit-catch-all (fn [sb q x] (str+ sb " " (cql-identifier x))))
 
@@ -759,7 +786,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
 (defn emit-query [sb query]
   (let [entry-point (find-entry-clause query)]
-    (str (terminate ((emit entry-point) sb query (entry-point query))))))
+    (terminate ((emit entry-point) sb query (entry-point query)))))
 
 (defn ->raw
   "Compiles a hayt query into its raw/string value"
