@@ -277,7 +277,7 @@
               (recursive false))))
 
 
-#_(deftest test-batch
+(deftest test-batch
   (are-raw
    "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
    (batch

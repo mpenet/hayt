@@ -723,34 +723,23 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (fn [sb q index-column]
      (str+ sb (wrap-parens (cql-identifier index-column))))
 
-   ;; :batch
-   ;; (fn [sb {:keys [logged counter]
-   ;;          :as q} queries]
-   ;;   (-> sb
-   ;;       (str+ "BEGIN")
-   ;;       (cond->
-   ;;           (not logged) (str+ " UNLOGGED")
-   ;;           counter (str+ " COUNTER"))
-   ;;       (str+ " BATCH ")
-   ;;       (as-> (:using q) using
-   ;;         (cond-> using
-   ;;           (str+ ((emit :using) q using) " \n"))))
-   ;;   (->> queries
-   ;;        (remove nil?)
-   ;;        (map emit-query)
-   ;;        join-lf)
-
-   ;;   (str+ sb  "BEGIN"
-   ;;        (when-not logged " UNLOGGED")
-   ;;        (when counter " COUNTER")
-   ;;        " BATCH "
-   ;;        (when-let [using (:using q)]
-   ;;          (str ((emit :using) q using) " \n"))
-   ;;        (->> queries
-   ;;             (remove nil?)
-   ;;             (map (partial emit-query sb))
-   ;;             join-lf)
-   ;;        "\n APPLY BATCH"))
+   :batch
+   (fn [sb {:keys [logged counter using] :as q}
+        queries]
+     (-> sb
+         (str+ "BEGIN")
+         (cond->
+             (not logged) (str+ " UNLOGGED")
+             counter (str+ " COUNTER"))
+         (str+ " BATCH")
+         (cond->
+             using (-> ((emit :using) q using)
+                       (str+ " \n")))
+         (str+
+          (->> (remove nil? queries)
+               (map #(emit-query (StringBuilder.) %))
+               join-lf)
+          "\n APPLY BATCH")))
 
    :queries
    (let [xform (comp (map emit-query)
