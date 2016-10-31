@@ -17,5 +17,5 @@
  (do (require '[qbits.alia :as alia])
      (extend-protocol alia/PStatement
        clojure.lang.APersistentMap
-       (query->statement [q values]
-         (alia/query->statement (->raw q) values)))))
+       (query->statement [q values codec]
+         (alia/query->statement (->raw q) values codec)))))

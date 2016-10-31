@@ -14,6 +14,12 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
 (declare emit-query emit-row)
 
+(defprotocol CQLEntities
+  (cql-identifier [x]
+    "Encodes CQL identifiers")
+  (cql-value [x]
+    "Encodes a CQL value"))
+
 ;; Wraps a CQL function (a template to clj.core/format and its
 ;; argument for later encoding.
 (defrecord CQLFn [name args])
@@ -23,6 +29,23 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (defrecord CQLComposite [value])
 (defrecord CQLUserType [value])
 
+(defmacro str* [& xs]
+  (let [size (count xs)]
+    `(->
+      ~(if (= size 1)
+         (first xs)
+         `(doto (StringBuilder.)
+            ~@(for [x xs]
+                (list '.append x))))
+      .toString)))
+
+(defmacro str+ [sb & xs]
+  (let [size (count xs)
+        sb (vary-meta sb assoc :tag 'java.lang.StringBuilder)]
+    `(doto ~sb
+       ~@(for [x xs]
+           (list '.append x)))))
+
 (defn join [^java.lang.Iterable coll ^String sep]
   (when (seq coll)
     (StringUtils/join coll sep)))
@@ -30,27 +53,47 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (def join-and #(join % " AND "))
 (def join-spaced #(join % " "))
 (def join-comma #(join % ", "))
+(def interpose-comma (interpose ", "))
 (def join-dot #(join % "."))
 (def join-lf #(join % "\n" ))
-(def format-eq #(str %1 " = " %2))
-(def format-kv #(str %1 " : "  %2))
-(def quote-string #(str "'" (StringUtils/replace % "'" "''") "'"))
-(def dquote-string #(str "\"" (StringUtils/replace % "\" " "\"\"") "\""))
-(def wrap-parens #(str "(" % ")"))
-(def wrap-brackets #(str "{" % "}"))
-(def wrap-sqbrackets #(str "[" % "]"))
+(def format-eq #(str* %1 " = " %2))
+(def format-kv #(str* %1 " : "  %2))
+(def quote-string #(str* "'" (StringUtils/replace % "'" "''") "'"))
+(def dquote-string #(str* "\"" (StringUtils/replace % "\" " "\"\"") "\""))
+(def wrap-parens #(str* "(" (or % "") ")"))
+(def wrap-brackets #(str* "{" % "}"))
+(def wrap-sqbrackets #(str* "[" % "]"))
 (def kw->c*const #(-> (name %)
                       StringUtils/upperCase
                       (StringUtils/replaceChars \- \_)))
-(def terminate #(str % ";"))
-
+(def terminate #(str+ % \; ))
 (def sequential-or-set? (some-fn sequential? set?))
 
-(defprotocol CQLEntities
-  (cql-identifier [x]
-    "Encodes CQL identifiers")
-  (cql-value [x]
-    "Encodes a CQL value"))
+(def cql-values-join-comma-xform
+  (comp (map #'cql-value)
+        interpose-comma))
+
+(def cql-identifiers-join-comma-xform
+  (comp (map #'cql-identifier)
+        interpose-comma))
+
+
+(defn str-fold
+  ([] (StringBuilder.))
+  ([^StringBuilder sb x]
+   (.append sb x))
+  ([^StringBuilder sb] (.toString sb)))
+
+(defn cql-values-join-comma [xs]
+  (transduce cql-values-join-comma-xform
+             str-fold
+             xs))
+
+(defn cql-identifiers-join-comma
+  [xs]
+  (transduce cql-identifiers-join-comma-xform
+             str-fold
+             xs))
 
 (extend-protocol CQLEntities
 
@@ -72,7 +115,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
   clojure.lang.Keyword
   (cql-identifier [x] (name x))
-  (cql-value [x] (str x))
+  (cql-value [x] (str* x))
 
   Date
   (cql-value [x]
@@ -86,15 +129,15 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   ;; generate query parts
   clojure.lang.IPersistentSet
   (cql-value [x]
-    (->> (map cql-value x)
-         join-comma
+    (->> x
+         cql-values-join-comma
          wrap-brackets))
 
   clojure.lang.IPersistentMap
   (cql-identifier [x]
     (let [[coll k] (first x) ]
       ;; handles foo['bar'] lookups
-      (str (cql-identifier coll)
+      (str* (cql-identifier coll)
            (wrap-sqbrackets (cql-value k)))))
 
   (cql-value [x]
@@ -107,9 +150,9 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
   clojure.lang.Sequential
   (cql-value [x]
-    (->> (map cql-value x)
-          join-comma
-          wrap-sqbrackets))
+    (->> x
+         cql-values-join-comma
+         wrap-sqbrackets))
 
   CQLUserType
   (cql-identifier [x]
@@ -131,13 +174,11 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   CQLComposite
   (cql-identifier [c]
     (->> (:value c)
-         (map cql-identifier)
-         join-comma
+         cql-identifiers-join-comma
          wrap-parens))
   (cql-value [c]
     (->> (:value c)
-         (map cql-value)
-         join-comma
+         cql-values-join-comma
          wrap-parens))
 
 
@@ -145,13 +186,13 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   CQLFn
   (cql-identifier [{fn-name :name  args :args}]
     (str (name fn-name)
-         (-> (map cql-identifier args)
-             join-comma
+         (-> args
+             cql-identifiers-join-comma
              wrap-parens)))
   (cql-value [{fn-name :name  args :args}]
     (str (name fn-name)
-         (-> (map cql-value args)
-             join-comma
+         (-> args
+             cql-values-join-comma
              wrap-parens)))
 
   CQLRaw
@@ -226,16 +267,16 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                          [column value] )
         col-name (cql-identifier column)]
     (if (identical? :in op)
-      (str col-name
-           " IN "
-           (if (sequential-or-set? value)
-             (-> (mapv cql-value value)
-                 join-comma
-                 wrap-parens)
-             (cql-value value)))
-      (str col-name
-           " " (operators op) " "
-           (cql-value value)))))
+      (str* col-name
+            " IN "
+            (if (sequential-or-set? value)
+              (-> value
+                  cql-values-join-comma
+                  wrap-parens)
+              (cql-value value)))
+      (str* col-name
+            " " (operators op) " "
+            (cql-value value)))))
 
 (defn query-cond
   [clauses]
@@ -260,368 +301,436 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (def emit
   { ;; entry clauses
    :select
-   (fn [q table]
-     (str "SELECT "
-          (emit-row (assoc q :from table)
-                    [:columns :from :where :order-by :limit :allow-filtering])))
-
+   (fn [^StringBuilder sb q table]
+     (-> sb
+         (str+ "SELECT ")
+         (emit-row (assoc q :from table)
+                   [:columns :from :where :order-by :limit :allow-filtering])))
    :insert
-   (fn [q table]
-     (str "INSERT INTO " (cql-identifier table) " "
-          (emit-row q [:values :if-exists :using])))
+   (fn [sb q table]
+     (-> sb
+         (str+ "INSERT INTO " (cql-identifier table) " ")
+         (emit-row q [:values :if-exists :using])))
 
    :update
-   (fn [q table]
-     (str "UPDATE " (cql-identifier table) " "
-          (emit-row q [:using :set-columns :where :if :if-exists])))
+   (fn [sb q table]
+     (-> sb
+         (str+ "UPDATE " (cql-identifier table) " ")
+         (emit-row q [:using :set-columns :where :if :if-exists])))
 
    :delete
-   (fn [{:keys [columns] :as q} table]
-     (str "DELETE "
-          (-> (if (identical? :* columns) (dissoc q :columns) q)
-              (assoc :from table)
-              (emit-row [:columns :from :using :where :if]))))
+   (fn [sb {:keys [columns] :as q} table]
+     (let [q (assoc (if (identical? :* columns)
+                      (dissoc q :columns)
+                      q)
+                    :from table)]
+       (-> sb
+           (str+ "DELETE ")
+           (emit-row q [:columns :from :using :where :if]))))
 
    :drop-index
-   (fn [q index]
-     (str "DROP INDEX "
-          (emit-row (assoc q :index index) [:if-exists :index])))
+   (fn [sb q index]
+     (-> sb
+         (str+ "DROP INDEX")
+         (emit-row q [:if-exists])
+         (str+ " "  (cql-identifier index))))
 
    :drop-type
-   (fn [q index]
-     (str "DROP TYPE "
-          (emit-row (assoc q :index index) [:if-exists :index])))
+   (fn [sb q index]
+     (-> sb
+         (str+ "DROP TYPE")
+         (emit-row q [:if-exists])
+         (str+ " " (cql-identifier index))))
 
    :drop-table
-   (fn [q table]
-     (str "DROP TABLE "
-          (emit-row (assoc q :table table) [:if-exists :table])))
+   (fn [sb q table]
+     (-> sb
+         (str+ "DROP TABLE")
+         (emit-row q [:if-exists])
+         (str+ " " (cql-identifier table))))
 
    :drop-column-family
-   (fn [q cf]
-     (str "DROP COLUMNFAMILY "
-          (emit-row (assoc q :cf cf) [:if-exists :cf])))
+   (fn [sb q cf]
+     (-> sb
+         (str+ "DROP COLUMNFAMILY" )
+         (emit-row q [:if-exists])
+         (str+ " " (cql-identifier cf))))
 
    :drop-keyspace
-   (fn [q keyspace]
-     (str "DROP KEYSPACE "
-          (emit-row (assoc q :ks keyspace) [:if-exists :ks])))
+   (fn [sb q keyspace]
+     (-> (str+ sb "DROP KEYSPACE" )
+         (emit-row q [:if-exists])
+         (str+ " " (cql-identifier keyspace))))
 
    :use-keyspace
-   (fn [q ks]
-     (str "USE " (cql-identifier ks)))
+   (fn [sb q ks]
+     (str+ sb "USE " (cql-identifier ks)))
 
    :truncate
-   (fn [q ks]
-     (str "TRUNCATE " (cql-identifier ks)))
+   (fn [sb q ks]
+     (str+ sb "TRUNCATE " (cql-identifier ks)))
 
    :grant
-   (fn [q perm]
-     (str "GRANT "
-          (emit-row (assoc q :perm perm)
-                    [:perm :resource :user])))
+   (fn [sb q perm]
+     (-> sb
+         (str+ "GRANT ")
+         (emit-row (assoc q :perm perm)
+                   [:perm :resource :user])))
 
    :revoke
-   (fn [q perm]
-     (str "REVOKE "
-          (emit-row (assoc q :perm perm) [:perm :resource :user])))
+   (fn [sb q perm]
+     (-> sb
+         (str+ "REVOKE ")
+         (emit-row (assoc q :perm perm) [:perm :resource :user])))
 
    :create-index
-   (fn [{:keys [custom with]
+   (fn [sb {:keys [custom with]
          :as q}
         column]
-     (str "CREATE "
-          (when custom "CUSTOM ")
-          "INDEX "
-          (emit-row q [:if-exists :index-name :on])
-          " " (wrap-parens (cql-identifier column))
-          (when (and custom with)
-            (str " " ((emit :with) q with)))))
+     (-> (str+ sb "CREATE")
+         (cond-> custom (str+ " CUSTOM"))
+         (str+ " INDEX")
+         (emit-row q [:if-exists :index-name :on])
+         (str+ " " (wrap-parens (cql-identifier column)))
+         (cond-> (and custom with)
+           ((emit :with) q with))))
 
    :create-trigger
-   (fn [{:keys [table using] :as q} name]
-     (str "CREATE TRIGGER " (cql-identifier name) " "
-          (emit-row q [:on :using])))
+   (fn [sb {:keys [table using] :as q} name]
+     (-> sb
+         (str+  "CREATE TRIGGER " (cql-identifier name))
+         (emit-row q [:on :using])))
 
    :drop-trigger
-   (fn [q name]
-     (str "DROP TRIGGER " (cql-identifier name) " "
-          (emit-row q [:on])))
+   (fn [sb q name]
+     (-> sb
+         (str+ "DROP TRIGGER " (cql-identifier name))
+         (emit-row q [:on])))
 
    :create-user
-   (fn [q user]
-     (str "CREATE USER " (cql-identifier user) " "
-          (emit-row q [:password :superuser])))
+   (fn [sb q user]
+     (-> sb
+         (str+ "CREATE USER " (cql-identifier user))
+         (emit-row q [:password :superuser])))
 
    :alter-user
-   (fn [q user]
-     (str "ALTER USER " (cql-identifier user) " "
-          (emit-row q [:password :superuser])))
+   (fn [sb q user]
+     (-> sb
+         (str+ "ALTER USER " (cql-identifier user))
+         (emit-row q [:password :superuser])))
 
    :drop-user
-   (fn [q user]
-     (str "DROP USER " (cql-identifier user)
-          (when-let [exists (emit-row q [:if-exists])]
-            (str " " exists))))
+   (fn [sb q user]
+     (-> sb
+         (str+ "DROP USER " (cql-identifier user)
+               ;; (when-let [exists (emit-row q [:if-exists])]
+               ;;   (str " " exists))
+               ;; FIXME
+               )))
 
    :list-users
-   (constantly "LIST USERS")
+   (fn [sb q _] (str+ sb "LIST USERS"))
 
    :perm
-   (fn [q perm]
+   (fn [sb q perm]
      (let [raw-perm (kw->c*const perm)]
-       (str "PERMISSION" (when (= "ALL" raw-perm) "S") " " raw-perm)))
+       (-> sb
+           (str+ "PERMISSION")
+           (cond-> (= "ALL" raw-perm) (str+ "S"))
+           (str+ " " raw-perm))))
 
    :list-perm
-   (fn [q perm]
-     (str "LIST "
-          (emit-row (assoc q :perm perm) [:perm :resource :user :recursive])))
+   (fn [sb q perm]
+     (-> sb
+         (str+ "LIST ")
+         (emit-row (assoc q :perm perm) [:perm :resource :user :recursive])))
 
    :create-table
-   (fn [q table]
-     (str "CREATE TABLE "
-          (emit-row (assoc q :table table)
-                    [:if-exists :table :column-definitions :with])))
+   (fn [sb q table]
+     (-> sb
+         (str+ "CREATE TABLE")
+         (emit-row (assoc q :table table) [:if-exists :table :column-definitions :with])))
 
    :create-type
-   (fn [q type]
-     (str "CREATE TYPE "
-          (emit-row (assoc q :type type)
-                    [:if-exists :type :column-definitions])))
+   (fn [sb q type]
+     (-> sb
+         (str+ "CREATE TYPE")
+         (emit-row (assoc q :type type) [:if-exists :type :column-definitions])))
 
    :alter-table
-   (fn [q table]
-     (str "ALTER TABLE " (cql-identifier table) " "
-          (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
+   (fn [sb q table]
+     (-> sb
+         (str+ "ALTER TABLE " (cql-identifier table))
+         (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
 
    :alter-type
-   (fn [q type]
-     (str "ALTER TYPE " (cql-identifier type) " "
-          (emit-row q [:alter-column :add-column :rename-column :drop-column])))
+   (fn [sb q type]
+     (-> sb
+         (str+ "ALTER TYPE " (cql-identifier type))
+         (emit-row q [:alter-column :add-column :rename-column :drop-column])))
 
    :alter-columnfamily
-   (fn [q cf]
-     (str "ALTER COLUMNFAMILY " (cql-identifier cf) " "
-          (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
+   (fn [sb q cf]
+     (-> sb
+         (str+ "ALTER COLUMNFAMILY " (cql-identifier cf))
+         (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
 
    :alter-keyspace
-   (fn [q ks]
-     (str "ALTER KEYSPACE " (cql-identifier ks) " "
-          (emit-row q [:with])))
+   (fn [sb q ks]
+     (-> sb
+         (str+ "ALTER KEYSPACE " (cql-identifier ks))
+         (emit-row q [:with])))
 
    :create-keyspace
-   (fn [q ks]
-     (str "CREATE KEYSPACE "
-          (emit-row (assoc q :ks ks) [:if-exists :ks :with])))
+   (fn [sb q ks]
+     (-> sb
+         (str+ "CREATE KEYSPACE")
+         (emit-row (assoc q :ks ks) [:if-exists :ks :with])))
 
    :resource
-   (fn [q resource]
-     ((emit :on) q resource))
+   (fn [sb q resource]
+     ((emit :on) sb q resource))
 
    :user
-   (fn [q user]
+   (fn [sb q user]
      (cond
       (contains? q :list-perm)
-      ((emit :of) q user)
+      ((emit :of) sb q user)
 
       (contains? q :revoke)
-      ((emit :from) q user)
+      ((emit :from) sb q user)
 
       (contains? q :grant)
-      ((emit :to) q user)))
+      ((emit :to) sb q user)))
 
    :on
-   (fn [q on]
-     (str "ON " (cql-identifier on)))
+   (fn [sb q on]
+     (str+ sb " ON " (cql-identifier on)))
 
    :to
-   (fn [q to]
-     (str "TO " (cql-identifier to)))
+   (fn [sb q to]
+     (str+ sb " TO " (cql-identifier to)))
 
    :of
-   (fn [q on]
-     (str "OF " (cql-identifier on)))
+   (fn [sb q on]
+     (str+ sb " OF " (cql-identifier on)))
 
    :from
-   (fn [q table]
-     (str "FROM " (cql-identifier table)))
+   (fn [sb q table]
+     (str+ sb " FROM " (cql-identifier table)))
 
    :into
-   (fn [q table]
-     (str "INTO " (cql-identifier table)))
+   (fn [sb q table]
+     (str+ sb " INTO " (cql-identifier table)))
 
    :columns
-   (fn [q columns]
-     (if (sequential? columns)
-       (join-comma (map cql-identifier columns))
-       (cql-identifier columns)))
+   (fn [sb q columns]
+     (-> sb
+         (str+ (if (sequential? columns)
+                 (cql-identifiers-join-comma columns)
+                 (cql-identifier columns)))))
 
    :where
-   (fn [q clauses]
-     (str "WHERE " (query-cond clauses)))
+   (fn [sb q clauses]
+     (str+ sb  " WHERE " (query-cond clauses)))
 
    :if
-   (fn [q clauses]
-     (str "IF " (query-cond clauses)))
+   (fn [sb q clauses]
+     (str+ sb " IF " (query-cond clauses)))
 
    :if-exists
-   (fn [q b]
-     (str "IF " (when (not b) "NOT ") "EXISTS"))
+   (fn [sb q b]
+     (str+ sb " IF" (if (not b) " NOT " " ") "EXISTS"))
 
    :order-by
-   (fn [q columns]
+   (fn [sb q columns]
      (->> columns
           (map (fn [col-values] ;; Values are a pair of col and order
                  (join-spaced (map cql-identifier col-values))))
           join-comma
-          (str "ORDER BY ")))
+          (str+ sb " ORDER BY ")))
 
    :primary-key
-   (fn [q primary-key]
+   (fn [sb q primary-key]
      (->> (if (sequential? primary-key)
             (->> primary-key
                  (map (fn [pk]
                         (if (sequential? pk)
-                          (->  (map cql-identifier pk)
-                               join-comma
+                          (->  (cql-identifiers-join-comma pk)
                                wrap-parens)
                           (cql-identifier pk))))
                  join-comma)
             (cql-identifier primary-key))
           wrap-parens
-          (str "PRIMARY KEY ")))
+          (str+ sb "PRIMARY KEY ")))
 
    :column-definitions
-   (fn [q column-definitions]
+   (fn [sb q column-definitions]
      (->> column-definitions
           (mapv (fn [[k & xs]]
                   (if (identical? :primary-key k)
-                    ((:primary-key emit) q (first xs))
+                    ((:primary-key emit) (StringBuilder.) q (first xs))
                     (join-spaced (map cql-identifier (cons k xs))))))
           join-comma
-          wrap-parens))
+          wrap-parens
+          (str+ sb " ")))
 
    :limit
-   (fn [q limit]
-     (str "LIMIT " (cql-value limit)))
+   (fn [sb q limit]
+     (str+ sb  " LIMIT " (cql-value limit)))
 
    :values
-   (fn [q x]
-     (str (wrap-parens (join-comma (map #(cql-identifier (first %)) x)))
-          " VALUES "
-          (wrap-parens (join-comma (map #(cql-value (second %)) x)))))
+   (fn [sb q x]
+     (str+ sb
+           (wrap-parens
+            (transduce (comp (map #(cql-identifier (first %)))
+                             interpose-comma)
+                       str-fold
+                       x))
+           " VALUES "
+           (wrap-parens
+            (transduce (comp (map #(cql-value (second %)))
+                             interpose-comma)
+                       str-fold
+                       x))))
 
    :set-columns
-   (fn [q values]
-     (->> values
-          (map (fn [[k v]]
-                 (if (and (sequential? v)
-                          (some operator? v))
-                   (counter k v)
-                   (format-eq (cql-identifier k)
-                              (cql-value v)))))
-          join-comma
-          (str "SET ")))
+   (fn [sb q values]
+     (-> sb
+         (str+ "SET "
+               (transduce
+                (comp
+                 (map (fn [[k v]]
+                        (if (and (sequential? v)
+                                 (some operator? v))
+                          (counter k v)
+                          (format-eq (cql-identifier k)
+                                     (cql-value v)))))
+                 (interpose ", "))
+                str-fold
+                values))))
 
    :using
-   (fn [q args]
-     (str "USING "
-          (if (coll? args)
-            (->> args
-                 (map (fn [[n value]]
-                        (str (-> n name StringUtils/upperCase)
-                             " " (cql-value value))))
-                 join-and)
-            (option-value args))))
+   (fn [sb q args]
+     (-> sb
+         (str+ " USING "
+               (if (coll? args)
+                 (->> args
+                      (map (fn [[n value]]
+                             (str (-> n name StringUtils/upperCase)
+                                  " " (cql-value value))))
+                      join-and)
+                 (option-value args)))))
 
    :compact-storage
-   (fn [q v]
-     (when v "COMPACT STORAGE"))
+   (fn [sb q v]
+     (when v (str+ sb "COMPACT STORAGE")))
 
    :allow-filtering
-   (fn [q v]
-     (when v "ALLOW FILTERING"))
+   (fn [sb q v]
+     (when v (str+ sb " ALLOW FILTERING")))
 
    :alter-column
-   (fn [q [identifier type]]
-     (format "ALTER %s TYPE %s"
-             (cql-identifier identifier)
-             (cql-identifier type)))
+   (fn [sb q [identifier type]]
+     (str+ sb
+           " ALTER "
+           (cql-identifier identifier)
+            " TYPE "
+            (cql-identifier type)))
 
    :rename-column
-   (fn [q [old-name new-name]]
-     (format "RENAME %s TO %s"
-             (cql-identifier old-name)
-             (cql-identifier new-name)))
+   (fn [sb q [old-name new-name]]
+     (str+ sb
+           " RENAME "
+           (cql-identifier old-name)
+           " TO "
+           (cql-identifier new-name)))
 
    :add-column
-   (fn [q [identifier type]]
-     (format "ADD %s %s"
-             (cql-identifier identifier)
-             (cql-identifier type)))
+   (fn [sb q [identifier type]]
+     (str+ sb
+           " ADD "
+           (cql-identifier identifier)
+           " "
+           (cql-identifier type)))
 
    :drop-column
-   (fn [q identifier]
-     (str "DROP " (cql-identifier identifier)))
+   (fn [sb q identifier]
+     (str+ sb " DROP " (cql-identifier identifier)))
 
    :clustering-order
-   (fn [q columns]
+   (fn [sb q columns]
      (->> columns
           (map (fn [col-values] ;; Values are a pair of col and order
                  (join-spaced (map cql-identifier col-values))))
           join-comma
           wrap-parens
-          (str "CLUSTERING ORDER BY ")))
+          (str+ sb "CLUSTERING ORDER BY ")))
 
    :with
-   (fn [q value-map]
+   (fn [sb q value-map]
      (->> (for [[k v] value-map]
             (if-let [with-entry (k emit)]
-              (with-entry q v)
+              (with-entry (StringBuilder.) q v)
               (format-eq (cql-identifier k)
                          (if (map? v)
                            (option-map v)
                            (option-value v)))))
           join-and
-          (str "WITH ")))
+          (str+ sb " WITH ")))
 
    :password
-   (fn [q pwd]
+   (fn [sb q pwd]
      ;; not sure if its a cql-id or cql-val
-     (str "WITH PASSWORD " (cql-identifier pwd)))
+     (str+ sb " WITH PASSWORD " (cql-identifier pwd)))
 
    :superuser
-   (fn [q superuser?]
-     (if superuser? "SUPERUSER" "NOSUPERUSER"))
+   (fn [sb q superuser?]
+     (str+ sb (if superuser? " SUPERUSER" " NOSUPERUSER")))
 
    :recursive
-   (fn [q recursive]
-     (when-not recursive "NORECURSIVE"))
+   (fn [sb q recursive]
+     (when-not recursive (str+ sb " NORECURSIVE")))
 
    :index-column
-   (fn [q index-column]
-     (wrap-parens (cql-identifier index-column)))
+   (fn [sb q index-column]
+     (str+ sb (wrap-parens (cql-identifier index-column))))
 
-   :batch
-   (fn [{:keys [logged counter]
-         :as q} queries]
-     (str "BEGIN"
-          (when-not logged " UNLOGGED")
-          (when counter " COUNTER")
-          " BATCH "
-          (when-let [using (:using q)]
-            (str ((emit :using) q using) " \n"))
-          (->> queries
-               (remove nil?)
-               (map emit-query)
-               join-lf)
-          "\n APPLY BATCH"))
+   ;; :batch
+   ;; (fn [sb {:keys [logged counter]
+   ;;          :as q} queries]
+   ;;   (-> sb
+   ;;       (str+ "BEGIN")
+   ;;       (cond->
+   ;;           (not logged) (str+ " UNLOGGED")
+   ;;           counter (str+ " COUNTER"))
+   ;;       (str+ " BATCH ")
+   ;;       (as-> (:using q) using
+   ;;         (cond-> using
+   ;;           (str+ ((emit :using) q using) " \n"))))
+   ;;   (->> queries
+   ;;        (remove nil?)
+   ;;        (map emit-query)
+   ;;        join-lf)
+
+   ;;   (str+ sb  "BEGIN"
+   ;;        (when-not logged " UNLOGGED")
+   ;;        (when counter " COUNTER")
+   ;;        " BATCH "
+   ;;        (when-let [using (:using q)]
+   ;;          (str ((emit :using) q using) " \n"))
+   ;;        (->> queries
+   ;;             (remove nil?)
+   ;;             (map (partial emit-query sb))
+   ;;             join-lf)
+   ;;        "\n APPLY BATCH"))
 
    :queries
-   (fn [q queries]
-     (->> (str "\n" (join-lf (map emit-query queries)) "\n")))})
+   (fn [sb q queries]
+     (str+ sb "\n" (join-lf (map emit-query queries)) "\n"))
+  })
 
-(def emit-catch-all (fn [q x] (cql-identifier x)))
+(def emit-catch-all (fn [sb q x] (str+ sb " " (cql-identifier x))))
 
 (def entry-clauses #{:select :insert :update :delete :use-keyspace :truncate
                      :drop-index :drop-type :drop-table :drop-keyspace :drop-columnfamily
@@ -636,19 +745,30 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
   (some entry-clauses (keys qmap)))
 
 (defn emit-row
-  [row template]
-  (->> template
-       (map (fn [token]
-              (when (contains? row token)
-                ((get emit token emit-catch-all) row (token row)))))
-       (remove nil?)
-       (join-spaced)))
+  [sb row template]
+  (run! (fn [token]
+          (when (contains? row token)
+            ((get emit token emit-catch-all) sb row (token row))))
+        template)
+  sb)
 
-(defn emit-query [query]
+;; (prn (->raw {:select "foo" :where [[:bar (CQLFn. "now" [])]]}))
+;; (dotimes [_ 5 ]
+;;   (time (dotimes [i 1]
+;;           (->raw {:select "foo"}))))
+
+(defn emit-query [sb query]
   (let [entry-point (find-entry-clause query)]
-    (terminate ((emit entry-point) query (entry-point query)))))
+    (str (terminate ((emit entry-point) sb query (entry-point query))))))
 
 (defn ->raw
   "Compiles a hayt query into its raw/string value"
   [query]
-  (emit-query query))
+  (emit-query (StringBuilder.) query))
+
+
+           ;; (->raw {:select "foo" :columns :* :where [[:bar "baz"]]})
+
+;; (dotimes [_ 5 ]
+;;   (time (dotimes [i 1000000]
+;;            (->raw {:select "foo" :columns :* :where [[:bar "baz"]]}))))

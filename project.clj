@@ -1,11 +1,14 @@
-(defproject cc.qbits/hayt "3.2.0"
+(defproject cc.qbits/hayt "3.3.0"
   :description "CQL Query Generation"
   :url "https://github.com/mpenet/hayt"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
-                 [cc.qbits/commons "0.4.5"]
-                 [org.apache.commons/commons-lang3 "3.4"]]
+  :dependencies [[cc.qbits/commons "0.4.5"]
+                 [org.apache.commons/commons-lang3 "3.4"]
+                 [org.clojure/clojure "1.9.0-alpha12"]
+                 ;; [org.clojure/test.check "0.9.0"]
+                 ;; [cc.qbits/spex "0.1.1"]
+                 ]
   :repositories {"sonatype" {:url "http://oss.sonatype.org/content/repositories/releases"
                              :snapshots false
                              :releases {:checksum :fail :update :always}}
@@ -30,5 +33,6 @@
                     qbits.hayt.codec.joda-time]}
   :source-paths ["src/clj"]
   :java-source-paths ["src/java"]
+  :jvm-opts ^:replace ["-server"]
   :javac-options ["-source" "1.7" "-target" "1.7" "-g"]
   :global-vars {*warn-on-reflection* true})
