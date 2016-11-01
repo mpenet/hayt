@@ -27,9 +27,7 @@ Please check the
 [Changelog](https://github.com/mpenet/hayt/blob/master/CHANGELOG.md) first
 if you are upgrading.
 
-```clojure
-[cc.qbits/hayt "3.2.0"]
-```
+[![Clojars Project](https://img.shields.io/clojars/v/cc.qbits/hayt.svg)](https://clojars.org/cc.qbits/hayt)
 
 Note: while in beta the API is still subject to changes.
 
