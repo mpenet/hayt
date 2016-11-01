@@ -29,9 +29,9 @@ when the query is compiled as a prepared statement"
 (defn as
   "Aliases a column (selector) to another identifier (id)"
   [selector id]
-  (cql/->CQLRaw (str (cql/cql-identifier selector)
-                     " AS "
-                     (cql/cql-identifier id))))
+  (cql/->CQLRaw (cql/str* (cql/cql-identifier selector)
+                          " AS "
+                          (cql/cql-identifier id))))
 
 (def now
   "Returns a now() CQL function"

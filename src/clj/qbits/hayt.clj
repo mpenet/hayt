@@ -15,17 +15,19 @@
 
 (compile-if-ns-exists
  qbits.alia
- (do (require '[qbits.alia :as alia])
-     ;; try to support both v3 and v4 of alia
+ (do
+   (require '[qbits.alia :as alia])
+   ;; try to support both v3 and v4 of alia
+   (if (-> alia/PStatement :sigs :query->statement :arglists first count (= 3))
      (try
-       (extend-protocol alia/PStatement
-         clojure.lang.APersistentMap
-         (query->statement [q values]
-           (alia/query->statement (->raw q) values)))
+       (eval '(extend-protocol alia/PStatement
+                clojure.lang.APersistentMap
+                (query->statement [q values codec]
+                  (alia/query->statement (->raw q) values codec))))
        (catch Exception _ nil))
      (try
-       (extend-protocol alia/PStatement
-         clojure.lang.APersistentMap
-         (query->statement [q values codec]
-           (alia/query->statement (->raw q) values codec)))
-       (catch Exception _ nil))))
+       (eval '(extend-protocol alia/PStatement
+                clojure.lang.APersistentMap
+                (query->statement [q values]
+                  (alia/query->statement (->raw q) values))))
+       (catch Exception _ nil)))))
