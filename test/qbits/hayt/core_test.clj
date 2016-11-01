@@ -258,6 +258,9 @@
    "DROP USER foo;"
    (drop-user :foo)
 
+   "DROP USER IF NOT EXISTS foo;"
+   (drop-user :foo (if-exists false))
+
    "LIST USERS;"
    (list-users)
 

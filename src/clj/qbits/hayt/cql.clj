@@ -12,7 +12,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (java.net InetAddress)
    (qbits.hayt Hex)))
 
-(declare emit-query emit-row)
+(declare emit-query emit-row!)
 
 (defprotocol CQLEntities
   (cql-identifier [x]
@@ -39,7 +39,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                 (list '.append x))))
       .toString)))
 
-(defmacro str+ [sb & xs]
+(defmacro str! [sb & xs]
   (let [size (count xs)
         sb (vary-meta sb assoc :tag 'java.lang.StringBuilder)]
     `(doto ~sb
@@ -73,7 +73,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 (def kw->c*const #(-> (name %)
                       StringUtils/upperCase
                       (StringUtils/replaceChars \- \_)))
-(def terminate #(.toString (str+ % \; )))
+(def terminate #(.toString (str! % \; )))
 (def sequential-or-set? (some-fn sequential? set?))
 
 (def map-cql-value (map #'cql-value))
@@ -89,12 +89,11 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
 (defn string-builder
   ([] (StringBuilder.))
-  ([^StringBuilder sb x]
-   (.append sb x))
+  ([^StringBuilder sb x] (.append sb x))
   ([^StringBuilder sb] (.toString sb)))
 
-(defn make-wrapped-string-builder [^String head
-                                   ^String tail]
+(defn make-wrapped-string-builder
+  [^String head ^String tail]
   (fn
     ([] (StringBuilder. head))
     ([^StringBuilder sb x]
@@ -140,7 +139,6 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
              xs))
 
 (extend-protocol CQLEntities
-
   (Class/forName "[B")
   (cql-identifier [x]
     (cql-value (ByteBuffer/wrap x)))
@@ -159,7 +157,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
   clojure.lang.Keyword
   (cql-identifier [x] (name x))
-  (cql-value [x] (str* x))
+  (cql-value [x] (str x))
 
   Date
   (cql-value [x]
@@ -314,7 +312,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                              (query-cond-sequential-entry (first xs)
                                                           (second xs)
                                                           (last xs))
-                             (query-cond-sequential-entry = (first xs) (second xs)))))
+                             (query-cond-sequential-entry := (first xs) (second xs)))))
                     interpose-and)]
     #(transduce xform string-builder %)))
 
@@ -332,20 +330,20 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    :select
    (fn [^StringBuilder sb q table]
      (-> sb
-         (str+ "SELECT ")
-         (emit-row (assoc q :from table)
+         (str! "SELECT ")
+         (emit-row! (assoc q :from table)
                    [:columns :from :where :order-by :limit :allow-filtering])))
    :insert
    (fn [sb q table]
      (-> sb
-         (str+ "INSERT INTO " (cql-identifier table) " ")
-         (emit-row q [:values :if-exists :using])))
+         (str! "INSERT INTO " (cql-identifier table) " ")
+         (emit-row! q [:values :if-exists :using])))
 
    :update
    (fn [sb q table]
      (-> sb
-         (str+ "UPDATE " (cql-identifier table) " ")
-         (emit-row q [:using :set-columns :where :if :if-exists])))
+         (str! "UPDATE " (cql-identifier table) " ")
+         (emit-row! q [:using :set-columns :where :if :if-exists])))
 
    :delete
    (fn [sb {:keys [columns] :as q} table]
@@ -354,167 +352,165 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                       q)
                     :from table)]
        (-> sb
-           (str+ "DELETE ")
-           (emit-row q [:columns :from :using :where :if]))))
+           (str! "DELETE ")
+           (emit-row! q [:columns :from :using :where :if]))))
 
    :drop-index
    (fn [sb q index]
      (-> sb
-         (str+ "DROP INDEX")
-         (emit-row q [:if-exists])
-         (str+ " "  (cql-identifier index))))
+         (str! "DROP INDEX")
+         (emit-row! q [:if-exists])
+         (str! " "  (cql-identifier index))))
 
    :drop-type
    (fn [sb q index]
      (-> sb
-         (str+ "DROP TYPE")
-         (emit-row q [:if-exists])
-         (str+ " " (cql-identifier index))))
+         (str! "DROP TYPE")
+         (emit-row! q [:if-exists])
+         (str! " " (cql-identifier index))))
 
    :drop-table
    (fn [sb q table]
      (-> sb
-         (str+ "DROP TABLE")
-         (emit-row q [:if-exists])
-         (str+ " " (cql-identifier table))))
+         (str! "DROP TABLE")
+         (emit-row! q [:if-exists])
+         (str! " " (cql-identifier table))))
 
    :drop-column-family
    (fn [sb q cf]
      (-> sb
-         (str+ "DROP COLUMNFAMILY" )
-         (emit-row q [:if-exists])
-         (str+ " " (cql-identifier cf))))
+         (str! "DROP COLUMNFAMILY" )
+         (emit-row! q [:if-exists])
+         (str! " " (cql-identifier cf))))
 
    :drop-keyspace
    (fn [sb q keyspace]
-     (-> (str+ sb "DROP KEYSPACE" )
-         (emit-row q [:if-exists])
-         (str+ " " (cql-identifier keyspace))))
+     (-> (str! sb "DROP KEYSPACE" )
+         (emit-row! q [:if-exists])
+         (str! " " (cql-identifier keyspace))))
 
    :use-keyspace
    (fn [sb q ks]
-     (str+ sb "USE " (cql-identifier ks)))
+     (str! sb "USE " (cql-identifier ks)))
 
    :truncate
    (fn [sb q ks]
-     (str+ sb "TRUNCATE " (cql-identifier ks)))
+     (str! sb "TRUNCATE " (cql-identifier ks)))
 
    :grant
    (fn [sb q perm]
      (-> sb
-         (str+ "GRANT ")
-         (emit-row (assoc q :perm perm)
+         (str! "GRANT ")
+         (emit-row! (assoc q :perm perm)
                    [:perm :resource :user])))
 
    :revoke
    (fn [sb q perm]
      (-> sb
-         (str+ "REVOKE ")
-         (emit-row (assoc q :perm perm) [:perm :resource :user])))
+         (str! "REVOKE ")
+         (emit-row! (assoc q :perm perm) [:perm :resource :user])))
 
    :create-index
    (fn [sb {:keys [custom with]
          :as q}
         column]
-     (-> (str+ sb "CREATE")
-         (cond-> custom (str+ " CUSTOM"))
-         (str+ " INDEX")
-         (emit-row q [:if-exists :index-name :on])
-         (str+ " " (wrap-parens (cql-identifier column)))
+     (-> (str! sb "CREATE")
+         (cond-> custom (str! " CUSTOM"))
+         (str! " INDEX")
+         (emit-row! q [:if-exists :index-name :on])
+         (str! " " (wrap-parens (cql-identifier column)))
          (cond-> (and custom with)
            ((emit :with) q with))))
 
    :create-trigger
    (fn [sb {:keys [table using] :as q} name]
      (-> sb
-         (str+  "CREATE TRIGGER " (cql-identifier name))
-         (emit-row q [:on :using])))
+         (str!  "CREATE TRIGGER " (cql-identifier name))
+         (emit-row! q [:on :using])))
 
    :drop-trigger
    (fn [sb q name]
      (-> sb
-         (str+ "DROP TRIGGER " (cql-identifier name))
-         (emit-row q [:on])))
+         (str! "DROP TRIGGER " (cql-identifier name))
+         (emit-row! q [:on])))
 
    :create-user
    (fn [sb q user]
      (-> sb
-         (str+ "CREATE USER " (cql-identifier user))
-         (emit-row q [:password :superuser])))
+         (str! "CREATE USER " (cql-identifier user))
+         (emit-row! q [:password :superuser])))
 
    :alter-user
    (fn [sb q user]
      (-> sb
-         (str+ "ALTER USER " (cql-identifier user))
-         (emit-row q [:password :superuser])))
+         (str! "ALTER USER " (cql-identifier user))
+         (emit-row! q [:password :superuser])))
 
    :drop-user
    (fn [sb q user]
      (-> sb
-         (str+ "DROP USER " (cql-identifier user)
-               ;; (when-let [exists (emit-row q [:if-exists])]
-               ;;   (str " " exists))
-               ;; FIXME
-               )))
+         (str! "DROP USER")
+         (emit-row! q [:if-exists])
+         (str! " " (cql-identifier user))))
 
    :list-users
-   (fn [sb q _] (str+ sb "LIST USERS"))
+   (fn [sb q _] (str! sb "LIST USERS"))
 
    :perm
    (fn [sb q perm]
      (let [raw-perm (kw->c*const perm)]
        (-> sb
-           (str+ "PERMISSION")
-           (cond-> (= "ALL" raw-perm) (str+ "S"))
-           (str+ " " raw-perm))))
+           (str! "PERMISSION")
+           (cond-> (= "ALL" raw-perm) (str! "S"))
+           (str! " " raw-perm))))
 
    :list-perm
    (fn [sb q perm]
      (-> sb
-         (str+ "LIST ")
-         (emit-row (assoc q :perm perm) [:perm :resource :user :recursive])))
+         (str! "LIST ")
+         (emit-row! (assoc q :perm perm) [:perm :resource :user :recursive])))
 
    :create-table
    (fn [sb q table]
      (-> sb
-         (str+ "CREATE TABLE")
-         (emit-row (assoc q :table table) [:if-exists :table :column-definitions :with])))
+         (str! "CREATE TABLE")
+         (emit-row! (assoc q :table table) [:if-exists :table :column-definitions :with])))
 
    :create-type
    (fn [sb q type]
      (-> sb
-         (str+ "CREATE TYPE")
-         (emit-row (assoc q :type type) [:if-exists :type :column-definitions])))
+         (str! "CREATE TYPE")
+         (emit-row! (assoc q :type type) [:if-exists :type :column-definitions])))
 
    :alter-table
    (fn [sb q table]
      (-> sb
-         (str+ "ALTER TABLE " (cql-identifier table))
-         (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
+         (str! "ALTER TABLE " (cql-identifier table))
+         (emit-row! q [:alter-column :add-column :rename-column :drop-column :with])))
 
    :alter-type
    (fn [sb q type]
      (-> sb
-         (str+ "ALTER TYPE " (cql-identifier type))
-         (emit-row q [:alter-column :add-column :rename-column :drop-column])))
+         (str! "ALTER TYPE " (cql-identifier type))
+         (emit-row! q [:alter-column :add-column :rename-column :drop-column])))
 
    :alter-columnfamily
    (fn [sb q cf]
      (-> sb
-         (str+ "ALTER COLUMNFAMILY " (cql-identifier cf))
-         (emit-row q [:alter-column :add-column :rename-column :drop-column :with])))
+         (str! "ALTER COLUMNFAMILY " (cql-identifier cf))
+         (emit-row! q [:alter-column :add-column :rename-column :drop-column :with])))
 
    :alter-keyspace
    (fn [sb q ks]
      (-> sb
-         (str+ "ALTER KEYSPACE " (cql-identifier ks))
-         (emit-row q [:with])))
+         (str! "ALTER KEYSPACE " (cql-identifier ks))
+         (emit-row! q [:with])))
 
    :create-keyspace
    (fn [sb q ks]
      (-> sb
-         (str+ "CREATE KEYSPACE")
-         (emit-row (assoc q :ks ks) [:if-exists :ks :with])))
+         (str! "CREATE KEYSPACE")
+         (emit-row! (assoc q :ks ks) [:if-exists :ks :with])))
 
    :resource
    (fn [sb q resource]
@@ -534,52 +530,51 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :on
    (fn [sb q on]
-     (str+ sb " ON " (cql-identifier on)))
+     (str! sb " ON " (cql-identifier on)))
 
    :to
    (fn [sb q to]
-     (str+ sb " TO " (cql-identifier to)))
+     (str! sb " TO " (cql-identifier to)))
 
    :of
    (fn [sb q on]
-     (str+ sb " OF " (cql-identifier on)))
+     (str! sb " OF " (cql-identifier on)))
 
    :from
    (fn [sb q table]
-     (str+ sb " FROM " (cql-identifier table)))
+     (str! sb " FROM " (cql-identifier table)))
 
    :into
    (fn [sb q table]
-     (str+ sb " INTO " (cql-identifier table)))
+     (str! sb " INTO " (cql-identifier table)))
 
    :columns
    (fn [sb q columns]
      (-> sb
-         (str+ (if (sequential? columns)
+         (str! (if (sequential? columns)
                  (cql-identifiers-join-comma columns)
                  (cql-identifier columns)))))
 
    :where
    (fn [sb q clauses]
-     (str+ sb  " WHERE " (query-cond clauses)))
+     (str! sb  " WHERE " (query-cond clauses)))
 
    :if
    (fn [sb q clauses]
-     (str+ sb " IF " (query-cond clauses)))
+     (str! sb " IF " (query-cond clauses)))
 
    :if-exists
    (fn [sb q b]
-     (str+ sb " IF" (if (not b) " NOT " " ") "EXISTS"))
+     (str! sb " IF" (if (not b) " NOT " " ") "EXISTS"))
 
    :order-by
-
    (let [xform-inner (comp map-cql-identifier
                            interpose-space)
          xform (comp (map #(transduce xform-inner string-builder %))
                      interpose-comma)]
      (fn [sb q columns]
        (->> (transduce xform string-builder columns)
-            (str+ sb " ORDER BY "))))
+            (str! sb " ORDER BY "))))
 
    :primary-key
    (let [xform (comp (map (fn [pk]
@@ -592,7 +587,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
               (transduce xform string-builder primary-key)
               (cql-identifier primary-key))
             wrap-parens
-            (str+ sb "PRIMARY KEY "))))
+            (str! sb "PRIMARY KEY "))))
 
    :column-definitions
    (let [xform-inner (comp map-cql-identifier
@@ -605,11 +600,11 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                              interpose-comma)
                        string-builder+parens
                        column-definitions)
-            (str+ sb " "))))
+            (str! sb " "))))
 
    :limit
    (fn [sb q limit]
-     (str+ sb  " LIMIT " (cql-value limit)))
+     (str! sb  " LIMIT " (cql-value limit)))
 
    :values
    (let [xform-values (comp (map #(cql-value (second %)))
@@ -617,7 +612,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
          xform-ids (comp (map #(cql-identifier (first %)))
                               interpose-comma)]
        (fn [sb q x]
-      (str+ sb
+      (str! sb
             (transduce xform-ids string-builder+parens x)
             " VALUES "
             (transduce xform-values string-builder+parens x))))
@@ -632,7 +627,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                                     (cql-value v)))))
                 (interpose ", "))]
      (fn [sb q values]
-       (str+ sb "SET " (transduce xform string-builder values))))
+       (str! sb "SET " (transduce xform string-builder values))))
 
    :using
    (let [xform (comp (map (fn [[n value]]
@@ -641,22 +636,22 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                      (interpose " AND "))]
      (fn [sb q args]
        (-> sb
-           (str+ " USING "
+           (str! " USING "
                  (if (coll? args)
                    (transduce xform string-builder args)
                    (option-value args))))))
 
    :compact-storage
    (fn [sb q v]
-     (when v (str+ sb "COMPACT STORAGE")))
+     (when v (str! sb "COMPACT STORAGE")))
 
    :allow-filtering
    (fn [sb q v]
-     (when v (str+ sb " ALLOW FILTERING")))
+     (when v (str! sb " ALLOW FILTERING")))
 
    :alter-column
    (fn [sb q [identifier type]]
-     (str+ sb
+     (str! sb
            " ALTER "
            (cql-identifier identifier)
            " TYPE "
@@ -664,7 +659,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :rename-column
    (fn [sb q [old-name new-name]]
-     (str+ sb
+     (str! sb
            " RENAME "
            (cql-identifier old-name)
            " TO "
@@ -672,7 +667,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :add-column
    (fn [sb q [identifier type]]
-     (str+ sb
+     (str! sb
            " ADD "
            (cql-identifier identifier)
            " "
@@ -680,7 +675,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :drop-column
    (fn [sb q identifier]
-     (str+ sb " DROP " (cql-identifier identifier)))
+     (str! sb " DROP " (cql-identifier identifier)))
 
    :clustering-order
    (let [xform-inner (comp map-cql-identifier
@@ -689,7 +684,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                            (interpose ", "))]
      (fn [sb q columns]
        (->> (transduce xform string-builder+parens columns)
-            (str+ sb "CLUSTERING ORDER BY "))))
+            (str! sb "CLUSTERING ORDER BY "))))
 
    :with
    (fn [sb q value-map]
@@ -704,38 +699,38 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                                             (option-value v))))))
                       interpose-and)
                      string-builder)
-          (str+ sb " WITH ")))
+          (str! sb " WITH ")))
 
    :password
    (fn [sb q pwd]
      ;; not sure if its a cql-id or cql-val
-     (str+ sb " WITH PASSWORD " (cql-identifier pwd)))
+     (str! sb " WITH PASSWORD " (cql-identifier pwd)))
 
    :superuser
    (fn [sb q superuser?]
-     (str+ sb (if superuser? " SUPERUSER" " NOSUPERUSER")))
+     (str! sb (if superuser? " SUPERUSER" " NOSUPERUSER")))
 
    :recursive
    (fn [sb q recursive]
-     (when-not recursive (str+ sb " NORECURSIVE")))
+     (when-not recursive (str! sb " NORECURSIVE")))
 
    :index-column
    (fn [sb q index-column]
-     (str+ sb (wrap-parens (cql-identifier index-column))))
+     (str! sb (wrap-parens (cql-identifier index-column))))
 
    :batch
    (fn [sb {:keys [logged counter using] :as q}
         queries]
      (-> sb
-         (str+ "BEGIN")
+         (str! "BEGIN")
          (cond->
-             (not logged) (str+ " UNLOGGED")
-             counter (str+ " COUNTER"))
-         (str+ " BATCH")
+             (not logged) (str! " UNLOGGED")
+             counter (str! " COUNTER"))
+         (str! " BATCH")
          (cond->
              using (-> ((emit :using) q using)
-                       (str+ " \n")))
-         (str+
+                       (str! " \n")))
+         (str!
           (->> (remove nil? queries)
                (map #(emit-query (StringBuilder.) %))
                join-lf)
@@ -745,9 +740,9 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (let [xform (comp (map emit-query)
                      interpose-lf)]
      (fn [sb q queries]
-       (str+ sb "\n" (transduce xform string-builder queries) "\n")))})
+       (str! sb "\n" (transduce xform string-builder queries) "\n")))})
 
-(def emit-catch-all (fn [sb q x] (str+ sb " " (cql-identifier x))))
+(def emit-catch-all (fn [sb q x] (str! sb " " (cql-identifier x))))
 
 (def entry-clauses #{:select :insert :update :delete :use-keyspace :truncate
                      :drop-index :drop-type :drop-table :drop-keyspace :drop-columnfamily
@@ -758,14 +753,15 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
 (defn find-entry-clause
   "Finds entry point key from query map"
-  [qmap]
-  (some entry-clauses (keys qmap)))
+  [m]
+  (some entry-clauses (keys m)))
 
-(defn emit-row
+(defn emit-row!
   [sb row template]
   (run! (fn [token]
-          (when (contains? row token)
-            ((get emit token emit-catch-all) sb row (token row))))
+          (let [value (get row token ::not-found)]
+            (when-not (identical? value ::not-found)
+              ((get emit token emit-catch-all) sb row (token row)))))
         template)
   sb)
 
