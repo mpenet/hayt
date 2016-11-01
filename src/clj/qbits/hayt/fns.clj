@@ -122,10 +122,14 @@ Returns a dateOf function with the supplied argument"
   [x]
   (cql-fn "dateOf" x))
 
-(defn distinct*
-  "Returns DISTINCT column id ex: `(select :table (columns (distinct :foo)))`"
-  [& xs]
-  (cql-raw (str "DISTINCT " (cql/join-comma (map cql/cql-identifier xs)))))
+(let [xform (comp (map cql/cql-identifier)
+                  cql/interpose-comma)]
+  (defn distinct*
+          "Returns DISTINCT column id ex: `(select :table (columns (distinct :foo)))`"
+    [& xs]
+    (->> (transduce xform cql/string-builder xs)
+         (cql/str* "DISTINCT ")
+         cql-raw)))
 
 ;; blob convertion fns
 ;;

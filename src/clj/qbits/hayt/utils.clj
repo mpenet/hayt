@@ -20,15 +20,17 @@
    :varint])
 
 ;; Sugar for collection types
-
-(defn ^:no-doc complex-type
-  "Helps with the generation of Collection types definitions.
+(let [xform (comp (map name)
+                  cql/interpose-comma)]
+    (defn ^:no-doc complex-type
+   "Helps with the generation of Collection types definitions.
 Takes a CQL type as keyword and it's arguments: ex (coll-type :map :int :uuid).
 The possible collection types are :map, :list and :set."
-  [t & spec]
-  (keyword (format "%s<%s>"
-                   (name t)
-                   (cql/join-comma (map name spec)))))
+      [t & spec]
+      (-> t
+          name
+          (cql/str* "<" (transduce xform cql/string-builder spec) ">")
+          keyword)))
 
 (def ^:no-doc ^:deprecated coll-type complex-type)
 

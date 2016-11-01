@@ -51,15 +51,11 @@
     (StringUtils/join coll sep)))
 
 (def join-and #(join % " AND "))
-(def interpose-and (interpose " AND "))
-
 (def join-spaced #(join % " "))
-(def interpose-space (interpose " "))
-
 (def join-comma #(join % ", "))
+(def interpose-and (interpose " AND "))
+(def interpose-space (interpose " "))
 (def interpose-comma (interpose ", "))
-
-(def join-lf #(join % "\n" ))
 (def interpose-lf (interpose "\n" ))
 
 (def format-eq #(str* %1 " = " %2))
@@ -719,22 +715,22 @@
      (str! sb (wrap-parens (cql-identifier index-column))))
 
    :batch
-   (fn [sb {:keys [logged counter using] :as q}
-        queries]
-     (-> sb
-         (str! "BEGIN")
-         (cond->
-             (not logged) (str! " UNLOGGED")
-             counter (str! " COUNTER"))
-         (str! " BATCH")
-         (cond->
-             using (-> ((emit :using) q using)
-                       (str! " \n")))
-         (str!
-          (->> (remove nil? queries)
-               (map #(emit-query (StringBuilder.) %))
-               join-lf)
-          "\n APPLY BATCH")))
+   (let [queries-xform (comp (remove nil?)
+                             (map #(emit-query (StringBuilder.) %))
+                             interpose-lf)]
+     (fn [sb {:keys [logged counter using] :as q}
+          queries]
+       (-> sb
+           (str! "BEGIN")
+           (cond->
+               (not logged) (str! " UNLOGGED")
+               counter (str! " COUNTER"))
+           (str! " BATCH")
+           (cond->
+               using (-> ((emit :using) q using)
+                         (str! " \n")))
+           (str! (transduce queries-xform string-builder queries)
+                 "\n APPLY BATCH"))))
 
    :queries
    (let [xform (comp (map emit-query)
