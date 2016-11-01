@@ -1,10 +1,10 @@
 (ns qbits.hayt.cql
   "CQL3 ref: http://cassandra.apache.org/doc/cql3/CQL.html or
-https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
+  https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 
-This one is really up to date:
-https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g
-And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/cql_tests.py"
+  This one is really up to date:
+  https://github.com/apache/cassandra/blob/cassandra-1.2/src/java/org/apache/cassandra/cql3/Cql.g
+  And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/cql_tests.py"
   (:import
    (org.apache.commons.lang3 StringUtils)
    (java.nio ByteBuffer)
@@ -332,7 +332,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
      (-> sb
          (str! "SELECT ")
          (emit-row! (assoc q :from table)
-                   [:columns :from :where :order-by :limit :allow-filtering])))
+                    [:columns :from :where :order-by :limit :allow-filtering])))
    :insert
    (fn [sb q table]
      (-> sb
@@ -402,7 +402,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
      (-> sb
          (str! "GRANT ")
          (emit-row! (assoc q :perm perm)
-                   [:perm :resource :user])))
+                    [:perm :resource :user])))
 
    :revoke
    (fn [sb q perm]
@@ -412,7 +412,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :create-index
    (fn [sb {:keys [custom with]
-         :as q}
+            :as q}
         column]
      (-> (str! sb "CREATE")
          (cond-> custom (str! " CUSTOM"))
@@ -518,15 +518,15 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :user
    (fn [sb q user]
-     (cond
-      (contains? q :list-perm)
-      ((emit :of) sb q user)
+     (cond-> sb
+       (contains? q :list-perm)
+       ((emit :of) q user)
 
-      (contains? q :revoke)
-      ((emit :from) sb q user)
+       (contains? q :revoke)
+       ((emit :from) q user)
 
-      (contains? q :grant)
-      ((emit :to) sb q user)))
+       (contains? q :grant)
+       ((emit :to) q user)))
 
    :on
    (fn [sb q on]
@@ -557,7 +557,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :where
    (fn [sb q clauses]
-     (str! sb  " WHERE " (query-cond clauses)))
+     (str! sb " WHERE " (query-cond clauses)))
 
    :if
    (fn [sb q clauses]
@@ -578,9 +578,9 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :primary-key
    (let [xform (comp (map (fn [pk]
-                          (if (sequential? pk)
-                            (cql-identifiers-join-comma+parens pk)
-                            (cql-identifier pk))))
+                            (if (sequential? pk)
+                              (cql-identifiers-join-comma+parens pk)
+                              (cql-identifier pk))))
                      interpose-comma)]
      (fn [sb q primary-key]
        (->> (if (sequential? primary-key)
@@ -594,9 +594,9 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
                            interpose-space)]
      (fn [sb q column-definitions]
        (->> (transduce (comp (map (fn [[k & xs]]
-                            (if (identical? :primary-key k)
-                              ((:primary-key emit) (StringBuilder.) q (first xs))
-                              (transduce xform-inner string-builder (cons k xs)))))
+                                    (if (identical? :primary-key k)
+                                      ((:primary-key emit) (StringBuilder.) q (first xs))
+                                      (transduce xform-inner string-builder (cons k xs)))))
                              interpose-comma)
                        string-builder+parens
                        column-definitions)
@@ -608,14 +608,14 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :values
    (let [xform-values (comp (map #(cql-value (second %)))
-                              interpose-comma)
+                            interpose-comma)
          xform-ids (comp (map #(cql-identifier (first %)))
-                              interpose-comma)]
-       (fn [sb q x]
-      (str! sb
-            (transduce xform-ids string-builder+parens x)
-            " VALUES "
-            (transduce xform-values string-builder+parens x))))
+                         interpose-comma)]
+     (fn [sb q x]
+       (str! sb
+             (transduce xform-ids string-builder+parens x)
+             " VALUES "
+             (transduce xform-values string-builder+parens x))))
 
    :set-columns
    (let [xform (comp
@@ -631,8 +631,8 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
 
    :using
    (let [xform (comp (map (fn [[n value]]
-                               (str (-> n name StringUtils/upperCase)
-                                    " " (cql-value value))))
+                            (str (-> n name StringUtils/upperCase)
+                                 " " (cql-value value))))
                      (interpose " AND "))]
      (fn [sb q args]
        (-> sb
@@ -681,7 +681,7 @@ And a useful test suite: https://github.com/riptano/cassandra-dtest/blob/master/
    (let [xform-inner (comp map-cql-identifier
                            (interpose " "))
          xform (comp (map #(transduce xform-inner string-builder %))
-                           (interpose ", "))]
+                     (interpose ", "))]
      (fn [sb q columns]
        (->> (transduce xform string-builder+parens columns)
             (str! sb "CLUSTERING ORDER BY "))))
