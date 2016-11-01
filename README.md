@@ -2,10 +2,17 @@
 
 CQL3 DSL for Clojure.
 
-## Why?
+## What?
 
-Hayt is an attempt to allow the existing and future clients to share
-this layer and provide a simple but extensible base to build upon.
+Hayt is a thin query DSL for CQL.
+
+It works in 2 simple steps, first the query api generates a map (AST)
+representation of the query, allowing you to compose/modify it at
+will, then there's a compilation step that will generate a raw string
+for you to use in prepared statements or normal queries.
+
+Both are decoupled, so you can just use the AST directly and make your
+own api on top of it if that's what you like.
 
 ## What's in the box?
 
@@ -13,13 +20,13 @@ this layer and provide a simple but extensible base to build upon.
   trunk, **DDL**, **CQL Functions**, **counter** , **triggers** and
   **collections** operations
 * Support for both **Raw queries** and **Prepared Statements** generation
-* **Great performance**
+* **Great performance** (lots of transducing and fiddling with StringBuilder)
 * **Extensive test coverage**
 * Decoupled query compiler, allowing you to **build your own DSL** in minutes
 * Highly **composable** using simple maps or the functions provided
 * Extensible **Clojure data types support**
 * Constantly **kept up to date** with Cassandra changes, almost daily
-* No macros, no pain
+* No (exposed) macros
 
 ## Installation
 
@@ -125,18 +132,6 @@ If you are curious about what else it can do, head to the
 [codox documentation](http://mpenet.github.com/hayt/codox/qbits.hayt.html)
 or the
 [tests](https://github.com/mpenet/hayt/blob/master/test/qbits/hayt/core_test.clj).
-
-## Hayt?
-
-Nope, it doesn't stand for "How Are You Today" :)
-
-Hayt is a gola, a manufactured clone in
-[Dune](http://en.wikipedia.org/wiki/Dune_universe), made from cells of
-a (deceased) person,
-[Duncan Idaho](http://en.wikipedia.org/wiki/Duncan_Idaho) in this
-instance.
-Long (and complex) story short, he eventually becomes the husband of
-[Alia](http://en.wikipedia.org/wiki/Alia_Atreides).
 
 ## License
 
