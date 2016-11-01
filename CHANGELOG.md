@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0.0-beta1
+
+* Internals changes that should make query generation 2x 3x faster and
+  more alloc friendly depending on the query
+
 ## 3.2.0
 
 * Added DROP TYPE

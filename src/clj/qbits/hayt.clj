@@ -13,9 +13,19 @@
 (doseq [module '(dsl fns utils)]
   (uns/alias-ns (symbol (str "qbits.hayt." module))))
 
-(compile-if-ns-exists qbits.alia
+(compile-if-ns-exists
+ qbits.alia
  (do (require '[qbits.alia :as alia])
-     (extend-protocol alia/PStatement
-       clojure.lang.APersistentMap
-       (query->statement [q values codec]
-         (alia/query->statement (->raw q) values codec)))))
+     ;; try to support both v3 and v4 of alia
+     (try
+       (extend-protocol alia/PStatement
+         clojure.lang.APersistentMap
+         (query->statement [q values]
+           (alia/query->statement (->raw q) values)))
+       (catch Exception _ nil))
+     (try
+       (extend-protocol alia/PStatement
+         clojure.lang.APersistentMap
+         (query->statement [q values codec]
+           (alia/query->statement (->raw q) values codec)))
+       (catch Exception _ nil))))
