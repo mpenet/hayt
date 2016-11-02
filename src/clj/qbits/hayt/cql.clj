@@ -143,23 +143,16 @@
   (cql-value [this]
     (cql-values-join-comma+parens value)))
 
+(def udt-xform (comp (map (fn [[k v]]
+                            (format-kv (cql-identifier k)
+                                       (cql-value v))))
+                     interpose-comma))
 (defrecord CQLUserType [value]
   CQLEntities
   (cql-identifier [this]
-    (transduce
-     (comp (map (fn [[k v]]
-                  (format-kv (cql-identifier k)
-                             (cql-value v))))
-           interpose-comma)
-     string-builder+brackets
-     value))
+    (transduce udt-xform string-builder+brackets value))
   (cql-value [this]
-    (transduce (comp (map (fn [[k v]]
-                            (format-kv (cql-identifier k)
-                                       (cql-value v))))
-                     interpose-comma)
-               string-builder+brackets
-               value)))
+    (transduce udt-xform string-builder+brackets value)))
 
 (extend-protocol CQLEntities
   (Class/forName "[B")
