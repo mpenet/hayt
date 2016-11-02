@@ -46,17 +46,26 @@
        ~@(for [x xs]
            (list '.append x)))))
 
-(defn join [^java.lang.Iterable coll ^String sep]
-  (when (seq coll)
-    (StringUtils/join coll sep)))
+(defn string-builder
+  ([] (StringBuilder.))
+  ([^StringBuilder sb x] (.append sb x))
+  ([^StringBuilder sb] (.toString sb)))
 
-(def join-and #(join % " AND "))
-(def join-spaced #(join % " "))
-(def join-comma #(join % ", "))
+(defn make-wrapped-string-builder
+  [^String head ^String tail]
+  (fn
+    ([] (StringBuilder. head))
+    ([^StringBuilder sb x]
+     (.append sb x))
+    ([^StringBuilder sb]
+     (.append sb tail)
+     (.toString sb))))
+
 (def interpose-and (interpose " AND "))
 (def interpose-space (interpose " "))
 (def interpose-comma (interpose ", "))
 (def interpose-lf (interpose "\n" ))
+(def interpose-dot (interpose "." ))
 
 (def format-eq #(str* %1 " = " %2))
 (def format-kv #(str* %1 " : "  %2))
@@ -82,21 +91,6 @@
 (def cql-identifiers-join-comma-xform
   (comp map-cql-identifier
         interpose-comma))
-
-(defn string-builder
-  ([] (StringBuilder.))
-  ([^StringBuilder sb x] (.append sb x))
-  ([^StringBuilder sb] (.toString sb)))
-
-(defn make-wrapped-string-builder
-  [^String head ^String tail]
-  (fn
-    ([] (StringBuilder. head))
-    ([^StringBuilder sb x]
-     (.append sb x))
-    ([^StringBuilder sb]
-     (.append sb tail)
-     (.toString sb))))
 
 (def string-builder+brackets (make-wrapped-string-builder "{" "}"))
 (def string-builder+square-brackets (make-wrapped-string-builder "[" "]"))
@@ -171,7 +165,7 @@
 
   clojure.lang.IPersistentMap
   (cql-identifier [x]
-    (let [[coll k] (first x) ]
+    (let [[coll k] (first x)]
       ;; handles foo['bar'] lookups
       (str* (cql-identifier coll)
             (wrap-sqbrackets (cql-value k)))))
@@ -233,8 +227,7 @@
 
   CQLNamespaced
   (cql-identifier [xs]
-    (transduce (comp map-cql-identifier
-                     (interpose "."))
+    (transduce (comp map-cql-identifier interpose-dot)
                string-builder
                (:value xs)))
 
@@ -290,7 +283,7 @@
   (let [[column value] (if (sequential? column)
                          [(CQLComposite. column)
                           (CQLComposite. value)]
-                         [column value] )
+                         [column value])
         col-name (cql-identifier column)]
     (if (identical? :in op)
       (str* col-name
@@ -315,11 +308,9 @@
 ;; x and y can be an operator or a value
 (defn counter [column [x y]]
   (let [identifier (cql-identifier column)]
-    (->> (if (operator? x)
-           [identifier (operators x) (cql-value y)]
-           [(cql-value x) (operators y) identifier])
-         join-spaced
-         (format-eq identifier))))
+    (if (operator? x)
+      (str* identifier " = " identifier " " (operators x) " " (cql-value y))
+      (str* identifier " = " (cql-value x) " " (operators y) " " identifier))))
 
 (def emit
   { ;; entry clauses
@@ -621,7 +612,7 @@
                          (counter k v)
                          (format-eq (cql-identifier k)
                                     (cql-value v)))))
-                (interpose ", "))]
+                interpose-comma)]
      (fn [sb q values]
        (str! sb "SET " (transduce xform string-builder values))))
 
@@ -629,7 +620,7 @@
    (let [xform (comp (map (fn [[n value]]
                             (str (-> n name StringUtils/upperCase)
                                  " " (cql-value value))))
-                     (interpose " AND "))]
+                     interpose-and)]
      (fn [sb q args]
        (-> sb
            (str! " USING "
@@ -674,10 +665,9 @@
      (str! sb " DROP " (cql-identifier identifier)))
 
    :clustering-order
-   (let [xform-inner (comp map-cql-identifier
-                           (interpose " "))
+   (let [xform-inner (comp map-cql-identifier interpose-space)
          xform (comp (map #(transduce xform-inner string-builder %))
-                     (interpose ", "))]
+                     interpose-comma)]
      (fn [sb q columns]
        (->> (transduce xform string-builder+parens columns)
             (str! sb "CLUSTERING ORDER BY "))))
