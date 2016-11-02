@@ -6,15 +6,9 @@
   (:import (java.util Date)))
 
 (defn cql-raw
-  "Allows to pass raw (assumed safe) content, no escaping will be
-applied. `preparable?` allows to control how the value will be handled
-when the query is compiled as a prepared statement"
-  ([x preparable?]
-     (if preparable?
-       (cql/->CQLRawPreparable x)
-       (cql/->CQLRaw x)))
-  ([x]
-     (cql-raw x false)))
+  "Allows to pass raw (assumed safe) content, no escaping will be applied."
+  [x]
+  (cql/->CQLRaw x))
 
 (defn cql-fn
   "Calls supplied function by name, with the supplied args"

@@ -20,15 +20,6 @@
   (cql-value [x]
     "Encodes a CQL value"))
 
-;; Wraps a CQL function (a template to clj.core/format and its
-;; argument for later encoding.
-(defrecord CQLFn [name args])
-(defrecord CQLRaw [value])
-(defrecord CQLRawPreparable [value])
-(defrecord CQLNamespaced [value])
-(defrecord CQLComposite [value])
-(defrecord CQLUserType [value])
-
 (defmacro str* [& xs]
   (let [size (count xs)]
     `(->
@@ -124,6 +115,52 @@
              string-builder+parens
              xs))
 
+(defrecord CQLFn [name args]
+  CQLEntities
+  (cql-identifier [{fn-name :name  args :args}]
+    (str (clojure.core/name name)
+         (cql-identifiers-join-comma+parens args)))
+  (cql-value [{fn-name :name  args :args}]
+    (str (clojure.core/name name)
+         (cql-values-join-comma+parens args))))
+
+(defrecord CQLRaw [value]
+  CQLEntities
+  (cql-identifier [x] value)
+  (cql-value [x] value))
+
+(defrecord CQLNamespaced [value]
+  CQLEntities
+  (cql-identifier [xs]
+    (transduce (comp map-cql-identifier interpose-dot)
+               string-builder
+               value)))
+
+(defrecord CQLComposite [value]
+  CQLEntities
+  (cql-identifier [this]
+    (cql-identifiers-join-comma+parens value))
+  (cql-value [this]
+    (cql-values-join-comma+parens value)))
+
+(defrecord CQLUserType [value]
+  CQLEntities
+  (cql-identifier [this]
+    (transduce
+     (comp (map (fn [[k v]]
+                  (format-kv (cql-identifier k)
+                             (cql-value v))))
+           interpose-comma)
+     string-builder+brackets
+     value))
+  (cql-value [this]
+    (transduce (comp (map (fn [[k v]]
+                            (format-kv (cql-identifier k)
+                                       (cql-value v))))
+                     interpose-comma)
+               string-builder+brackets
+               value)))
+
 (extend-protocol CQLEntities
   (Class/forName "[B")
   (cql-identifier [x]
@@ -177,55 +214,10 @@
   (cql-value [x]
     (cql-values-join-comma+square-brackets x))
 
-  CQLUserType
-  (cql-identifier [x]
-    (transduce
-     (comp (map (fn [[k v]]
-                  (format-kv (cql-identifier k)
-                             (cql-value v))))
-           interpose-comma)
-     string-builder+brackets
-     (:value x)))
-  (cql-value [x]
-    (transduce (comp (map (fn [[k v]]
-                            (format-kv (cql-identifier k)
-                                       (cql-value v))))
-                     interpose-comma)
-               string-builder+brackets
-               (:value x)))
-
-  CQLComposite
-  (cql-identifier [c]
-    (cql-identifiers-join-comma+parens (:value c)))
-  (cql-value [c]
-    (cql-values-join-comma+parens (:value c)))
-
-  ;; CQL Function are always safe, their arguments might not be though
-  CQLFn
-  (cql-identifier [{fn-name :name  args :args}]
-    (str (name fn-name)
-         (cql-identifiers-join-comma+parens args)))
-  (cql-value [{fn-name :name  args :args}]
-    (str (name fn-name)
-         (cql-values-join-comma+parens args)))
-
-  CQLRaw
-  (cql-identifier [x] (:value x))
-  (cql-value [x] (:value x))
-
-  CQLRawPreparable
-  (cql-identifier [x] (:value x))
-  (cql-value [x] (:value x))
-
   clojure.lang.Symbol
   (cql-identifier [x] (str x))
   (cql-value [x] (str x))
 
-  CQLNamespaced
-  (cql-identifier [xs]
-    (transduce (comp map-cql-identifier interpose-dot)
-               string-builder
-               (:value xs)))
 
   nil
   (cql-value [x] "null")
