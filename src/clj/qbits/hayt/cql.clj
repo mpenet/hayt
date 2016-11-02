@@ -64,8 +64,8 @@
 (def interpose-and (interpose " AND "))
 (def interpose-space (interpose " "))
 (def interpose-comma (interpose ", "))
-(def interpose-lf (interpose "\n" ))
-(def interpose-dot (interpose "." ))
+(def interpose-lf (interpose "\n"))
+(def interpose-dot (interpose "."))
 
 (def format-eq #(str* %1 " = " %2))
 (def format-kv #(str* %1 " : "  %2))
@@ -78,19 +78,15 @@
 (def kw->c*const #(-> (name %)
                       StringUtils/upperCase
                       (StringUtils/replaceChars \- \_)))
-(def terminate #(.toString (str! % \; )))
+
+(def terminate #(.toString (str! % \;)))
 (def sequential-or-set? (some-fn sequential? set?))
 
 (def map-cql-value (map #'cql-value))
 (def map-cql-identifier (map #'cql-identifier))
 
-(def cql-values-join-comma-xform
-  (comp map-cql-value
-        interpose-comma))
-
-(def cql-identifiers-join-comma-xform
-  (comp map-cql-identifier
-        interpose-comma))
+(def cql-values-join-comma-xform (comp map-cql-value interpose-comma))
+(def cql-identifiers-join-comma-xform (comp map-cql-identifier interpose-comma))
 
 (def string-builder+brackets (make-wrapped-string-builder "{" "}"))
 (def string-builder+square-brackets (make-wrapped-string-builder "[" "]"))
@@ -366,13 +362,13 @@
    :drop-column-family
    (fn [sb q cf]
      (-> sb
-         (str! "DROP COLUMNFAMILY" )
+         (str! "DROP COLUMNFAMILY")
          (emit-row! q [:if-exists])
          (str! " " (cql-identifier cf))))
 
    :drop-keyspace
    (fn [sb q keyspace]
-     (-> (str! sb "DROP KEYSPACE" )
+     (-> (str! sb "DROP KEYSPACE")
          (emit-row! q [:if-exists])
          (str! " " (cql-identifier keyspace))))
 
@@ -412,7 +408,7 @@
    :create-trigger
    (fn [sb {:keys [table using] :as q} name]
      (-> sb
-         (str!  "CREATE TRIGGER " (cql-identifier name))
+         (str! "CREATE TRIGGER " (cql-identifier name))
          (emit-row! q [:on :using])))
 
    :drop-trigger
@@ -747,7 +743,7 @@
   (run! (fn [token]
           (let [value (get row token ::not-found)]
             (when-not (identical? value ::not-found)
-              ((get emit token emit-catch-all) sb row (token row)))))
+              ((get emit token emit-catch-all) sb row value))))
         template)
   sb)
 
