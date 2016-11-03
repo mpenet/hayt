@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.0.0-beta1
+## 4.0.0-beta*
 
 * Internals changes that should make query generation 2x 3x faster and
   more alloc friendly depending on the query
