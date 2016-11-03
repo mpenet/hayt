@@ -247,13 +247,13 @@
     x
     (quote-string (name x))))
 
-(defn option-map [m]
-  (transduce (comp (map (fn [[k v]]
-                          (format-kv (quote-string (name k))
-                                     (option-value v))))
-                   interpose-comma)
-             string-builder+brackets
-             m))
+(def option-map
+  (let [xform (comp (map (fn [[k v]]
+                           (format-kv (quote-string (name k))
+                                      (option-value v))))
+                    interpose-comma)]
+    (fn [m]
+      (transduce xform string-builder+brackets m))))
 
 ;; secondary index clauses helpers
 (defn query-cond-sequential-entry [op column value]
@@ -535,8 +535,7 @@
      (str! sb " IF" (if (not b) " NOT " " ") "EXISTS"))
 
    :order-by
-   (let [xform-inner (comp map-cql-identifier
-                           interpose-space)
+   (let [xform-inner (comp map-cql-identifier interpose-space)
          xform (comp (map #(transduce xform-inner string-builder %))
                      interpose-comma)]
      (fn [sb q columns]
@@ -549,7 +548,7 @@
                               (cql-identifiers-join-comma+parens pk)
                               (cql-identifier pk))))
                      interpose-comma)]
-     (fn [sb q primary-key]
+     (fn [sb _ primary-key]
        (->> (if (sequential? primary-key)
               (transduce xform string-builder primary-key)
               (cql-identifier primary-key))
@@ -557,16 +556,14 @@
             (str! sb "PRIMARY KEY "))))
 
    :column-definitions
-   (let [xform-inner (comp map-cql-identifier
-                           interpose-space)]
-     (fn [sb q column-definitions]
-       (->> (transduce (comp (map (fn [[k & xs]]
+   (let [xform-inner (comp map-cql-identifier interpose-space)
+         xform (comp (map (fn [[k & xs]]
                                     (if (identical? :primary-key k)
-                                      ((:primary-key emit) (StringBuilder.) q (first xs))
+                                      ((:primary-key emit) (StringBuilder.) nil (first xs))
                                       (transduce xform-inner string-builder (cons k xs)))))
-                             interpose-comma)
-                       string-builder+parens
-                       column-definitions)
+                             interpose-comma)]
+     (fn [sb q column-definitions]
+       (->> (transduce xform string-builder+parens column-definitions)
             (str! sb " "))))
 
    :limit
