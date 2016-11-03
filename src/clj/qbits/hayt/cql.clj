@@ -117,10 +117,10 @@
 
 (defrecord CQLFn [name args]
   CQLEntities
-  (cql-identifier [{fn-name :name  args :args}]
+  (cql-identifier [this]
     (str (clojure.core/name name)
          (cql-identifiers-join-comma+parens args)))
-  (cql-value [{fn-name :name  args :args}]
+  (cql-value [this]
     (str (clojure.core/name name)
          (cql-values-join-comma+parens args))))
 
@@ -261,17 +261,20 @@
 
 ;; secondary index clauses helpers
 (defn query-cond-sequential-entry [op column value]
-  (let [[column value] (if (sequential? column)
-                         [(CQLComposite. column)
-                          (CQLComposite. value)]
-                         [column value])
+  (let [composite? (sequential? column)
+        column (if composite?
+                 (CQLComposite. column)
+                 column)
+        value (if composite?
+                 (CQLComposite. value)
+                 value)
         col-name (cql-identifier column)]
-    (if (identical? :in op)
-      (str* col-name
-            " IN "
-            (if (sequential-or-set? value)
-              (cql-values-join-comma+parens value)
-              (cql-value value)))
+    (case op
+      :in  (str* col-name
+                 " IN "
+                 (if (sequential-or-set? value)
+                   (cql-values-join-comma+parens value)
+                   (cql-value value)))
       (str* col-name
             " " (operators op) " "
             (cql-value value)))))
