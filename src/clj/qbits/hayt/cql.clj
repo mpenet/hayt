@@ -266,15 +266,15 @@
                  (CQLComposite. column)
                  column)
         value (if composite?
-                 (CQLComposite. value)
-                 value)
+                (CQLComposite. value)
+                value)
         col-name (cql-identifier column)]
-    (case op
-      :in  (str* col-name
-                 " IN "
-                 (if (sequential-or-set? value)
-                   (cql-values-join-comma+parens value)
-                   (cql-value value)))
+    (if (identical? op :in)
+      (str* col-name
+            " IN "
+            (if (sequential-or-set? value)
+              (cql-values-join-comma+parens value)
+              (cql-value value)))
       (str* col-name
             " " (operators op) " "
             (cql-value value)))))
