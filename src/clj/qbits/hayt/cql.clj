@@ -21,14 +21,10 @@
     "Encodes a CQL value"))
 
 (defmacro str* [& xs]
-  (let [size (count xs)]
-    `(->
-      ~(if (= size 1)
-         (first xs)
-         `(doto (StringBuilder.)
-            ~@(for [x xs]
-                (list '.append x))))
-      .toString)))
+  `(-> (doto (StringBuilder.)
+         ~@(for [x xs]
+             (list '.append x)))
+       .toString))
 
 (defmacro str! [sb & xs]
   (let [size (count xs)
