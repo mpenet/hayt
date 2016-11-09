@@ -7,6 +7,11 @@
    [clojure.test.check.generators :as gen]
    [qbits.spex :as sx]))
 
+;; TODO
+;; create separate specs for keyspace/table/column ids so that we have
+;; custom gen available the road and allow execution against a real c*
+;; instance of valid queries for generated cassandra schemas.
+
 ;; both should be refined since it's an open protocol
 ;; todo quoted strings
 (s/def ::cql-identifier
