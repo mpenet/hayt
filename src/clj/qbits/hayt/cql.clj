@@ -404,7 +404,9 @@
    :create-user
    (fn [sb q user]
      (-> sb
-         (str! "CREATE USER " (cql-identifier user))
+         (str! "CREATE USER ")
+         (emit-row! q [:if-exists])
+                  (str! " " (cql-identifier user))
          (emit-row! q [:password :superuser])))
 
    :alter-user

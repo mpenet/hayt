@@ -5,7 +5,10 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[cc.qbits/commons "0.4.6"]
                  [org.apache.commons/commons-lang3 "3.4"]
-                 [org.clojure/clojure "1.9.0-alpha14"]]
+                 [org.clojure/clojure "1.9.0-alpha12"]
+                 [org.clojure/test.check "0.9.0"]
+                 [cc.qbits/spex "0.1.1"]
+                 [cc.qbits/alia "3.2.0" :exclude [org.clojure/clojure]]]
   :profiles {:dev  {:dependencies [[clj-time "0.8.0"]
                                    [codox "0.8.10"]]}}
 
