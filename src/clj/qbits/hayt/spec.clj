@@ -16,6 +16,16 @@
         :symbol symbol?
         :bytes bytes?))
 
+;; be more precise for table/column names
+(s/def ::cql-identifier*
+  (s/or :string (s/spec string?
+                        :gen (fn []
+                               (gen/not-empty gen/string-alphanumeric)))
+        :keyword (s/spec keyword?
+                         :gen (fn []
+                                (gen/fmap keyword
+                                          (gen/not-empty gen/string-alphanumeric))))))
+
 ;; todo quoted strings
 (s/def ::cql-value
   (s/or :string string?
@@ -200,24 +210,24 @@
 (s/def ::statement (s/multi-spec statement :entry-clause))
 
 ;; select
-(s/def ::select ::cql-identifier)
-(s/def ::from ::cql-identifier)
-(s/def ::columns ::cql-identifier)
+(s/def ::select ::cql-identifier*)
+(s/def ::from ::cql-identifier*)
+(s/def ::columns ::cql-identifier*)
 (s/def ::limit pos-int?)
 (s/def ::only-if ::if)
 (s/def ::where ::clauses)
-(s/def ::order-by (s/cat :column ::cql-identifier :order #{:desc :asc}))
+(s/def ::order-by (s/cat :column ::cql-identifier* :order #{:desc :asc}))
 (s/def ::operator (into #{} (keys cql/operators)))
 
 ;; insert
-(s/def ::insert ::cql-identifier)
+(s/def ::insert ::cql-identifier*)
 (s/def ::if-exists boolean?)
 
 (s/def ::values (s/+ (s/spec (s/cat :column ::cql-identifier
                                     :value ::cql-value))))
 
 ;; update
-(s/def ::update ::cql-identifier)
+(s/def ::update ::cql-identifier*)
 (s/def ::set-column-op #{- + :- :+})
 (s/def ::set-columns
   (s/+ (s/spec
@@ -230,7 +240,7 @@
 
 (s/def ::recursive boolean?)
 
-(s/def ::on ::cql-identifier)
+(s/def ::on ::cql-identifier*)
 (s/def ::resource ::on)
 
 (s/def ::perm #{:create :alter :drop :select :modify :authorize :describe :execute})
@@ -255,56 +265,57 @@
 
 (s/def ::password string?)
 
-(s/def ::delete ::cql-identifier)
+(s/def ::delete ::cql-identifier*)
 
 (sx/ns-as 'qbits.hayt.spec.using 'using)
 (s/def ::using/timestamp pos-int?)
 (s/def ::using/ttl pos-int?)
 (s/def ::using (s/keys :opt-un [::using/ttl ::using/timestamp]))
 
-(s/def ::column-definitions (s/tuple ::cql-identifier
+(s/def ::column-definitions (s/tuple ::cql-identifier*
                                      ::cql-type))
 
 
-(s/def ::use-keyspace ::cql-identifier)
-(s/def ::truncate ::cql-identifier)
-(s/def ::drop-index ::cql-identifier)
-(s/def ::drop-type ::cql-identifier)
-(s/def ::drop-table ::cql-identifier)
-(s/def ::drop-keyspace ::cql-identifier)
-(s/def ::drop-column-family ::cql-identifier)
-(s/def ::create-index ::cql-identifier)
-(s/def ::create-trigger ::cql-identifier)
-(s/def ::drop-trigger ::cql-identifier)
-(s/def ::grant ::cql-identifier)
-(s/def ::revoke ::cql-identifier)
+(s/def ::use-keyspace ::cql-identifier*)
+(s/def ::truncate ::cql-identifier*)
+(s/def ::drop-index ::cql-identifier*)
+(s/def ::drop-type ::cql-identifier*)
+(s/def ::drop-table ::cql-identifier*)
+(s/def ::drop-keyspace ::cql-identifier*)
+(s/def ::drop-column-family ::cql-identifier*)
+(s/def ::create-index ::cql-identifier*)
+(s/def ::create-trigger ::cql-identifier*)
+(s/def ::drop-trigger ::cql-identifier*)
+(s/def ::grant ::cql-identifier*)
+(s/def ::revoke ::cql-identifier*)
 
-(s/def ::create-user ::cql-identifier)
-(s/def ::alter-user ::cql-identifier)
-(s/def ::drop-user ::cql-identifier)
+(s/def ::create-user ::cql-identifier*)
+(s/def ::alter-user ::cql-identifier*)
+(s/def ::drop-user ::cql-identifier*)
 
 (s/def ::list-users nil?)
 (s/def ::list-perm ::perm)
 
 ;; (s/def ::batch ::cql-identifier)
 
-(s/def ::create-table ::cql-identifier)
-(s/def ::alter-table ::cql-identifier)
+(s/def ::create-table ::cql-identifier*)
+(s/def ::alter-table ::cql-identifier*)
 
 (s/def ::add-column (s/cat :column ::cql-identifier
                            :type ::cql-type
                            :static (s/? ::cql-static-type)))
-(s/def ::rename-column (s/tuple ::cql-identifier ::cql-identifier))
-(s/def ::alter-column (s/cat :column ::cql-identifier
+(s/def ::rename-column (s/tuple ::cql-identifier* ::cql-identifier))
+(s/def ::alter-column (s/cat :column ::cql-identifier*
                              :type ::cql-type
                              :static (s/? ::cql-static-type)))
-(s/def ::drop-column ::cql-identifier)
+(s/def ::drop-column ::cql-identifier*)
 
 
 
-(s/def ::alter-column-family ::cql-identifier)
-(s/def ::alter-keyspace ::cql-identifier)
-(s/def ::create-type ::cql-identifier)
-(s/def ::alter-type ::cql-identifier)
+(s/def ::alter-column-family ::cql-identifier*)
+(s/def ::alter-keyspace ::cql-identifier*)
+(s/def ::create-type ::cql-identifier*)
+(s/def ::alter-type ::cql-identifier*)
 
-;; (s/exercise ::statement 100)
+
+((s/exercise ::statement 1))
