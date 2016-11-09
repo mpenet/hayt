@@ -316,6 +316,3 @@
 (s/def ::alter-keyspace ::cql-identifier*)
 (s/def ::create-type ::cql-identifier*)
 (s/def ::alter-type ::cql-identifier*)
-
-
-((s/exercise ::statement 1))
