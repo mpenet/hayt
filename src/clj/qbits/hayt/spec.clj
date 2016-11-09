@@ -2,7 +2,9 @@
   (:require
    [clojure.string :as str]
    [qbits.hayt.cql :as cql]
+   [qbits.hayt.utils :as utils]
    [clojure.spec :as s]
+   [clojure.test.check.generators :as gen]
    [qbits.spex :as sx]))
 
 ;; both should be refined since it's an open protocol
@@ -30,8 +32,14 @@
         :nil nil?))
 
 (s/def ::cql-type
-  #(or (keyword? %)
-       (string? %)))
+  (s/spec #(contains? (set utils/native-types)
+                 (keyword %))
+          :gen (fn []
+                 (gen/let [type (gen/elements utils/native-types)
+                           f (gen/elements [name identity])]
+                   (f type)))))
+
+(s/exercise ::cql-type)
 
 (s/def ::cql-static-type #{:static "static"})
 
@@ -126,12 +134,12 @@
 (defmethod statement :grant
   [query]
   (s/keys :req-un [::grant]
-          :opt-un [::perm ::ressource ::user]))
+          :opt-un [::perm ::resource ::user]))
 
 (defmethod statement :revoke
   [query]
   (s/keys :req-un [::revoke]
-          :opt-un [::perm ::ressource ::user]))
+          :opt-un [::perm ::resource ::user]))
 
 (defmethod statement :create-user
   [query]
@@ -154,12 +162,12 @@
 
 (defmethod statement :list-perm
   [query]
-  (s/keys :req-un [::list-perm ::ressource ::user]
+  (s/keys :req-un [::list-perm ::resource ::user]
           :opt-un [::perm ::recursive]))
 
 (defmethod statement :create-table
   [query]
-  (s/keys :req-un [::create-table ::columns-definitions]
+  (s/keys :req-un [::create-table ::column-definitions]
           :opt-un [::if-exists ::with]))
 
 (defmethod statement :alter-table
@@ -180,7 +188,7 @@
 
 (defmethod statement :create-type
   [query]
-  (s/keys :req-un [::create-type ::type ::columns-definitions]
+  (s/keys :req-un [::create-type ::column-definitions]
           :opt-un [::if-exists]))
 
 (defmethod statement :alter-type
@@ -225,17 +233,27 @@
 (s/def ::on ::cql-identifier)
 (s/def ::resource ::on)
 
-(let [perms #{:create :alter :drop :select :modify :authorize :describe :execute}]
-  (s/def ::perm #(contains? perms (keyword (str/lower-case %)))))
+(s/def ::perm #{:create :alter :drop :select :modify :authorize :describe :execute})
 
 (s/def ::user string?)
 
 (s/def ::custom boolean?)
+(s/def ::superuser boolean?)
 
 ;; refine
-(s/def ::with (s/every-kv #(or (keyword? %)
-                               (string? %))
-                          any?))
+(s/def ::with (s/spec (s/every-kv #(or (keyword? %)
+                                       (string? %))
+                                  any?)
+                      :gen (fn []
+                             (gen/one-of
+                              [(gen/map (gen/one-of [gen/keyword
+                                                     gen/string])
+                                        gen/any)
+                               (gen/vector (gen/tuple (gen/one-of [gen/keyword
+                                                                   gen/string])
+                                                      gen/any))]))))
+
+(s/def ::password string?)
 
 (s/def ::delete ::cql-identifier)
 
@@ -243,6 +261,10 @@
 (s/def ::using/timestamp pos-int?)
 (s/def ::using/ttl pos-int?)
 (s/def ::using (s/keys :opt-un [::using/ttl ::using/timestamp]))
+
+(s/def ::column-definitions (s/tuple ::cql-identifier
+                                     ::cql-type))
+
 
 (s/def ::use-keyspace ::cql-identifier)
 (s/def ::truncate ::cql-identifier)
@@ -280,7 +302,9 @@
 
 
 
-(s/def ::alter-column-family ::alter-column-family)
+(s/def ::alter-column-family ::cql-identifier)
 (s/def ::alter-keyspace ::cql-identifier)
 (s/def ::create-type ::cql-identifier)
 (s/def ::alter-type ::cql-identifier)
+
+;; (s/exercise ::statement 100)
