@@ -21,7 +21,7 @@
         :symbol symbol?
         :bytes bytes?))
 
-;; be more precise for table/column names
+;; be more e for table/column names
 (s/def ::cql-identifier*
   (s/or :string (s/spec string?
                         :gen (fn []
@@ -54,7 +54,6 @@
                            f (gen/elements [name identity])]
                    (f type)))))
 
-(s/exercise ::cql-type)
 
 (s/def ::cql-static-type #{:static "static"})
 
@@ -74,28 +73,28 @@
 (s/def ::if ::clauses)
 
 ;; statements
+;; (def statement nil)
 (defmulti statement cql/find-entry-clause)
 
 (defmethod statement :select
   [query]
-  (s/keys :req-un [::select]
-          :opt-un [::select ::from ::columns ::where ::order-by ::limit
-                   ::only-if]))
+  (s/merge (s/keys :req-un [::select])
+         ::select-clauses))
 
 (defmethod statement :insert
   [query]
-  (s/keys :req-un [::insert ::values]
-          :opt-un [::if-exists]))
+  (s/merge (s/keys :req-un [::insert])
+         ::insert-clauses))
 
 (defmethod statement :update
   [query]
-  (s/keys :req-un [::update ::set-columns ::where]
-          :opt-un [::using ::if ::if-exists]))
+  (s/merge (s/keys :req-un [::update])
+         ::update-clauses))
 
 (defmethod statement :delete
   [query]
-  (s/keys :req-un [::update ::set-columns ::where]
-          :opt-un [::using ::if ::if-exists]))
+  (s/merge (s/keys :req-un [::delete])
+         ::delete-clauses))
 
 (defmethod statement :use-keyspace
   [query]
@@ -107,69 +106,70 @@
 
 (defmethod statement :drop-index
   [query]
-  (s/keys :req-un [::drop-index]
-          :opt-un [::if-exists]))
+
+  (s/merge (s/keys :req-un [::drop-index])
+         ::drop-index-clauses))
 
 (defmethod statement :drop-type
   [query]
-  (s/keys :req-un [::drop-type]
-          :opt-un [::if-exists]))
+
+  (s/merge (s/keys :req-un [::drop-type])
+         ::drop-type-clauses))
 
 (defmethod statement :drop-table
   [query]
-  (s/keys :req-un [::drop-table]
-          :opt-un [::if-exists]))
+  (s/merge (s/keys :req-un [::drop-table])
+         ::drop-table-clauses))
 
 (defmethod statement :drop-keyspace
   [query]
-  (s/keys :req-un [::drop-keyspace]
-          :opt-un [::if-exists]))
+  (s/merge (s/keys :req-un [::drop-keyspace])
+         ::drop-keyspace-clauses))
 
 (defmethod statement :drop-column-family
   [query]
-  (s/keys :req-un [::drop-column-family]
-          :opt-un [::if-exists]))
+  (s/merge (s/keys :req-un [::drop-column-family])
+         ::drop-column-family-clauses))
 
 (defmethod statement :create-index
   [query]
-  (s/and (s/keys :req-un [::create-index ::on]
-                 :opt-un [::if-exists ::with ::custom])
-         #(or (not (contains? % :with))
-              (and (contains? % :with) (contains? % :custom)))))
+  (s/merge (s/keys :req-un [::create-index])
+         ::create-index-clauses))
 
 (defmethod statement :create-trigger
   [query]
-  (s/keys :req-un [::create-trigger ::on]
-          :opt-un [::using]))
+  (s/merge (s/keys :req-un [::create-trigger])
+         ::create-trigger-clauses))
 
 (defmethod statement :drop-trigger
   [query]
-  (s/keys :req-un [::drop-trigger ::on]))
+  (s/merge (s/keys :req-un [::drop-trigger])
+         ::drop-trigger-clauses))
 
 (defmethod statement :grant
   [query]
-  (s/keys :req-un [::grant]
-          :opt-un [::perm ::resource ::user]))
+  (s/merge (s/keys :req-un [::grant])
+         ::grant-clauses))
 
 (defmethod statement :revoke
   [query]
-  (s/keys :req-un [::revoke]
-          :opt-un [::perm ::resource ::user]))
+  (s/merge (s/keys :req-un [::revoke])
+         ::revoke-clauses))
 
 (defmethod statement :create-user
   [query]
-  (s/keys :req-un [::create-user ::password]
-          :opt-un [::superuser ::if-exists]))
+  (s/merge (s/keys :req-un [::create-user])
+         ::create-user-clauses))
 
 (defmethod statement :alter-user
   [query]
-  (s/keys :req-un [::alter-user ::password]
-          :opt-un [::superuser]))
+  (s/merge (s/keys :req-un [::alter-user])
+         ::alter-user-clauses))
 
 (defmethod statement :drop-user
   [query]
-  (s/keys :req-un [::drop-user]
-          :opt-un [::if-exists]))
+  (s/merge (s/keys :req-un [::drop-user])
+         ::drop-user-clauses))
 
 (defmethod statement :list-users
   [query]
@@ -177,45 +177,47 @@
 
 (defmethod statement :list-perm
   [query]
-  (s/keys :req-un [::list-perm ::resource ::user]
-          :opt-un [::perm ::recursive]))
+  (s/merge (s/keys :req-un [::list-perm])
+         ::list-perm-clauses))
 
 (defmethod statement :create-table
   [query]
-  (s/keys :req-un [::create-table ::column-definitions]
-          :opt-un [::if-exists ::with]))
+  (s/merge (s/keys :req-un [::create-table])
+         ::create-table-clauses))
 
 (defmethod statement :alter-table
   [query]
-  (s/keys :req-un [::alter-table (or ::add-column ::rename-column ::drop-column
-                                     ::alter-column)]
-          :opt-un [::with]))
+  (s/merge (s/keys :req-un [::alter-table])
+         ::alter-table-clauses))
 
 (defmethod statement :alter-columnfamily
   [query]
-  (s/keys :req-un [::alter-column-family (or ::add-column ::rename-column
-                                             ::drop-column ::alter-column)]
-          :opt-un [::with]))
+  (s/merge (s/keys :req-un [::alter-column-family])
+         ::alter-column-family-clauses))
 
 (defmethod statement :alter-keyspace
   [query]
-  (s/keys :req-un [::alter-keyspace ::with]))
+  (s/merge (s/keys :req-un [::alter-keyspace])
+         ::alter-keyspace-clauses))
 
 (defmethod statement :create-type
   [query]
-  (s/keys :req-un [::create-type ::column-definitions]
-          :opt-un [::if-exists]))
+  (s/merge (s/keys :req-un [::create-type])
+         ::create-type-clauses))
 
 (defmethod statement :alter-type
   [query]
-  (s/keys :req-un [::alter-type (or ::add-column ::alter-column ::rename-column
-                                    ::drop-column)]
-          :opt-un [::with]))
+  (s/merge (s/keys :req-un [::alter-type])
+         ::alter-type-clauses))
 
 (s/def ::statement (s/multi-spec statement :entry-clause))
 
 ;; select
 (s/def ::select ::cql-identifier*)
+(s/def ::select-clauses
+  (s/keys :opt-un [::from ::columns ::where ::order-by ::limit
+                   ::only-if]))
+
 (s/def ::from ::cql-identifier*)
 (s/def ::columns ::cql-identifier*)
 (s/def ::limit pos-int?)
@@ -226,6 +228,10 @@
 
 ;; insert
 (s/def ::insert ::cql-identifier*)
+(s/def ::insert-clauses
+  (s/keys :req-un [::values]
+          :opt-un [::if-exists]))
+
 (s/def ::if-exists boolean?)
 
 (s/def ::values (s/+ (s/spec (s/cat :column ::cql-identifier
@@ -233,6 +239,10 @@
 
 ;; update
 (s/def ::update ::cql-identifier*)
+(s/def ::update-clauses
+  (s/keys :req-un [::set-columns ::where]
+          :opt-un [::using ::if ::if-exists]))
+
 (s/def ::set-column-op #{- + :- :+})
 (s/def ::set-columns
   (s/+ (s/spec
@@ -267,10 +277,12 @@
                                (gen/vector (gen/tuple (gen/one-of [gen/keyword
                                                                    gen/string])
                                                       gen/any))]))))
-
 (s/def ::password string?)
 
 (s/def ::delete ::cql-identifier*)
+(s/def ::delete-clauses
+  (s/keys :req-un [::where]
+          :opt-un [::columns ::using ::only-if]))
 
 (sx/ns-as 'qbits.hayt.spec.using 'using)
 (s/def ::using/timestamp pos-int?)
@@ -282,34 +294,88 @@
 
 
 (s/def ::use-keyspace ::cql-identifier*)
+
 (s/def ::truncate ::cql-identifier*)
+
 (s/def ::drop-index ::cql-identifier*)
+(s/def ::drop-index-clauses (s/keys :opt-un [::if-exists]))
+
 (s/def ::drop-type ::cql-identifier*)
+(s/def ::drop-type-clauses (s/keys :opt-un [::if-exists]))
+
+
 (s/def ::drop-table ::cql-identifier*)
+(s/def ::drop-table-clauses (s/keys :opt-un [::if-exists]))
+
 (s/def ::drop-keyspace ::cql-identifier*)
+(s/def ::drop-keyspace-clauses (s/keys :opt-un [::if-exists]))
+
 (s/def ::drop-column-family ::cql-identifier*)
+(s/def ::drop-column-family-clauses (s/keys :opt-un [::if-exists]))
+
 (s/def ::create-index ::cql-identifier*)
+(s/def ::create-index-clauses
+  (s/and (s/keys :req-un [::on]
+                 :opt-un [::if-exists ::with ::custom])
+         #(or (not (contains? % :with))
+              (and (contains? % :with) (contains? % :custom)))))
+
 (s/def ::create-trigger ::cql-identifier*)
+(s/def ::create-trigger-clauses
+  (s/keys :req-un [::on]
+          :opt-un [::using]))
+
 (s/def ::drop-trigger ::cql-identifier*)
+(s/def ::drop-trigger-clauses
+    (s/keys :req-un [::on]))
+
 (s/def ::grant ::cql-identifier*)
+(s/def ::grant-clauses (s/keys :opt-un [::perm ::resource ::user]))
+
 (s/def ::revoke ::cql-identifier*)
+(s/def ::revoke-clauses (s/keys :opt-un [::perm ::resource ::user]))
 
 (s/def ::create-user ::cql-identifier*)
+(s/def ::create-user-clauses
+  (s/keys :req-un [::password]
+          :opt-un [::superuser ::if-exists]))
+
+
 (s/def ::alter-user ::cql-identifier*)
+(s/def ::alter-user-clauses
+  (s/keys :req-un [::password]
+          :opt-un [::superuser]))
+
 (s/def ::drop-user ::cql-identifier*)
+(s/def ::drop-user-clauses (s/keys :opt-un [::if-exists]))
 
 (s/def ::list-users nil?)
+
 (s/def ::list-perm ::perm)
+(s/def ::list-perm-clauses
+  (s/keys :req-un [::resource ::user]
+          :opt-un [::perm ::recursive]))
 
 ;; (s/def ::batch ::cql-identifier)
 
 (s/def ::create-table ::cql-identifier*)
+(s/def ::create-table-clauses
+  (s/keys :req-un [::column-definitions]
+          :opt-un [::if-exists ::with]))
+
 (s/def ::alter-table ::cql-identifier*)
+(s/def ::alter-table-clauses
+  (s/keys :req-un [(or ::add-column ::rename-column ::drop-column
+                       ::alter-column)]
+          :opt-un [::with]))
+
 
 (s/def ::add-column (s/cat :column ::cql-identifier
                            :type ::cql-type
                            :static (s/? ::cql-static-type)))
+
 (s/def ::rename-column (s/tuple ::cql-identifier* ::cql-identifier))
+
 (s/def ::alter-column (s/cat :column ::cql-identifier*
                              :type ::cql-type
                              :static (s/? ::cql-static-type)))
@@ -318,6 +384,39 @@
 
 
 (s/def ::alter-column-family ::cql-identifier*)
+(s/def ::alter-column-family-clauses
+  (s/keys :req-un [(or ::add-column ::rename-column
+                       ::drop-column ::alter-column)]
+          :opt-un [::with]))
+
 (s/def ::alter-keyspace ::cql-identifier*)
+(s/def ::alter-keyspace-clauses
+  (s/keys :req-un [::with]))
+
 (s/def ::create-type ::cql-identifier*)
+(s/def ::create-type-clauses
+  (s/keys :req-un [::column-definitions]
+          :opt-un [::if-exists]))
+
 (s/def ::alter-type ::cql-identifier*)
+(s/def ::alter-type-clauses
+  (s/keys :req-un [(or ::add-column ::alter-column ::rename-column
+                       ::drop-column)]
+          :opt-un [::with]))
+
+
+;; (s/exercise ::statement )
+
+
+;; DSL SPECS
+
+
+
+
+;; STATEMENT fns
+
+
+
+;; (s/fdef qbits.hayt/raw
+;;         :args ::statement
+;;         :ret string?)
