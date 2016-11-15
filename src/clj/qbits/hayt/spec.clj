@@ -219,7 +219,9 @@
                    ::only-if]))
 
 (s/def ::from ::cql-identifier*)
-(s/def ::columns ::cql-identifier*)
+(s/def ::columns (s/or :scalar ::cql-identifier*
+                       :coll (s/coll-of ::cql-identifier*
+                                        :min-count 1)))
 (s/def ::limit pos-int?)
 (s/def ::only-if ::if)
 (s/def ::where ::clauses)
@@ -289,8 +291,8 @@
 (s/def ::using/ttl pos-int?)
 (s/def ::using (s/keys :opt-un [::using/ttl ::using/timestamp]))
 
-(s/def ::column-definitions (s/tuple ::cql-identifier*
-                                     ::cql-type))
+(s/def ::column-definitions (s/every-kv ::cql-identifier*
+                                        ::cql-type))
 
 
 (s/def ::use-keyspace ::cql-identifier*)
@@ -381,8 +383,6 @@
                              :static (s/? ::cql-static-type)))
 (s/def ::drop-column ::cql-identifier*)
 
-
-
 (s/def ::alter-column-family ::cql-identifier*)
 (s/def ::alter-column-family-clauses
   (s/keys :req-un [(or ::add-column ::rename-column
@@ -404,19 +404,6 @@
                        ::drop-column)]
           :opt-un [::with]))
 
-
-;; (s/exercise ::statement )
-
-
-;; DSL SPECS
-
-
-
-
-;; STATEMENT fns
-
-
-
-;; (s/fdef qbits.hayt/raw
-;;         :args ::statement
-;;         :ret string?)
+(s/fdef qbits.hayt/raw
+        :args ::statement
+        :ret string?)
