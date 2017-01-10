@@ -126,6 +126,12 @@
            (set-columns :bar 1
                         :baz [+ 2]))
 
+   "UPDATE foo USING TTL 100 SET id = 10;"
+   (update :foo (set-columns {:id 10}) (using :ttl 100))
+
+   "UPDATE foo USING TTL 100 AND TIMESTAMP 1000 SET id = 10;"
+   (update :foo (set-columns {:id 10}) (using :ttl 100 :timestamp 1000))
+
    "UPDATE foo SET baz = [1, 2];"
    (update :foo
            (set-columns :baz [1 2]))
