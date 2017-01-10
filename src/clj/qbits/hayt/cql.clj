@@ -309,7 +309,7 @@
    :update
    (fn [sb q table]
      (-> sb
-         (str! "UPDATE " (cql-identifier table) " ")
+         (str! "UPDATE " (cql-identifier table))
          (emit-row! q [:using :set-columns :where :if :if-exists])))
 
    :delete
@@ -591,7 +591,7 @@
                                     (cql-value v)))))
                 interpose-comma)]
      (fn [sb q values]
-       (str! sb "SET " (transduce xform string-builder values))))
+       (str! sb " SET " (transduce xform string-builder values))))
 
    :using
    (let [xform (comp (map (fn [[n value]]
