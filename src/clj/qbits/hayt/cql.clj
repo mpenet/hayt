@@ -692,7 +692,7 @@
            (cond->
                (not logged) (str! " UNLOGGED")
                counter (str! " COUNTER"))
-           (str! " BATCH")
+           (str! " BATCH ")
            (cond->
                using (-> ((emit :using) q using)
                          (str! " \n")))
