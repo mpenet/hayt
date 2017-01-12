@@ -288,7 +288,7 @@
 
 (deftest test-batch
   (are-raw
-   "BEGIN BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
+   "BEGIN BATCH  USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
    (batch
     (queries
      nil
@@ -301,7 +301,10 @@
                     :ttl 200000)))
     (using :timestamp 2134))
 
-   "BEGIN UNLOGGED BATCH USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
+   "BEGIN UNLOGGED BATCH INSERT INTO table (col) VALUES (1);\n APPLY BATCH;"
+   {:batch [{:insert :table, :values {:col 1}}]}
+
+   "BEGIN UNLOGGED BATCH  USING TIMESTAMP 2134 \nUPDATE foo SET bar = 1, baz = baz + 2;\nINSERT INTO foo (\"a\", \"c\") VALUES ('b', 'd') USING TIMESTAMP 100000 AND TTL 200000;\n APPLY BATCH;"
    (batch
     (queries
      (update :foo
