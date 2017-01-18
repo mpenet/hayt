@@ -55,7 +55,7 @@
 (def interpose-dot (interpose "."))
 
 (def format-eq #(str* %1 " = " %2))
-(def format-kv #(str* %1 " : "  %2))
+(def format-kv #(str* %1 " : " %2))
 
 (def quote-string #(str* "'" (StringUtils/replace % "'" "''") "'"))
 (def dquote-string #(str* "\"" (StringUtils/replace % "\" " "\"\"") "\""))
@@ -226,6 +226,7 @@
              '>= ">="
              '+ "+"
              '- "-"
+             'not= "IS NOT" ;; for materialized views
              'contains "CONTAINS"
              'contains-key "CONTAINS KEY"}]
     (reduce-kv
@@ -327,7 +328,7 @@
      (-> sb
          (str! "DROP INDEX")
          (emit-row! q [:if-exists])
-         (str! " "  (cql-identifier index))))
+         (str! " " (cql-identifier index))))
 
    :drop-type
    (fn [sb q index]
@@ -442,6 +443,17 @@
      (-> sb
          (str! "CREATE TABLE")
          (emit-row! (assoc q :table table) [:if-exists :table :column-definitions :with])))
+
+   :materialized-view
+   (fn [^StringBuilder sb q table]
+     (-> sb
+         (str! "CREATE MATERIALIZED VIEW")
+         (emit-row! (assoc q :table table)
+                    [:if-exists :table])
+         (str! " AS ")
+         (emit-row! q [:select])
+         (str! " ")
+         (emit-row! q [:primary-key :with])))
 
    :create-type
    (fn [sb q type]
@@ -558,17 +570,17 @@
    :column-definitions
    (let [xform-inner (comp map-cql-identifier interpose-space)
          xform (comp (map (fn [[k & xs]]
-                                    (if (identical? :primary-key k)
-                                      ((:primary-key emit) (StringBuilder.) nil (first xs))
-                                      (transduce xform-inner string-builder (cons k xs)))))
-                             interpose-comma)]
+                            (if (identical? :primary-key k)
+                              ((:primary-key emit) (StringBuilder.) nil (first xs))
+                              (transduce xform-inner string-builder (cons k xs)))))
+                     interpose-comma)]
      (fn [sb q column-definitions]
        (->> (transduce xform string-builder+parens column-definitions)
             (str! sb " "))))
 
    :limit
    (fn [sb q limit]
-     (str! sb  " LIMIT " (cql-value limit)))
+     (str! sb " LIMIT " (cql-value limit)))
 
    :values
    (let [xform-values (comp (map #(cql-value (second %)))
@@ -712,7 +724,8 @@
                      :create-index :create-trigger :drop-trigger :grant :revoke
                      :create-user :alter-user :drop-user :list-users :list-perm
                      :batch :create-table :alter-table :alter-columnfamily
-                     :alter-keyspace :create-keyspace :create-type :alter-type})
+                     :alter-keyspace :create-keyspace :create-type :alter-type
+                     :materialized-view})
 
 (defn find-entry-clause
   "Finds entry point key from query map"
