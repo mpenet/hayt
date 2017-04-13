@@ -321,7 +321,7 @@
                     :from table)]
        (-> sb
            (str! "DELETE ")
-           (emit-row! q [:columns :from :using :where :if]))))
+           (emit-row! q [:columns :from :using :where :if :if-exists]))))
 
    :drop-index
    (fn [sb q index]
