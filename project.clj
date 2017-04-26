@@ -1,4 +1,4 @@
-(defproject cc.qbits/hayt "4.0.0-beta7"
+(defproject cc.qbits/hayt "4.0.0"
   :description "CQL Query Generation"
   :url "https://github.com/mpenet/hayt"
   :license {:name "Eclipse Public License"
