@@ -1,5 +1,5 @@
 (ns qbits.hayt.cql
-  "CQL3 ref: http://cassandra.apache.org/doc/cql3/CQL.html or
+  "CQL3 ref: http://cassandra.apache.org/doc/old/CQL-3.0.html or
   https://github.com/apache/cassandra/blob/trunk/doc/cql3/CQL.textile#functions
 
   This one is really up to date:
