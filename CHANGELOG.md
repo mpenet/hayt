@@ -195,7 +195,7 @@ Some changes require you to run against Cassandra 2.0+ !!
 
 ## 1.2.0
 
-* Support up to cql 3.1.1 http://cassandra.apache.org/doc/cql3/CQL.html#a3.1.1
+* Support up to cql 3.1.1 http://cassandra.apache.org/doc/old/CQL-3.0.html#a3.1.1
 ** Added `qbits.hayt.clause/if-exists`
 ** Added `qbits.hayt.fns/distinct*`
 ** `qbits.hayt.clause/if-not-exists` is deprecated, use

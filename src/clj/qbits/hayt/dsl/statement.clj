@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [update]))
 
 (defn select
-  "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#selectStmt
 
 Takes a table identifier and additional clause arguments:
 
@@ -15,7 +15,7 @@ Takes a table identifier and additional clause arguments:
   (into {:select table :columns :*} clauses))
 
 (defn insert
-  "http://cassandra.apache.org/doc/cql3/CQL.html#insertStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#insertStmt
 
 Takes a table identifier and additional clause arguments:
 * values
@@ -25,7 +25,7 @@ Takes a table identifier and additional clause arguments:
   (into {:insert table} clauses))
 
 (defn update
-  "http://cassandra.apache.org/doc/cql3/CQL.html#updateStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#updateStmt
 
 Takes a table identifier and additional clause arguments:
 
@@ -38,7 +38,7 @@ Takes a table identifier and additional clause arguments:
   (into {:update table} clauses))
 
 (defn delete
-  "http://cassandra.apache.org/doc/cql3/CQL.html#deleteStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#deleteStmt
 
 Takes a table identifier and additional clause arguments:
 
@@ -50,14 +50,14 @@ Takes a table identifier and additional clause arguments:
   (into {:delete table :columns :*} clauses))
 
 (defn truncate
-  "http://cassandra.apache.org/doc/cql3/CQL.html#truncateStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#truncateStmt
 
 Takes a table identifier."
   [table]
   {:truncate table})
 
 (defn drop-keyspace
-  "http://cassandra.apache.org/doc/cql3/CQL.html#dropKeyspaceStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#dropKeyspaceStmt
 
 Takes a keyspace identifier and additional clauses:
 * if-exists"
@@ -65,7 +65,7 @@ Takes a keyspace identifier and additional clauses:
   (into {:drop-keyspace keyspace} clauses))
 
 (defn drop-table
-  "http://cassandra.apache.org/doc/cql3/CQL.html#dropTableStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#dropTableStmt
 
 Takes a table identifier and additional clauses:
 * if-exists"
@@ -82,7 +82,7 @@ Takes a type identifier and additional clauses:
 
 
 (defn drop-columnfamily
-  "http://cassandra.apache.org/doc/cql3/CQL.html#dropTableStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#dropTableStmt
 
 Takes a column family identifier and additional clauses:
 * if-exists"
@@ -90,14 +90,14 @@ Takes a column family identifier and additional clauses:
   (into {:drop-columnfamily cf} clauses))
 
 (defn drop-trigger
-  "http://cassandra.apache.org/doc/cql3/CQL.html#dropTriggerStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#dropTriggerStmt
 
 Takes a trigger identifier and a table identifier"
   [trigger table]
   {:drop-trigger trigger :on table})
 
 (defn drop-index
-  "http://cassandra.apache.org/doc/cql3/CQL.html#dropIndexStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#dropIndexStmt
 
 Takes an index identifier and additional clauses:
 * if-exists"
@@ -105,7 +105,7 @@ Takes an index identifier and additional clauses:
   (into {:drop-index index} clauses))
 
 (defn create-index
-  "http://cassandra.apache.org/doc/cql3/CQL.html#createIndexStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#createIndexStmt
 
 Takes a table identifier and additional clause arguments:
 
@@ -117,7 +117,7 @@ Takes a table identifier and additional clause arguments:
   (into {:create-index name :custom false :on table} clauses))
 
 (defn create-keyspace
-  "http://cassandra.apache.org/doc/cql3/CQL.html#createKeyspaceStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#createKeyspaceStmt
 
 Takes a keyspace identifier and clauses:
 * with"
@@ -125,12 +125,12 @@ Takes a keyspace identifier and clauses:
   (into {:create-keyspace keyspace} clauses))
 
 (defn create-trigger
-  "http://cassandra.apache.org/doc/cql3/CQL.html#createTriggerStmt"
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#createTriggerStmt"
   [trigger table using]
   {:create-trigger trigger :on table :using using})
 
 (defn create-type
-  "http://cassandra.apache.org/doc/cql3/CQL.html#createTypeStmt"
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#createTypeStmt"
   [type & clauses]
   (into {:create-type type} clauses))
 
@@ -143,7 +143,7 @@ Takes a keyspace identifier and clauses:
   (into {:create-table table} clauses))
 
 (defn create-index
-  "http://cassandra.apache.org/doc/cql3/CQL.html#createIndexStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#createIndexStmt
 
 Takes a table identifier and additional clause arguments:
 
@@ -155,12 +155,12 @@ Takes a table identifier and additional clause arguments:
   (into {:create-index name :custom false :on table} clauses))
 
 (defn alter-type
-  "http://cassandra.apache.org/doc/cql3/CQL.html#alterTypeStmt"
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#alterTypeStmt"
   [type & clauses]
   (into {:alter-type type} clauses))
 
 (defn alter-table
-  "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#alterTableStmt
 
 Takes a table identifier and additional clause arguments:
 
@@ -174,7 +174,7 @@ Takes a table identifier and additional clause arguments:
   (into {:alter-table table} clauses))
 
 (defn alter-columnfamily
-  "http://cassandra.apache.org/doc/cql3/CQL.html#alterTableStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#alterTableStmt
 
 Takes a columnfamiliy identifier and additional clause arguments:
 
@@ -190,14 +190,14 @@ Takes a columnfamiliy identifier and additional clause arguments:
 (def ^{:deprecated "1.5.0"} alter-column-family alter-columnfamily)
 
 (defn alter-keyspace
-  "http://cassandra.apache.org/doc/cql3/CQL.html#alterKeyspaceStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#alterKeyspaceStmt
 
 Takes a keyspace identifier and a `with` clause."
   [keyspace & clauses]
   (into {:alter-keyspace keyspace} clauses))
 
 (defn batch
-  "http://cassandra.apache.org/doc/cql3/CQL.html#batchStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#batchStmt
 
 Takes hayt queries  optional clauses:
 * queries
@@ -208,7 +208,7 @@ Takes hayt queries  optional clauses:
   (into {:logged true} clauses))
 
 (defn use-keyspace
-  "http://cassandra.apache.org/doc/cql3/CQL.html#useStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#useStmt
 
 Takes a keyspace identifier"
   [keyspace]

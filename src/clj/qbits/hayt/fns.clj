@@ -44,38 +44,38 @@
   (.getTime ^Date d))
 
 (defn max-timeuuid
-  "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid"
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#timeuuidFun"
   [^Date date]
   (cql-fn "maxTimeuuid" (date->epoch date)))
 
 (defn min-timeuuid
-  "http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid"
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#timeuuidFun"
   [^Date date]
   (cql-fn "minTimeuuid" (date->epoch date)))
 
 (defn token
-  "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#selectStmt
 
 Returns a token function with the supplied argument"
   [& tokens]
   (apply cql-fn "token" tokens))
 
 (defn writetime
-  "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#selectStmt
 
 Returns a WRITETIME function with the supplied argument"
   [x]
   (cql-fn "WRITETIME" x))
 
 (defn ttl
-  "http://cassandra.apache.org/doc/cql3/CQL.html#selectStmt
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#selectStmt
 
 Returns a TTL function with the supplied argument"
   [x]
   (cql-fn "TTL" x))
 
 (defn to-date
-  "http://cassandra.apache.org/doc/cql3/CQL.html#timeFun
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#timeFun
 
 Converts the timestamp/timeuuid argument into a date type"
   {:added "3.1.0"}
@@ -83,7 +83,7 @@ Converts the timestamp/timeuuid argument into a date type"
   (cql-fn "toDate" x))
 
 (defn to-timestamp
-  "http://cassandra.apache.org/doc/cql3/CQL.html#timeFun
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#timeFun
 
 Converts the timestamp/timeuuid argument into a timestamp type"
   {:added "3.1.0"}
@@ -91,7 +91,7 @@ Converts the timestamp/timeuuid argument into a timestamp type"
   (cql-fn "toTimestamp" x))
 
 (defn to-unix-timestamp
-  "http://cassandra.apache.org/doc/cql3/CQL.html#timeFun
+  "http://cassandra.apache.org/doc/old/CQL-3.0.html#timeFun
 
 Converts the timestamp/timeuuid/date argument into a bigInt raw value"
   {:added "3.1.0"}
@@ -100,7 +100,7 @@ Converts the timestamp/timeuuid/date argument into a bigInt raw value"
 
 (defn unix-timestamp-of
   "DEPRECATED: USE to-unix-timestamp instead
-  http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid
+  http://cassandra.apache.org/doc/old/CQL-3.0.html#timeuuidFun
 
 Returns a unixTimestampOf function with the supplied argument"
   {:deprecated "3.1.0"}
@@ -109,7 +109,7 @@ Returns a unixTimestampOf function with the supplied argument"
 
 (defn date-of
   "DEPRECATED: USE to-date instead
-  http://cassandra.apache.org/doc/cql3/CQL.html#usingtimeuuid
+  http://cassandra.apache.org/doc/old/CQL-3.0.html#timeuuidFun
 
 Returns a dateOf function with the supplied argument"
   {:deprecated "3.1.0"}
