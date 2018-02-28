@@ -3,7 +3,7 @@
   :url "https://github.com/mpenet/hayt"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[cc.qbits/commons "0.4.6"]
+  :dependencies [[cc.qbits/commons "0.5.1"]
                  [org.apache.commons/commons-lang3 "3.4"]
                  [org.clojure/clojure "1.9.0-alpha14"]]
   :profiles {:dev  {:dependencies [[clj-time "0.8.0"]
