@@ -1,4 +1,4 @@
-# Hayt [![Build Status](https://secure.travis-ci.org/mpenet/hayt.png?branch=master)](http://travis-ci.org/mpenet/hayt)
+# Hayt [![Build Status](https://secure.travis-ci.org/mpenet/hayt.png?branch=master)](http://travis-ci.org/mpenet/hayt) [![cljdoc badge](https://cljdoc.xyz/badge/cc.qbits/hayt)](https://cljdoc.xyz/d/cc.qbits/hayt/CURRENT)
 
 CQL3 DSL for Clojure.
 
