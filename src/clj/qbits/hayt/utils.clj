@@ -106,7 +106,7 @@ ex:    (select :foo (where [[contains :foo  ...]]]))"
 
 (def dec-by
   "Decrement counter by x, usable in `values` and `set-columns`"
-  remove-head)
+  remove-tail)
 
 (def prepend
   "Prepend element to List"

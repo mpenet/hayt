@@ -174,7 +174,18 @@
    "UPDATE foo SET baz = ['prepended'] + baz WHERE foo = 'bar';"
    (update :foo
            (set-columns {:baz [["prepended"] +]})
-           (where [[:foo "bar"]]))))
+           (where [[:foo "bar"]]))
+
+   "UPDATE foo SET baz = baz + 1 WHERE foo = 'bar';"
+   (update :foo
+           (set-columns {:baz (inc-by 1)})
+           (where [[:foo "bar"]]))
+
+   "UPDATE foo SET baz = baz - 1 WHERE foo = 'bar';"
+   (update :foo
+           (set-columns {:baz (dec-by 1)})
+           (where [[:foo "bar"]]))
+    ))
 
 (deftest test-delete
 
