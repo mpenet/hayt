@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.2
+
+* Changed dec-by to use remove-tail (`counterfield = counterfield - x` instead of `counterfield = x - counterfield`)
+
 ## 4.0.0-beta*
 
 * Internals changes that should make query generation 2x 3x faster and
