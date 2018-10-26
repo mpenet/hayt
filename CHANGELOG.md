@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.3.0 (yeah I messed up versioning inc -_-)
+
+* allow unknown cluster map options (it used to throw)
+* bump clojure to 1.10.0-beta4
+* bump java-driver to 3.6
+* bump core.async to 0.4.474
+* bump manifold to 0.1.8
+* bump test-check to 0.10.0-alpha3
+* bump qbits.commons to 0.5.1
+
 ## 4.0.2
 
 * Changed dec-by to use remove-tail (`counterfield = counterfield - x` instead of `counterfield = x - counterfield`)
