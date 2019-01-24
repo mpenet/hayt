@@ -1,5 +1,5 @@
 (ns qbits.hayt.dsl
-  (:refer-clojure :exclude [update])
+  (:refer-clojure :exclude [update group-by])
   (:require [qbits.hayt.ns :as uns]))
 
 (doseq [module '(statement clause)]

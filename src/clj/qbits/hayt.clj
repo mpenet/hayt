@@ -1,6 +1,6 @@
 (ns qbits.hayt
   "This namespace contains aliases for qbits.dsl.*, qbits.fns and qbits.utils"
-  (:refer-clojure :exclude [update])
+  (:refer-clojure :exclude [update group-by])
   (:require
    [qbits.hayt.ns :as uns]
    [qbits.commons.jvm :refer [compile-if-ns-exists]]

@@ -300,7 +300,7 @@
      (-> sb
          (str! "SELECT ")
          (emit-row! (assoc q :from table)
-                    [:columns :from :where :order-by :limit :allow-filtering])))
+                    [:columns :from :where :group-by :order-by :limit :allow-filtering])))
    :insert
    (fn [sb q table]
      (-> sb
@@ -545,6 +545,10 @@
    :if-exists
    (fn [sb q b]
      (str! sb " IF" (if (not b) " NOT " " ") "EXISTS"))
+
+   :group-by
+   (fn [sb q columns]
+     (str! sb " GROUP BY " (cql-identifiers-join-comma columns)))
 
    :order-by
    (let [xform-inner (comp map-cql-identifier interpose-space)
