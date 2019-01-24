@@ -1,5 +1,5 @@
 (ns qbits.hayt.core-test
-  (:refer-clojure :exclude [update])
+  (:refer-clojure :exclude [update group-by])
   (:use clojure.test
         qbits.hayt
         qbits.hayt.codec.joda-time
@@ -40,6 +40,17 @@
            (columns :bar "baz")
            (limit 100)
            (allow-filtering true))
+
+   "SELECT * FROM foo GROUP BY bar, \"baz\";"
+   (select :foo
+           (group-by :bar "baz"))
+
+   "SELECT * FROM foo WHERE foo > 1 AND foo < 10 GROUP BY foo, \"bar\" LIMIT 10;"
+   (select :foo
+           (where [[> :foo 1]
+                   [< :foo 10]])
+           (group-by :foo "bar")
+           (limit 10))
 
    "SELECT * FROM foo ORDER BY bar desc;"
    (select :foo

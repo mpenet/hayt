@@ -1,4 +1,5 @@
-(ns qbits.hayt.dsl.clause)
+(ns qbits.hayt.dsl.clause
+  (:refer-clojure :exclude [group-by]))
 
 (defn columns
   "Clause: takes columns identifiers
@@ -22,6 +23,11 @@ ex: (columns :foo \"bar\" :baz) "
   "Clause: Sets LIMIT, takes a numeric value"
   [n]
   {:limit n})
+
+(defn group-by
+  "Clause: expects 1 or more columns.
+  ex: (group-by col1 col2)"
+  [& columns] {:group-by columns})
 
 (defn order-by
   "Clause: takes vectors of 2 elements, where the first is the column

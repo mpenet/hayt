@@ -8,6 +8,7 @@ Takes a table identifier and additional clause arguments:
 
 * columns (defaults to *)
 * where
+* group-by
 * order-by
 * limit
 * only-if"
