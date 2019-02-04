@@ -3,9 +3,7 @@ language: clojure
 lein: lein
 
 jdk:
-  # - openjdk7
-  - oraclejdk7
-  - oraclejdk8
+  - openjdk8
 
 branches:
   only:
