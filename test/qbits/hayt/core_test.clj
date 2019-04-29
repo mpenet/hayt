@@ -608,6 +608,12 @@
      "INSERT INTO test (v1, c, k) VALUES (null, 1, 0);"
      (insert :test (values [[:v1 nil] [:c 1] [:k 0]]))
 
+     "UPDATE users SET emails = emails + {'foo@bar.com'} WHERE id = 73;"
+     (update :users
+             (set-columns {:emails
+                           [+ #{"foo@bar.com"}]})
+             (where [[= :id 73]]))
+      
      "UPDATE user_profiles SET addresses = addresses + {'work' : {city : 'Santa Clara', street : '3975 Freedom Circle Blvd', zip : 95050}} WHERE login = 'tsmith';"
      (update :user_profiles
              (set-columns {:addresses
